@@ -1,7 +1,7 @@
 from collections import Counter
 from functools import reduce
 from os import PathLike
-from typing import List, Literal, Optional, Union, Iterable
+from typing import List, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -15,13 +15,6 @@ from lamindb.dev.storage._backed_access import (
     registry,
 )
 from lamin_utils import logger
-from lnschema_core.models import (
-    Data,
-    Run,
-    __repr__,
-)
-from lamindb.dev._settings import settings
-from lamindb.dev._run_context import run_context
 from lamindb.dev._data import _track_run_input
 
 

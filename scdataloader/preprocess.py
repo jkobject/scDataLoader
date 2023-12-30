@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Callable
+from typing import Optional, Union, Callable
 from django.db import IntegrityError
 
 import numpy as np

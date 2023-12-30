@@ -1,7 +1,4 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import List, Optional, Union
 
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
@@ -200,7 +197,7 @@ class Dataset(torchDataset):
             )
         self.add_prior_network(net)
 
-    def add_prior_network(self, prior_network: pd.DataFrame):
+    def add_prior_network(self, prior_network: pd.DataFrame, init_len):
         # validate the network dataframe
         required_columns: list[str] = ["target", "regulators"]
         optional_columns: list[str] = ["type", "weight"]
