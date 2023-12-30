@@ -234,10 +234,7 @@ map_hierarchy: list of observations to map to a hierarchy
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/data.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
@@ -266,7 +263,14 @@ map_hierarchy: list of observations to map to a hierarchy
 <span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
-<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">use_prior_network</span><span class="p">(</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">use_prior_network</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;collectri&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">split_complexes</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -284,7 +288,9 @@ map_hierarchy: list of observations to map to a hierarchy
     <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tflink&quot;</span><span class="p">:</span>
         <span class="n">TFLINK</span> <span class="o">=</span> <span class="s2">&quot;https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz&quot;</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">pd_load_cached</span><span class="p">(</span><span class="n">TFLINK</span><span class="p">)</span>
-        <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Name.TF&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">,</span> <span class="s2">&quot;Name.Target&quot;</span><span class="p">:</span> <span class="s2">&quot;target&quot;</span><span class="p">})</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Name.TF&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">,</span> <span class="s2">&quot;Name.Target&quot;</span><span class="p">:</span> <span class="s2">&quot;target&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;htftarget&quot;</span><span class="p">:</span>
         <span class="n">HTFTARGET</span> <span class="o">=</span> <span class="s2">&quot;http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt&quot;</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">pd_load_cached</span><span class="p">(</span><span class="n">HTFTARGET</span><span class="p">)</span>
@@ -292,7 +298,9 @@ map_hierarchy: list of observations to map to a hierarchy
     <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;collectri&quot;</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">decoupler</span> <span class="k">as</span> <span class="nn">dc</span>
 
-        <span class="n">net</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">get_collectri</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">,</span> <span class="n">split_complexes</span><span class="o">=</span><span class="n">split_complexes</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">get_collectri</span><span class="p">(</span>
+            <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">,</span> <span class="n">split_complexes</span><span class="o">=</span><span class="n">split_complexes</span>
+        <span class="p">)</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">})</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

@@ -43,9 +43,11 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a>
+    <li class="toctree-l2"><a class="reference internal" href="#install-it-from-pypi">Install it from PyPI</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#project-layout">Project layout</a>
+    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#development">Development</a>
     </li>
     </ul>
                 </li>
@@ -89,21 +91,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="welcome-to-mkdocs">Welcome to MkDocs</h1>
-<p>For full documentation visit <a href="https://www.mkdocs.org">mkdocs.org</a>.</p>
-<h2 id="commands">Commands</h2>
+                <h1 id="scdataloader">scdataloader</h1>
+<p><a href="https://codecov.io/gh/jkobject/scDataLoader"><img alt="codecov" src="https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here" /></a>
+<a href="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml"><img alt="CI" src="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg" /></a></p>
+<p>Awesome single cell dataloader created by @jkobject</p>
+<p>This data loader is designed to be used with:</p>
 <ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs -h</code> - Print help message and exit.</li>
+<li><a href="https://lamin.ai/">lamindb</a></li>
 </ul>
-<h2 id="project-layout">Project layout</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
+<p>and:</p>
+<ul>
+<li><a href="https://scanpy.readthedocs.io/en/stable/">scanpy</a></li>
+<li><a href="https://anndata.readthedocs.io/en/latest/">anndata</a></li>
+</ul>
+<p>It allows you to:</p>
+<ol>
+<li>load thousands of datasets containing millions of cells in a few seconds.</li>
+<li>preprocess the data per dataset and download it locally (normalization, filtering, etc.)</li>
+<li>create a more complex single cell dataset</li>
+<li>extend it to your need</li>
+</ol>
+<h2 id="install-it-from-pypi">Install it from PyPI</h2>
+<pre><code class="language-bash">pip install scdataloader
 </code></pre>
+<h2 id="usage">Usage</h2>
+<p>see the notebooks in <a href="https://jkobject.github.io/scDataLoader/">docs</a>:</p>
+<ol>
+<li><a href="https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html">load a dataset</a></li>
+<li><a href="https://jkobject.github.io/scDataLoader/notebooks/02_create_dataset.html">create a dataset</a></li>
+</ol>
+<h2 id="development">Development</h2>
+<p>Read the <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
               
             </div>
           </div><footer>
@@ -152,5 +170,5 @@ docs/
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2023-12-30 13:48:46.007737+00:00
+Build Date UTC : 2023-12-30 14:36:39.696726+00:00
 -->

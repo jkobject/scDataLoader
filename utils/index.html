@@ -61,6 +61,8 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.utils">utils</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.createFoldersFor">createFoldersFor()</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable()</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping()</a>
@@ -133,6 +135,47 @@
 
 
 
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.createFoldersFor" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">createFoldersFor</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>will recursively create folders if needed until having all the folders required to save the file in this filepath</p>
+
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">createFoldersFor</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    will recursively create folders if needed until having all the folders required to save the file in this filepath</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prevval</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">prevval</span> <span class="o">+=</span> <span class="n">val</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prevval</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">prevval</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
 
 
 <div class="doc doc-object doc-function">
@@ -246,37 +289,7 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
@@ -298,7 +311,37 @@
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">getBiomartTable</span><span class="p">(</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">getBiomartTable</span><span class="p">(</span>
     <span class="n">ensemble_server</span><span class="o">=</span><span class="s2">&quot;http://jul2023.archive.ensembl.org/biomart&quot;</span><span class="p">,</span>
     <span class="n">useCache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">cache_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/biomart/&quot;</span><span class="p">,</span>
@@ -431,38 +474,38 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function generates a mapping of all elements to their ancestors in the ontology dataframe.</span>
 
@@ -582,23 +625,23 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -695,19 +738,19 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -844,43 +887,7 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
 <span class="normal">239</span>
@@ -898,8 +905,60 @@
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
-<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
-    <span class="n">lb</span><span class="p">,</span> <span class="n">remote_dataset</span><span class="p">,</span> <span class="n">download_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="kc">None</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
+    <span class="n">lb</span><span class="p">,</span>
+    <span class="n">remote_dataset</span><span class="p">,</span>
+    <span class="n">download_folder</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">,</span>
+    <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function loads a remote lamindb dataset to local.</span>
@@ -917,7 +976,9 @@
 <span class="sd">        lamindb.Dataset: The local dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">saved_files</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">default_storage</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Storage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+    <span class="n">default_storage</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Storage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">root</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">remote_dataset</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">only</span>
@@ -940,7 +1001,9 @@
         <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
         <span class="c1"># if location already has a file, don&#39;t save again</span>
-        <span class="k">if</span> <span class="n">use_cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">download_folder</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">use_cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">download_folder</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">path</span><span class="o">.</span><span class="n">download_to</span><span class="p">(</span><span class="n">download_folder</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
@@ -1045,24 +1108,24 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pd_load_cached</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pd_load_cached</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    pd_load_cached downloads a file from a url and loads it as a pandas dataframe</span>
 
@@ -1214,53 +1277,7 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">303</span>
 <span class="normal">304</span>
 <span class="normal">305</span>
 <span class="normal">306</span>
@@ -1314,7 +1331,57 @@
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span>
-<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">lb</span><span class="p">,</span>
     <span class="n">organisms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">sex</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
@@ -1364,7 +1431,9 @@
     <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
         <span class="n">name</span><span class="p">,</span>
         <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">,</span>
-        <span class="n">bionty_source</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">BiontySource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Phenotype&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">(),</span>
+        <span class="n">bionty_source</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">BiontySource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Phenotype&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
     <span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1390,7 +1459,9 @@
     <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
     <span class="n">lb</span><span class="o">.</span><span class="n">Tissue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># DevelopmentalStage</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span> <span class="k">else</span> <span class="n">dev_stages</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span> <span class="k">else</span> <span class="n">dev_stages</span>
+    <span class="p">)</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
         <span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">ontology_id</span>
     <span class="p">)</span>
@@ -1583,37 +1654,7 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 96</span>
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
@@ -1670,7 +1711,41 @@
 <span class="normal">150</span>
 <span class="normal">151</span>
 <span class="normal">152</span>
-<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">organism</span><span class="p">):</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">organism</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    validate checks if the adata object is valid for lamindb</span>
 
@@ -1718,7 +1793,8 @@
     <span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
-        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">],</span>
+        <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">,</span>
     <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid ethnicity ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
@@ -1739,7 +1815,10 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid cell type ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bionty_source</span><span class="o">=</span><span class="n">bionty_source</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+            <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">],</span>
+            <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="o">.</span><span class="n">all</span><span class="p">()</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid dev stage ontology term id found&quot;</span><span class="p">)</span>
