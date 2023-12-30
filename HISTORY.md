@@ -4,6 +4,22 @@ Changelog
 
 (unreleased)
 ------------
+- More deps. [jkobject]
+- Debug. [jkobject]
+- Debug linter. [jkobject]
+- Bump actions/setup-python from 4 to 5. [dependabot[bot]]
+
+  Bumps [actions/setup-python](https://github.com/actions/setup-python) from 4 to 5.
+  - [Release notes](https://github.com/actions/setup-python/releases)
+  - [Commits](https://github.com/actions/setup-python/compare/v4...v5)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/setup-python
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Release: version  🚀 [jkobject]
 - Update. [jkobject]
 - Release: version  🚀 [jkobject]
 - Update LICENSE. [Jérémie Kalfon]
