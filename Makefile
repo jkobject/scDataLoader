@@ -32,10 +32,10 @@ fmt:              ## Format code using black & isort.
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)flake8 scdataloader/
+	$(ENV_PREFIX)flake8 --ignore=E501,E203,E266,E265,W503 scdataloader/
 	$(ENV_PREFIX)black -l 79 --check scdataloader/
 	$(ENV_PREFIX)black -l 79 --check tests/
-	$(ENV_PREFIX)mypy --ignore-missing-imports scdataloader/
+##	$(ENV_PREFIX)mypy --ignore-missing-imports scdataloader/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.

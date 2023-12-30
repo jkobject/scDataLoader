@@ -1,16 +1,15 @@
 from dataclasses import dataclass, field
 
+import lamindb as ln
+import lnschema_bionty as lb
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
 
-import lamindb as ln
-import lnschema_bionty as lb
+from scdataloader import mapped
 
 # TODO: manage load gene embeddings to make
 # from scprint.dataloader.embedder import embed
 from scdataloader.utils import get_ancestry_mapping, pd_load_cached
-from scdataloader import mapped
-
 
 LABELS_TOADD = {
     "assay_ontology_term_id": [
@@ -73,8 +72,12 @@ class Dataset(torchDataset):
 
     lamin_dataset: ln.Dataset
     genedf: pd.DataFrame = None
-    gene_embedding: pd.DataFrame = None  # TODO: make it part of specialized dataset
-    organisms: list[str] = field(default_factory=["NCBITaxon:9606", "NCBITaxon:10090"])
+    gene_embedding: pd.DataFrame = (
+        None  # TODO: make it part of specialized dataset
+    )
+    organisms: list[str] = field(
+        default_factory=["NCBITaxon:9606", "NCBITaxon:10090"]
+    )
     obs: list[str] = field(
         default_factory=[
             "self_reported_ethnicity_ontology_term_id",
@@ -140,7 +143,8 @@ class Dataset(torchDataset):
     def __repr__(self):
         print(
             "total dataset size is {} Gb".format(
-                sum([file.size for file in self.lamin_dataset.artifacts.all()]) / 1e9
+                sum([file.size for file in self.lamin_dataset.artifacts.all()])
+                / 1e9
             )
         )
         print("---")
@@ -161,7 +165,9 @@ class Dataset(torchDataset):
         return self.mapped_dataset.get_label_weights(*args, **kwargs)
 
     def get_unseen_mapped_dataset_elements(self, idx):
-        return [str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")]
+        return [
+            str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")
+        ]
 
     def use_prior_network(
         self, name="collectri", organism="human", split_complexes=True
@@ -181,7 +187,9 @@ class Dataset(torchDataset):
         if name == "tflink":
             TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
             net = pd_load_cached(TFLINK)
-            net = net.rename(columns={"Name.TF": "regulator", "Name.Target": "target"})
+            net = net.rename(
+                columns={"Name.TF": "regulator", "Name.Target": "target"}
+            )
         elif name == "htftarget":
             HTFTARGET = "http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt"
             net = pd_load_cached(HTFTARGET)
@@ -189,7 +197,9 @@ class Dataset(torchDataset):
         elif name == "collectri":
             import decoupler as dc
 
-            net = dc.get_collectri(organism=organism, split_complexes=split_complexes)
+            net = dc.get_collectri(
+                organism=organism, split_complexes=split_complexes
+            )
             net = net.rename(columns={"source": "regulator"})
         else:
             raise ValueError(
@@ -233,7 +243,9 @@ class Dataset(torchDataset):
         # TODO: check that we match the genes in the network to the genes in the dataset
 
         print(
-            "loaded {:.2f}% of the edges".format((len(prior_network) / init_len) * 100)
+            "loaded {:.2f}% of the edges".format(
+                (len(prior_network) / init_len) * 100
+            )
         )
         # TODO: transform it into a sparse matrix
         self.prior_network = prior_network
@@ -244,7 +256,9 @@ class Dataset(torchDataset):
     def load_genes(self, organisms):
         organismdf = []
         for o in organisms:
-            organism = lb.Gene(organism=lb.Organism.filter(ontology_id=o).one()).df()
+            organism = lb.Gene(
+                organism=lb.Organism.filter(ontology_id=o).one()
+            ).df()
             organism["organism"] = o
             organismdf.append(organism)
 

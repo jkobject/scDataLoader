@@ -1,18 +1,17 @@
-from typing import Optional, Union, Callable
-from django.db import IntegrityError
+from typing import Callable, Optional, Union
+from uuid import uuid4
 
+import anndata as ad
+import bionty as bt
+import lamindb as ln
 import numpy as np
 import pandas as pd
 import scanpy as sc
-import anndata as ad
 from anndata import AnnData
+from django.db import IntegrityError
 from scipy.sparse import csr_matrix
-from uuid import uuid4
 
 from scdataloader import utils as data_utils
-
-import lamindb as ln
-import bionty as bt
 
 FULL_LENGTH_ASSAYS = [
     "EFO: 0700016",
@@ -231,7 +230,9 @@ class Preprocessor:
         intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
         print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
         if len(intersect_genes) < self.min_valid_genes_id:
-            raise Exception("Dataset dropped due to too many genes not mapping to it")
+            raise Exception(
+                "Dataset dropped due to too many genes not mapping to it"
+            )
         adata = adata[:, list(intersect_genes)]
         # marking unseen genes
         unseen = set(genesdf.index) - set(adata.var.index)
@@ -253,13 +254,19 @@ class Preprocessor:
             and self.length_normalize
         ):
             subadata = data_utils.length_normalize(
-                adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
+                adata[
+                    adata.obs["assay_ontology_term_id"].isin(
+                        FULL_LENGTH_ASSAYS
+                    )
+                ],
             )
 
             adata = ad.concat(
                 [
                     adata[
-                        ~adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)
+                        ~adata.obs["assay_ontology_term_id"].isin(
+                            FULL_LENGTH_ASSAYS
+                        )
                     ],
                     subadata,
                 ],
@@ -281,15 +288,17 @@ class Preprocessor:
 
         adata.obs["outlier"] = (
             data_utils.is_outlier(adata, "total_counts", self.madoutlier)
-            | data_utils.is_outlier(adata, "n_genes_by_counts", self.madoutlier)
+            | data_utils.is_outlier(
+                adata, "n_genes_by_counts", self.madoutlier
+            )
             | data_utils.is_outlier(
                 adata, "pct_counts_in_top_20_genes", self.madoutlier
             )
         )
 
-        adata.obs["mt_outlier"] = data_utils.is_outlier(adata, "pct_counts_mt", 3) | (
-            adata.obs["pct_counts_mt"] > self.pct_mt_outlier
-        )
+        adata.obs["mt_outlier"] = data_utils.is_outlier(
+            adata, "pct_counts_mt", 3
+        ) | (adata.obs["pct_counts_mt"] > self.pct_mt_outlier)
         total_outliers = (adata.obs["outlier"] | adata.obs["mt_outlier"]).sum()
         total_cells = adata.shape[0]
         percentage_outliers = (total_outliers / total_cells) * 100
@@ -332,7 +341,9 @@ class Preprocessor:
             print("Binning data ...")
             if not isinstance(self.binning, int):
                 raise ValueError(
-                    "Binning arg must be an integer, but got {}.".format(self.binning)
+                    "Binning arg must be an integer, but got {}.".format(
+                        self.binning
+                    )
                 )
             # NOTE: the first bin is always a spectial for zero
             n_bins = self.binning
@@ -379,7 +390,9 @@ class Preprocessor:
         # mitochondrial genes
         genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
         # ribosomal genes
-        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(("RPS", "RPL"))
+        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(
+            ("RPS", "RPL")
+        )
         # hemoglobin genes.
         genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
         return genesdf
@@ -480,7 +493,9 @@ def additional_preprocess(adata):
     )  # multi ethnic will have to get renamed
     adata.obs["cell_culture"] = False
     # if cell_type contains the word "(cell culture)" then it is a cell culture and we mark it as so and remove this from the cell type
-    loc = adata.obs["cell_type_ontology_term_id"].str.contains("(cell culture)")
+    loc = adata.obs["cell_type_ontology_term_id"].str.contains(
+        "(cell culture)"
+    )
     if loc.sum() > 0:
         adata.obs["cell_type_ontology_term_id"] = adata.obs[
             "cell_type_ontology_term_id"
@@ -538,8 +553,12 @@ def additional_postprocess(adata):
     )  # + "_" + adata.obs['dataset_id'].astype(str)
 
     # if group is too small
-    okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10]
-    not_okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3]
+    okgroup = [
+        i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10
+    ]
+    not_okgroup = [
+        i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3
+    ]
     # set the group to empty
     adata.obs.loc[adata.obs["dpt_group"].isin(not_okgroup), "dpt_group"] = ""
     adata.obs["heat_diff"] = np.nan

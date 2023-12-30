@@ -5,8 +5,8 @@ from typing import List, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
-from lamindb_setup.dev.upath import UPath
-
+from lamin_utils import logger
+from lamindb.dev._data import _track_run_input
 from lamindb.dev.storage._backed_access import (
     ArrayTypes,
     GroupTypes,
@@ -14,8 +14,7 @@ from lamindb.dev.storage._backed_access import (
     _safer_read_index,
     registry,
 )
-from lamin_utils import logger
-from lamindb.dev._data import _track_run_input
+from lamindb_setup.dev.upath import UPath
 
 
 class _Connect:
@@ -43,7 +42,10 @@ class _Connect:
 
 
 def mapped(
-    dataset, stream: bool = False, is_run_input: Optional[bool] = None, **kwargs
+    dataset,
+    stream: bool = False,
+    is_run_input: Optional[bool] = None,
+    **kwargs,
 ) -> "MappedDataset":
     _track_run_input(dataset, is_run_input)
     path_list = []
@@ -94,8 +96,12 @@ class MappedDataset:
                     self.n_obs_list.append(X.attrs["shape"][0])
         self.n_obs = sum(self.n_obs_list)
 
-        self.indices = np.hstack([np.arange(n_obs) for n_obs in self.n_obs_list])
-        self.storage_idx = np.repeat(np.arange(len(self.storages)), self.n_obs_list)
+        self.indices = np.hstack(
+            [np.arange(n_obs) for n_obs in self.n_obs_list]
+        )
+        self.storage_idx = np.repeat(
+            np.arange(len(self.storages)), self.n_obs_list
+        )
 
         self.join_vars = join_vars if len(path_list) > 1 else None
         self.var_indices = None
@@ -103,7 +109,9 @@ class MappedDataset:
             self._make_join_vars()
 
         self.encode_labels = encode_labels
-        self.label_keys = [label_keys] if isinstance(label_keys, str) else label_keys
+        self.label_keys = (
+            [label_keys] if isinstance(label_keys, str) else label_keys
+        )
         if isinstance(encode_labels, bool):
             if encode_labels:
                 encode_labels = label_keys
@@ -149,7 +157,9 @@ class MappedDataset:
                 raise ValueError(
                     "The provided AnnData objects don't have shared varibales."
                 )
-            self.var_indices = [vrs.get_indexer(self.var_joint) for vrs in var_list]
+            self.var_indices = [
+                vrs.get_indexer(self.var_joint) for vrs in var_list
+            ]
 
     def __len__(self):
         return self.n_obs
@@ -230,7 +240,9 @@ class MappedDataset:
             if i == 0:
                 labels = self.get_merged_labels(val)
             else:
-                labels += "_" + self.get_merged_labels(val).astype(str).astype("O")
+                labels += "_" + self.get_merged_labels(val).astype(str).astype(
+                    "O"
+                )
         counter = Counter(labels)  # type: ignore
         counter = np.array([counter[label] for label in labels])
         weights = scaler / (counter + scaler)
@@ -243,7 +255,9 @@ class MappedDataset:
         for storage in self.storages:
             with _Connect(storage) as store:
                 codes = self.get_codes(store, label_key)
-                labels = decode(codes) if isinstance(codes[0], bytes) else codes
+                labels = (
+                    decode(codes) if isinstance(codes[0], bytes) else codes
+                )
                 cats = self.get_categories(store, label_key)
                 if cats is not None:
                     cats = decode(cats) if isinstance(cats[0], bytes) else cats
@@ -263,7 +277,9 @@ class MappedDataset:
                     cats_merge.update(cats)
                 else:
                     codes = self.get_codes(store, label_key)
-                    codes = decode(codes) if isinstance(codes[0], bytes) else codes
+                    codes = (
+                        decode(codes) if isinstance(codes[0], bytes) else codes
+                    )
                     cats_merge.update(codes)
         return cats_merge
 
