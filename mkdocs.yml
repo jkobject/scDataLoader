@@ -6,11 +6,13 @@ theme:
 site_url: https://www.jkobject.com/scdataloader/
 nav:
   - Home: index.md
-  - download and preprocess: notebooks/1_download_and_preprocess.ipynb
-  - use the dataloader: notebooks/2_create_dataloader.ipynb
-  - Dataset: Dataset.md
-  - preprocess: preprocess.md
-  - utils: utils.md
+  - Example notebooks:
+    - download and preprocess: notebooks/1_download_and_preprocess.ipynb
+    - use the dataloader: notebooks/2_create_dataloader.ipynb
+  - documentation:
+    - dataset: dataset.md
+    - preprocess: preprocess.md
+    - utils: utils.md
 plugins: 
   - search
   - mkdocstrings:
@@ -23,6 +25,7 @@ plugins:
             summary: true
             merge_init_into_class: true
             show_signature: false
+            do_heading: true
       default_handler: python
   - git-revision-date-localized
   - git-authors
