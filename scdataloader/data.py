@@ -10,7 +10,7 @@ import lamindb as ln
 import lnschema_bionty as lb
 
 # TODO: manage load gene embeddings to make
-from scprint.dataloader.embedder import embed
+# from scprint.dataloader.embedder import embed
 from scdataloader.utils import get_ancestry_mapping, pd_load_cached
 from scdataloader import mapped
 
@@ -253,24 +253,24 @@ class Dataset(torchDataset):
 
         return pd.concat(organismdf)
 
-    def load_embeddings(self, genedfs, embedding_size=128, cache=True):
-        embeddings = []
-        for o in self.organisms:
-            genedf = genedfs[genedfs.organism == o]
-            org_name = lb.Organism.filter(ontology_id=o).one().scientific_name
-            embedding = embed(
-                genedf=genedf,
-                organism=org_name,
-                cache=cache,
-                fasta_path="/tmp/data/fasta/",
-                embedding_size=embedding_size,
-            )
-            genedf = pd.concat(
-                [genedf.set_index("ensembl_gene_id"), embedding], axis=1, join="inner"
-            )
-            genedf.columns = genedf.columns.astype(str)
-            embeddings.append(genedf)
-        return pd.concat(embeddings)
+    # def load_embeddings(self, genedfs, embedding_size=128, cache=True):
+    #    embeddings = []
+    #    for o in self.organisms:
+    #        genedf = genedfs[genedfs.organism == o]
+    #        org_name = lb.Organism.filter(ontology_id=o).one().scientific_name
+    #        embedding = embed(
+    #            genedf=genedf,
+    #            organism=org_name,
+    #            cache=cache,
+    #            fasta_path="/tmp/data/fasta/",
+    #            embedding_size=embedding_size,
+    #        )
+    #        genedf = pd.concat(
+    #            [genedf.set_index("ensembl_gene_id"), embedding], axis=1, join="inner"
+    #        )
+    #        genedf.columns = genedf.columns.astype(str)
+    #        embeddings.append(genedf)
+    #    return pd.concat(embeddings)
 
     def define_hierarchies(self, labels):
         self.class_groupings = {}
