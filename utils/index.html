@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://www.jkobject.com/scdataloader/utils/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>utils - scdataloader</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "utils";
+        var mkdocs_page_input_path = "utils.md";
+        var mkdocs_page_url = "/scdataloader/utils/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> scdataloader
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Example notebooks</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/1_download_and_preprocess/">one-off preparation and download of the database (optional)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/2_create_dataloader/">Create the dataloader</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../dataset/">dataset</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">utils</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.utils">utils</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.is_outlier">is_outlier()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.length_normalize">length_normalize()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.pd_load_cached">pd_load_cached()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.validate">validate()</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">scdataloader</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">documentation</li>
+      <li class="breadcrumb-item active">utils</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation-for-utils-module">Documentation for <code>utils</code> module</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+
+<h2 id="scdataloader.utils" class="doc doc-heading">
+          <code>scdataloader.utils</code>
+
+
+</h2>
+
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.getBiomartTable" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">getBiomartTable</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>generate a genelist dataframe from ensembl's biomart</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>ensemble_server</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;http://jul2023.archive.ensembl.org/biomart&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>the biomart server. Defaults to "http://jul2023.archive.ensembl.org/biomart".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>useCache</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>whether to use the cache or not. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>cache_folder</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;/tmp/biomart/&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>the cache folder. Defaults to "/tmp/biomart/".</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>should be a dataframe (when the result from the server is something else)</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+            –
+            <div class="doc-md-description">
+              <p>pd.DataFrame: the dataframe</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">getBiomartTable</span><span class="p">(</span>
+    <span class="n">ensemble_server</span><span class="o">=</span><span class="s2">&quot;http://jul2023.archive.ensembl.org/biomart&quot;</span><span class="p">,</span>
+    <span class="n">useCache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cache_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/biomart/&quot;</span><span class="p">,</span>
+    <span class="n">attributes</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">bypass_attributes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;generate a genelist dataframe from ensembl&#39;s biomart</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ensemble_server (str, optional): the biomart server. Defaults to &quot;http://jul2023.archive.ensembl.org/biomart&quot;.</span>
+<span class="sd">        useCache (bool, optional): whether to use the cache or not. Defaults to False.</span>
+<span class="sd">        cache_folder (str, optional): the cache folder. Defaults to &quot;/tmp/biomart/&quot;.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: should be a dataframe (when the result from the server is something else)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: the dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attr</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hgnc_symbol&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gene_biotype&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entrezgene_id&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bypass_attributes</span>
+        <span class="k">else</span> <span class="p">[]</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">cache_folder</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;/&quot;</span>
+
+    <span class="n">cache_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">)</span>
+    <span class="n">createFoldersFor</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">)</span>
+    <span class="n">cachefile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">,</span> <span class="s2">&quot;.biomart.csv&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">useCache</span> <span class="o">&amp;</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cachefile</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fetching gene names from biomart cache&quot;</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">cachefile</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;downloading gene names from biomart&quot;</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">_fetchFromServer</span><span class="p">(</span><span class="n">ensemble_server</span><span class="p">,</span> <span class="n">attr</span> <span class="o">+</span> <span class="n">attributes</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">cachefile</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">attr</span> <span class="o">+</span> <span class="n">attributes</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;should be a dataframe&quot;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;hgnc_symbol&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">())]</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">hgnc_symbol</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;hgnc_symbol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">hgnc_symbol</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+    <span class="p">][</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.get_ancestry_mapping" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_ancestry_mapping</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>This function generates a mapping of all elements to their ancestors in the ontology dataframe.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>all_elem</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>A list of all elements.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>onto_df</code></b>
+                  (<code>DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>The ontology dataframe.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>dict</code></b>            –
+            <div class="doc-md-description">
+              <p>A dictionary mapping each element to its ancestors.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function generates a mapping of all elements to their ancestors in the ontology dataframe.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        all_elem (list): A list of all elements.</span>
+<span class="sd">        onto_df (DataFrame): The ontology dataframe.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary mapping each element to its ancestors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ancestors</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">full_ancestors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_elem</span><span class="p">:</span>
+        <span class="n">ancestors</span><span class="p">[</span><span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_all_ancestors</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">val</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">ancestors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">full_ancestors</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="c1"># removing ancestors that are not in our datasets</span>
+    <span class="n">full_ancestors</span> <span class="o">=</span> <span class="n">full_ancestors</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">ancestors</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">leafs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_elem</span><span class="p">)</span> <span class="o">-</span> <span class="n">full_ancestors</span>
+    <span class="n">full_ancestors</span> <span class="o">=</span> <span class="n">full_ancestors</span> <span class="o">-</span> <span class="n">leafs</span>
+
+    <span class="n">groupings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">full_ancestors</span><span class="p">:</span>
+        <span class="n">groupings</span><span class="p">[</span><span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leafs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ancestor</span> <span class="ow">in</span> <span class="n">ancestors</span><span class="p">[</span><span class="n">leaf</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ancestor</span> <span class="ow">in</span> <span class="n">full_ancestors</span><span class="p">:</span>
+                <span class="n">groupings</span><span class="p">[</span><span class="n">ancestor</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">groupings</span><span class="p">,</span> <span class="n">full_ancestors</span><span class="p">,</span> <span class="n">leafs</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.is_outlier" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">is_outlier</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>is_outlier detects outliers in adata.obs[metric]</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adata</code></b>
+                  (<code>annData</code>)
+              –
+              <div class="doc-md-description">
+                <p>the anndata object</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metric</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>the metric column to use</p>
+              </div>
+            </li>
+            <li>
+              <b><code>nmads</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>the number of median absolute deviations to use as a threshold</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+            –
+            <div class="doc-md-description">
+              <p>pd.Series: a boolean series indicating whether a cell is an outlier or not</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        adata (annData): the anndata object</span>
+<span class="sd">        metric (str): the metric column to use</span>
+<span class="sd">        nmads (int): the number of median absolute deviations to use as a threshold</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.Series: a boolean series indicating whether a cell is an outlier or not</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+    <span class="n">outlier</span> <span class="o">=</span> <span class="p">(</span><span class="n">M</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="o">-</span> <span class="n">nmads</span> <span class="o">*</span> <span class="n">median_abs_deviation</span><span class="p">(</span><span class="n">M</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="o">+</span> <span class="n">nmads</span> <span class="o">*</span> <span class="n">median_abs_deviation</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">M</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">outlier</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.length_normalize" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">length_normalize</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>length_normalize normalizes the counts by the gene length</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adata</code></b>
+                  (<code>anndata</code>)
+              –
+              <div class="doc-md-description">
+                <p>the anndata object</p>
+              </div>
+            </li>
+            <li>
+              <b><code>gene_lengths</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>the gene lengths</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>anndata</code></b>            –
+            <div class="doc-md-description">
+              <p>the anndata object</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    length_normalize normalizes the counts by the gene length</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        adata (anndata): the anndata object</span>
+<span class="sd">        gene_lengths (list): the gene lengths</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        anndata: the anndata object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">((</span><span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">gene_lengths</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.load_dataset_local" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">load_dataset_local</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>This function loads a remote lamindb dataset to local.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>lb</code></b>
+                  (<code>lamindb</code>)
+              –
+              <div class="doc-md-description">
+                <p>The lamindb instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>remote_dataset</code></b>
+                  (<code><span title="lamindb.Dataset">Dataset</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The remote Dataset.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>download_folder</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The path to the download folder.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>name</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The name of the dataset.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>description</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The description of the dataset.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>use_cache</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to use cache. Defaults to True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>only</code></b>
+                  (<code>list</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>A list of indices to specify which files to download. Defaults to None.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+            –
+            <div class="doc-md-description">
+              <p>lamindb.Dataset: The local dataset.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
+    <span class="n">lb</span><span class="p">,</span> <span class="n">remote_dataset</span><span class="p">,</span> <span class="n">download_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function loads a remote lamindb dataset to local.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lb (lamindb): The lamindb instance.</span>
+<span class="sd">        remote_dataset (lamindb.Dataset): The remote Dataset.</span>
+<span class="sd">        download_folder (str): The path to the download folder.</span>
+<span class="sd">        name (str): The name of the dataset.</span>
+<span class="sd">        description (str): The description of the dataset.</span>
+<span class="sd">        use_cache (bool, optional): Whether to use cache. Defaults to True.</span>
+<span class="sd">        only (list, optional): A list of indices to specify which files to download. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        lamindb.Dataset: The local dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">saved_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">default_storage</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Storage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">remote_dataset</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">only</span>
+        <span class="k">else</span> <span class="n">remote_dataset</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="n">only</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">only</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ontology_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">organism</span><span class="o">.</span><span class="n">all</span><span class="p">()]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organism</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">organism</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Multiple organisms detected&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organism</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No organism detected&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="c1"># lb.settings.organism = organism</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
+        <span class="c1"># if location already has a file, don&#39;t save again</span>
+        <span class="k">if</span> <span class="n">use_cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">download_folder</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">download_to</span><span class="p">(</span><span class="n">download_folder</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">default_storage</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
+        <span class="n">saved_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">saved_files</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dataset</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.pd_load_cached" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pd_load_cached</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>pd_load_cached downloads a file from a url and loads it as a pandas dataframe</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>url</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>the url to download the file from</p>
+              </div>
+            </li>
+            <li>
+              <b><code>loc</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;/tmp/&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>the location to save the file to. Defaults to "/tmp/".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>cache</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>whether to use the cached file or not. Defaults to True.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+            –
+            <div class="doc-md-description">
+              <p>pd.DataFrame: the dataframe</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pd_load_cached</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    pd_load_cached downloads a file from a url and loads it as a pandas dataframe</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): the url to download the file from</span>
+<span class="sd">        loc (str, optional): the location to save the file to. Defaults to &quot;/tmp/&quot;.</span>
+<span class="sd">        cache (bool, optional): whether to use the cached file or not. Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: the dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check if the file exists, if not, download it</span>
+    <span class="n">loc</span> <span class="o">+=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">cache</span><span class="p">:</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+    <span class="c1"># Load the data from the file</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.populate_my_ontology" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">populate_my_ontology</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>creates a local version of the lamin ontologies and add the required missing values in base ontologies</p>
+<p>run this function just one for each new lamin storage</p>
+<p>erase everything with lb.$ontology.filter().delete()</p>
+<p>add whatever value you need afterward like it is done here with:</p>
+<p><code>lb.$ontology(name="ddd", ontology_id="ddddd").save()</code></p>
+<p><code>df["assay_ontology_term_id"].unique()</code></p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>lb</code></b>
+                  (<code>lamindb</code>)
+              –
+              <div class="doc-md-description">
+                <p>lamindb instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organisms</code></b>
+                  (<code>list</code>, default:
+                      <code>[&#39;NCBITaxon:10090&#39;, &#39;NCBITaxon:9606&#39;]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of organisms. Defaults to ["NCBITaxon:10090", "NCBITaxon:9606"].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sex</code></b>
+                  (<code>list</code>, default:
+                      <code>[&#39;PATO:0000384&#39;, &#39;PATO:0000383&#39;]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of sexes. Defaults to ["PATO:0000384", "PATO:0000383"].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>celltypes</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of cell types. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ethnicities</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of ethnicities. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>assays</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of assays. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>tissues</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of tissues. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>diseases</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of diseases. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dev_stages</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of developmental stages. Defaults to [].</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+    <span class="n">lb</span><span class="p">,</span>
+    <span class="n">organisms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
+    <span class="n">sex</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
+    <span class="n">celltypes</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">ethnicities</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">assays</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">tissues</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">diseases</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">dev_stages</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a local version of the lamin ontologies and add the required missing values in base ontologies</span>
+
+<span class="sd">    run this function just one for each new lamin storage</span>
+
+<span class="sd">    erase everything with lb.$ontology.filter().delete()</span>
+
+<span class="sd">    add whatever value you need afterward like it is done here with:</span>
+
+<span class="sd">    `lb.$ontology(name=&quot;ddd&quot;, ontology_id=&quot;ddddd&quot;).save()`</span>
+
+<span class="sd">    `df[&quot;assay_ontology_term_id&quot;].unique()`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lb (lamindb): lamindb instance.</span>
+<span class="sd">        organisms (list, optional): List of organisms. Defaults to [&quot;NCBITaxon:10090&quot;, &quot;NCBITaxon:9606&quot;].</span>
+<span class="sd">        sex (list, optional): List of sexes. Defaults to [&quot;PATO:0000384&quot;, &quot;PATO:0000383&quot;].</span>
+<span class="sd">        celltypes (list, optional): List of cell types. Defaults to [].</span>
+<span class="sd">        ethnicities (list, optional): List of ethnicities. Defaults to [].</span>
+<span class="sd">        assays (list, optional): List of assays. Defaults to [].</span>
+<span class="sd">        tissues (list, optional): List of tissues. Defaults to [].</span>
+<span class="sd">        diseases (list, optional): List of diseases. Defaults to [].</span>
+<span class="sd">        dev_stages (list, optional): List of developmental stages. Defaults to [].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span> <span class="k">else</span> <span class="n">celltypes</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">CellType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># Organism</span>
+    <span class="c1"># names = bt.Organism().df().index if not organisms else organisms</span>
+    <span class="c1"># records = lb.Organism.from_values(names, field=lb.Organism.ontology_id)</span>
+    <span class="c1"># ln.save(records)</span>
+    <span class="c1"># lb.Organism(name=&quot;unknown&quot;, ontology_id=&quot;unknown&quot;).save()</span>
+    <span class="c1"># Phenotype</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">,</span>
+        <span class="n">bionty_source</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">BiontySource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Phenotype&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># ethnicity</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span> <span class="k">else</span> <span class="n">ethnicities</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">Ethnicity</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>  <span class="c1"># multi ethnic will have to get renamed</span>
+    <span class="c1"># ExperimentalFactor</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span> <span class="k">else</span> <span class="n">assays</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
+        <span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">ontology_id</span>
+    <span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># lookup = lb.ExperimentalFactor.lookup()</span>
+    <span class="c1"># lookup.smart_seq_v4.parents.add(lookup.smart_like)</span>
+    <span class="c1"># Tissue</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span> <span class="k">else</span> <span class="n">tissues</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">Tissue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># DevelopmentalStage</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span> <span class="k">else</span> <span class="n">dev_stages</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
+        <span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">ontology_id</span>
+    <span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># Disease</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span> <span class="k">else</span> <span class="n">diseases</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;PATO:0000461&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># genes</span>
+    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">:</span>
+        <span class="c1"># convert onto to name</span>
+        <span class="n">organism</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()[</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span>
+            <span class="n">names</span><span class="p">,</span>
+            <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">,</span>
+            <span class="n">bionty_source</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">BiontySource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Gene&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.utils.validate" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">validate</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>validate checks if the adata object is valid for lamindb</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adata</code></b>
+                  (<code>anndata</code>)
+              –
+              <div class="doc-md-description">
+                <p>the anndata object</p>
+              </div>
+            </li>
+            <li>
+              <b><code>lb</code></b>
+                  (<code>lamindb</code>)
+              –
+              <div class="doc-md-description">
+                <p>the lamindb instance</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organism</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>the organism</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the adata object is not valid</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid ethnicity ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid organism ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid sex ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid disease ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid cell_type ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid development_stage ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid tissue ontology term id according to the lb instance</p>
+              </div>
+            </li>
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the anndata contains invalid assay ontology term id according to the lb instance</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>bool</code></b>            –
+            <div class="doc-md-description">
+              <p>True if the adata object is valid</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">organism</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    validate checks if the adata object is valid for lamindb</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        adata (anndata): the anndata object</span>
+<span class="sd">        lb (lamindb): the lamindb instance</span>
+<span class="sd">        organism (str): the organism</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if the adata object is not valid</span>
+<span class="sd">        ValueError: if the anndata contains invalid ethnicity ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid organism ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid sex ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid disease ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid cell_type ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid development_stage ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid tissue ontology term id according to the lb instance</span>
+<span class="sd">        ValueError: if the anndata contains invalid assay ontology term id according to the lb instance</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the adata object is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">organism</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">organism</span> <span class="o">=</span> <span class="n">organism</span>
+
+    <span class="k">if</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Duplicate gene names found in adata.var.index&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Duplicate cell names found in adata.obs.index&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&#39; is missing in the provided anndata object.&quot;</span>
+            <span class="p">)</span>
+    <span class="n">bionty_source</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">BiontySource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;DevelopmentalStage&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid ethnicity ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid organism ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;sex_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid sex ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid disease ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid cell type ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bionty_source</span><span class="o">=</span><span class="n">bionty_source</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid dev stage ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid tissue ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid assay ontology term id found&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="n">lb</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">lb</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">organism</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid gene ensembl id found&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../preprocess/" class="btn btn-neutral float-left" title="preprocess"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../preprocess/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

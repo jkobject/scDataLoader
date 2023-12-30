@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://www.jkobject.com/scdataloader/dataset/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>dataset - scdataloader</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "dataset";
+        var mkdocs_page_input_path = "dataset.md";
+        var mkdocs_page_url = "/scdataloader/dataset/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> scdataloader
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Example notebooks</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/1_download_and_preprocess/">one-off preparation and download of the database (optional)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/2_create_dataloader/">Create the dataloader</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">dataset</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.data.Dataset">Dataset</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.use_prior_network">use_prior_network()</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">scdataloader</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">documentation</li>
+      <li class="breadcrumb-item active">dataset</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation-for-dataset">Documentation for <code>Dataset</code></h1>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="scdataloader.data.Dataset" class="doc doc-heading">
+          <code>scdataloader.data.Dataset</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
+
+  
+      <p>Dataset class to load a bunch of anndata from a lamin dataset in a memory efficient way.</p>
+<p>For an example, see :meth:<code>~lamindb.Dataset.mapped</code>.</p>
+<p>.. note::</p>
+<pre><code>A similar data loader exists `here
+&lt;https://github.com/Genentech/scimilarity&gt;`__.
+</code></pre>
+      <hr />
+<pre><code>lamin_dataset (lamindb.Dataset): lamin dataset to load
+genedf (pd.Dataframe): dataframe containing the genes to load
+gene_embedding: dataframe containing the gene embeddings
+organisms (list[str]): list of organisms to load
+obs (list[str]): list of observations to load
+encode_obs (list[str]): list of observations to encode
+map_hierarchy: list of observations to map to a hierarchy
+</code></pre>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.data.Dataset.use_prior_network" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">use_prior_network</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>use_prior_network loads a prior GRN from a list of available networks.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>name</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;collectri&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>name of the network to load. Defaults to "collectri".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organism</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;human&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>organism to load the network for. Defaults to "human".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_complexes</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>whether to split complexes into individual genes. Defaults to True.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>ValueError</code>
+              –
+              <div class="doc-md-description">
+                <p>if the provided name is not amongst the available names.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/data.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">use_prior_network</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;collectri&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">split_complexes</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    use_prior_network loads a prior GRN from a list of available networks.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str, optional): name of the network to load. Defaults to &quot;collectri&quot;.</span>
+<span class="sd">        organism (str, optional): organism to load the network for. Defaults to &quot;human&quot;.</span>
+<span class="sd">        split_complexes (bool, optional): whether to split complexes into individual genes. Defaults to True.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if the provided name is not amongst the available names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: use omnipath instead</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tflink&quot;</span><span class="p">:</span>
+        <span class="n">TFLINK</span> <span class="o">=</span> <span class="s2">&quot;https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz&quot;</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">pd_load_cached</span><span class="p">(</span><span class="n">TFLINK</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Name.TF&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">,</span> <span class="s2">&quot;Name.Target&quot;</span><span class="p">:</span> <span class="s2">&quot;target&quot;</span><span class="p">})</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;htftarget&quot;</span><span class="p">:</span>
+        <span class="n">HTFTARGET</span> <span class="o">=</span> <span class="s2">&quot;http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt&quot;</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">pd_load_cached</span><span class="p">(</span><span class="n">HTFTARGET</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;TF&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">})</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;collectri&quot;</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">decoupler</span> <span class="k">as</span> <span class="nn">dc</span>
+
+        <span class="n">net</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">get_collectri</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">,</span> <span class="n">split_complexes</span><span class="o">=</span><span class="n">split_complexes</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;regulator&quot;</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;provided name: &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not amongst the available names.&quot;</span>
+        <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_prior_network</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../notebooks/2_create_dataloader/" class="btn btn-neutral float-left" title="Create the dataloader"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../preprocess/" class="btn btn-neutral float-right" title="preprocess">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../notebooks/2_create_dataloader/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../preprocess/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
