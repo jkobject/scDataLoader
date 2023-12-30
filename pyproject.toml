@@ -6,8 +6,19 @@ authors = ["rochacbruno"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-
+python = "^3.10"
+lamindb = "*"
+cellxgene-census = "*"
+torch = "*"
+anndata = "*"
+matplotlib = "*"
+seaborn = "*"
+ipykernel = "*"
+torchdata = "*"
+biomart = "*"
+pandas = ">=2.0.0"
+leidenalg = "*"
+decoupler = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
