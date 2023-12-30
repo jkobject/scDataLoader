@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "a-flask-test"
-version = "0.1.0"
-description = ""
-authors = ["rochacbruno"]
+name = "scdataloader"
+version = "0.0.2"
+description = "a dataloader for single cell data in lamindb"
+authors = ["jkobject"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
