@@ -4,6 +4,9 @@ Changelog
 
 (unreleased)
 ------------
+- Update. [jkobject]
+- Release: version  🚀 [jkobject]
+- Update LICENSE. [Jérémie Kalfon]
 - Prevent issue. [jkobject]
 - Finish cleanup. [jkobject]
 - Creating the dataloader. [jkobject]
