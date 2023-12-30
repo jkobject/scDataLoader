@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "a-flask-test"
+version = "0.1.0"
+description = ""
+authors = ["rochacbruno"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+coverage = "^7.3.4"
+flake8 = "^6.1.0"
+black = "^23.12.1"
+isort = "^5.13.2"
+pytest-cov = "^4.1.0"
+mypy = "^1.8.0"
+gitchangelog = "^3.0.4"
+mkdocs = "^1.5.3"
+mkdocs-git-revision-date-localized-plugin = "*"
+mkdocstrings = "*"
+mkdocs-git-authors-plugin = "*"
+mkdocs-jupyter = "*"
+mkdocstrings-python = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+scdataloader = 'scdataloader.__main__:main'
