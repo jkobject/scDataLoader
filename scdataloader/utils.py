@@ -24,6 +24,16 @@ def createFoldersFor(filepath):
 
 
 def _fetchFromServer(ensemble_server, attributes):
+    """
+    Fetches data from the specified ensemble server.
+
+    Args:
+        ensemble_server (str): The URL of the ensemble server to fetch data from.
+        attributes (list): The list of attributes to fetch from the server.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame containing the fetched data.
+    """
     server = BiomartServer(ensemble_server)
     ensmbl = server.datasets["hsapiens_gene_ensembl"]
     print(attributes)
