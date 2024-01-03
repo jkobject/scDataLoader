@@ -27,6 +27,15 @@ It allows you to:
 pip install scdataloader
 ```
 
+### Install it locally and run the notebooks:
+
+```bash
+git clone https://github.com/jkobject/scDataLoader.git
+cd scDataLoader
+poetry install
+```
+then run the notebooks with the poetry installed environment
+
 ## Usage
 
 see the notebooks in [docs](https://jkobject.github.io/scDataLoader/):
