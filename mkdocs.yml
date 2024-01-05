@@ -13,6 +13,7 @@ nav:
     - dataset: dataset.md
     - preprocess: preprocess.md
     - utils: utils.md
+    - dataloader: dataloader.md
 plugins: 
   - search
   - mkdocstrings:
