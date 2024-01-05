@@ -71,6 +71,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../utils/">utils</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dataloader/">dataloader</a>
+                  </li>
               </ul>
       </div>
     </div>
@@ -528,13 +530,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">dataLoader</span>
+<span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">lamindb</span> <span class="k">as</span> <span class="nn">ln</span>
+<span class="kn">import</span> <span class="nn">lnschema_bionty</span> <span class="k">as</span> <span class="nn">lb</span>
+
 
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">from scdataloader import Dataset
-from scdataloader import dataLoader
+from scdataloader import DataLoader
+import pandas as pd
+import lamindb as ln
+import lnschema_bionty as lb
+
 
 %load_ext autoreload
 %autoreload 2</div>
@@ -776,14 +786,16 @@ genedf['group'] = c</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">embed</span><span class="p">(</span><span class="n">genedf</span><span class="o">=</span><span class="n">genedf</span><span class="p">,</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># see scprint for this or contact me (@jkobject)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">embed</span><span class="p">(</span><span class="n">genedf</span><span class="o">=</span><span class="n">genedf</span><span class="p">,</span>
     <span class="n">organism</span><span class="o">=</span><span class="s2">"homo_sapiens"</span><span class="p">,</span>
     <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">fasta_path</span><span class="o">=</span><span class="s2">"/tmp/data/fasta/"</span><span class="p">,</span>
     <span class="n">embedding_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,)</span>
 <span class="n">embeddings</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s1">'../../data/temp/embeddings.parquet'</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-6">embeddings = embed(genedf=genedf,
+<div class="clipboard-copy-txt" id="cell-6"># see scprint for this or contact me (@jkobject)
+embeddings = embed(genedf=genedf,
     organism="homo_sapiens",
     cache=True,
     fasta_path="/tmp/data/fasta/",
@@ -901,7 +913,7 @@ dataset.artifacts.count()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># the dataloader can weight some rare samples more: </span>
 <span class="c1"># one need to provide the labels on which to weight the samples:</span>
-<span class="n">labels_weighted_sampling</span> <span class="o">=</span> <span class="n">hierarchical_labels</span><span class="o">+</span><span class="p">[</span>
+<span class="n">labels_weighted_sampling</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'sex_ontology_term_id'</span><span class="p">,</span>
     <span class="s2">"cell_type_ontology_term_id"</span><span class="p">,</span>
     <span class="c1">#"tissue_ontology_term_id",</span>
@@ -922,7 +934,7 @@ dataset.artifacts.count()</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-9"># the dataloader can weight some rare samples more: 
 # one need to provide the labels on which to weight the samples:
-labels_weighted_sampling = hierarchical_labels+[
+labels_weighted_sampling = [
     'sex_ontology_term_id',
     "cell_type_ontology_term_id",
     #"tissue_ontology_term_id",
@@ -966,12 +978,12 @@ all_labels = labels_weighted_sampling+[
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1">#we then create a mapped dataset. This transforms a bunch of anndata from possibly various species, into a combined object that acts roughly as a single anndata dataset </span>
 <span class="c1"># (WIP to get all the features of an anndata object) </span>
-<span class="n">mdataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">genedf</span><span class="p">,</span> <span class="n">gene_embedding</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">organisms</span><span class="o">=</span><span class="p">[</span><span class="s1">'"NCBITaxon:9606"'</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">all_labels</span><span class="p">,</span> <span class="n">encode_obs</span><span class="o">=</span><span class="n">labels_weighted_sampling</span><span class="p">,</span> <span class="n">map_hierarchy</span><span class="o">=</span><span class="n">hierarchical_labels</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">mdataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">genedf</span><span class="p">,</span> <span class="n">gene_embedding</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">organisms</span><span class="o">=</span><span class="p">[</span><span class="s2">"NCBITaxon:9606"</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">all_labels</span><span class="p">,</span> <span class="n">encode_obs</span><span class="o">=</span><span class="n">labels_weighted_sampling</span><span class="p">)</span>
 <span class="n">mdataset</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-10">#we then create a mapped dataset. This transforms a bunch of anndata from possibly various species, into a combined object that acts roughly as a single anndata dataset 
 # (WIP to get all the features of an anndata object) 
-mdataset = Dataset(dataset, genedf, gene_embedding=embeddings, organisms=['"NCBITaxon:9606"'], obs=all_labels, encode_obs=labels_weighted_sampling, map_hierarchy=hierarchical_labels, )
+mdataset = Dataset(dataset, genedf, gene_embedding=embeddings, organisms=["NCBITaxon:9606"], obs=all_labels, encode_obs=labels_weighted_sampling)
 mdataset</div>
 </div>
 </div>
@@ -1031,11 +1043,11 @@ embedding size is 1024
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># now we make the dataloader</span>
-<span class="n">dataloader</span> <span class="o">=</span> <span class="n">BaseDataLoader</span><span class="p">(</span><span class="n">mdataset</span><span class="p">,</span> <span class="n">label_to_weight</span><span class="o">=</span><span class="n">labels_weighted_sampling</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">mdataset</span><span class="p">,</span> <span class="n">label_to_weight</span><span class="o">=</span><span class="n">labels_weighted_sampling</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-11"># now we make the dataloader
-dataloader = BaseDataLoader(mdataset, label_to_weight=labels_weighted_sampling, batch_size=4, num_workers=1)
+dataloader = DataLoader(mdataset, label_to_weight=labels_weighted_sampling, batch_size=4, num_workers=1)
 len(dataloader)</div>
 </div>
 </div>

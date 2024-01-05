@@ -69,6 +69,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../utils/">utils</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dataloader/">dataloader</a>
+                  </li>
               </ul>
       </div>
     </div>
@@ -590,7 +592,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="kn">import</span> <span class="nn">lamindb</span> <span class="k">as</span> <span class="nn">ln</span>
 <span class="kn">import</span> <span class="nn">lnschema_bionty</span> <span class="k">as</span> <span class="nn">lb</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">lb</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">organism</span> <span class="o">=</span> <span class="s2">"human"</span>
 
@@ -601,7 +602,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 import lamindb as ln
 import lnschema_bionty as lb
-import pandas as pd
 
 lb.settings.organism = "human"
 
@@ -1092,7 +1092,13 @@ cx_dataset, len(cx_dataset.files.all())</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>❗ no run &amp; transform get linked, consider passing a `run` or calling ln.track()
-❗ record with EtxwAoHUyGTdCB8swqaf already exists on default database: File(uid='EtxwAoHUyGTdCB8swqaf', key='cell-census/2023-07-25/h5ads/0738f538-ff2f-4346-b2eb-72704c291188.h5ad', suffix='.h5ad', accessor='AnnData', description='High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways', size=12110480, hash='8PORLeHJm9wYZ5MUc4AlSw-2', hash_type='md5-n', visibility=1, key_is_virtual=False, updated_at=2023-11-28 22:44:40 UTC, storage_id=2, transform_id=11, run_id=16, created_by_id=1)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>❗ record with EtxwAoHUyGTdCB8swqaf already exists on default database: File(uid='EtxwAoHUyGTdCB8swqaf', key='cell-census/2023-07-25/h5ads/0738f538-ff2f-4346-b2eb-72704c291188.h5ad', suffix='.h5ad', accessor='AnnData', description='High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways', size=12110480, hash='8PORLeHJm9wYZ5MUc4AlSw-2', hash_type='md5-n', visibility=1, key_is_virtual=False, updated_at=2023-11-28 22:44:40 UTC, storage_id=2, transform_id=11, run_id=16, created_by_id=1)
 File cell-census/2023-07-25/h5ads/0738f538-ff2f-4346-b2eb-72704c291188.h5ad already exists in storage
 ❗ no run &amp; transform get linked, consider passing a `run` or calling ln.track()
 File cell-census/2023-07-25/h5ads/07428d73-fdea-4bd4-a801-94b00c4d961c.h5ad already exists in storage
@@ -1515,7 +1521,13 @@ do_preprocess = Preprocessor(lb, additional_postprocess=additional_postprocess, 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>❗ no run &amp; transform get linked, consider passing a `run` or calling ln.track()
 0
-AnnData object with n_obs × n_vars = 69709 × 25701
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>AnnData object with n_obs × n_vars = 69709 × 25701
     obs: 'n_genes', 'sample', 'percent_mito', 'n_counts', 'batch', 'S_score', 'G2M_score', 'phase', 'scrublet_score', 'scrublet_cluster_score', 'zscore', 'bh_pval', 'bonf_pval', 'is_doublet', 'lineage', 'dataset', 'lineageSomatic', 'assay_ontology_term_id', 'cell_type_ontology_term_id', 'development_stage_ontology_term_id', 'disease_ontology_term_id', 'donor_id', 'is_primary_data', 'organism_ontology_term_id', 'self_reported_ethnicity_ontology_term_id', 'sex_ontology_term_id', 'suspension_type', 'tissue_ontology_term_id', 'cell_type', 'assay', 'disease', 'organism', 'sex', 'tissue', 'self_reported_ethnicity', 'development_stage'
     var: 'gene_symbols', 'feature_is_filtered', 'feature_name', 'feature_reference', 'feature_biotype'
     uns: 'default_embedding', 'lineageSomatic_colors', 'lineage_colors', 'schema_version', 'title'
