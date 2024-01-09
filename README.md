@@ -3,7 +3,9 @@
 [![codecov](https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here)](https://codecov.io/gh/jkobject/scDataLoader)
 [![CI](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml)
 
-Awesome single cell dataloader created by @jkobject
+Awesome single cell dataloader created by @jkobject 
+
+built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
 
 This data loader is designed to be used with:
 
