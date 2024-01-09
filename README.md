@@ -23,6 +23,17 @@ It allows you to:
 3. create a more complex single cell dataset
 4. extend it to your need
 
+## About
+
+the idea is to use it to train models like scGPT / GeneFormer (and soon, scPrint ;)). It is: 
+
+1. loading from lamin 
+2. doing some dataset specific preprocessing if needed 
+3. creating a dataset object on top of .mapped() (that is needed for mapping genes, cell labels etc..)
+4. passing it to a dataloader object that can work with it correctly
+
+Currently one would have to use the preprocess function to make the dataset fit for different tools like scGPT / Geneformer. But I would want to enable it through different Collators. This is still missing and a WIP... (please do contribute!)
+
 ## Install it from PyPI
 
 ```bash
