@@ -80,6 +80,7 @@ class MappedDataset:
         join_vars: Optional[Literal["auto", "inner", "None"]] = "auto",
         encode_labels: Optional[Union[bool, List[str]]] = False,
         parallel: bool = False,
+        unknown_class: str = "unknown",
     ):
         self.storages = []
         self.conns = []
@@ -96,22 +97,16 @@ class MappedDataset:
                     self.n_obs_list.append(X.attrs["shape"][0])
         self.n_obs = sum(self.n_obs_list)
 
-        self.indices = np.hstack(
-            [np.arange(n_obs) for n_obs in self.n_obs_list]
-        )
-        self.storage_idx = np.repeat(
-            np.arange(len(self.storages)), self.n_obs_list
-        )
+        self.indices = np.hstack([np.arange(n_obs) for n_obs in self.n_obs_list])
+        self.storage_idx = np.repeat(np.arange(len(self.storages)), self.n_obs_list)
 
         self.join_vars = join_vars if len(path_list) > 1 else None
         self.var_indices = None
-        if self.join_vars is not None:
+        if self.join_vars != "None":
             self._make_join_vars()
 
         self.encode_labels = encode_labels
-        self.label_keys = (
-            [label_keys] if isinstance(label_keys, str) else label_keys
-        )
+        self.label_keys = [label_keys] if isinstance(label_keys, str) else label_keys
         if isinstance(encode_labels, bool):
             if encode_labels:
                 encode_labels = label_keys
@@ -122,6 +117,8 @@ class MappedDataset:
             for label in encode_labels:
                 cats = self.get_merged_categories(label)
                 self.encoders[label] = {cat: i for i, cat in enumerate(cats)}
+                if unknown_class in self.encoders[label]:
+                    self.encoders[label][unknown_class] = -1
         else:
             self.encoders = {}
         self._closed = False
@@ -157,9 +154,15 @@ class MappedDataset:
                 raise ValueError(
                     "The provided AnnData objects don't have shared varibales."
                 )
-            self.var_indices = [
-                vrs.get_indexer(self.var_joint) for vrs in var_list
-            ]
+            self.var_indices = [vrs.get_indexer(self.var_joint) for vrs in var_list]
+
+    def _check_aligned_vars(self, vars: list):
+        i = 0
+        for storage in self.storages:
+            with _Connect(storage) as store:
+                if vars == _safer_read_index(store["var"]).tolist():
+                    i += 1
+        print("{}% are aligned".format(i * 100 / len(self.storages)))
 
     def __len__(self):
         return self.n_obs
@@ -240,9 +243,7 @@ class MappedDataset:
             if i == 0:
                 labels = self.get_merged_labels(val)
             else:
-                labels += "_" + self.get_merged_labels(val).astype(str).astype(
-                    "O"
-                )
+                labels += "_" + self.get_merged_labels(val).astype(str).astype("O")
         counter = Counter(labels)  # type: ignore
         counter = np.array([counter[label] for label in labels])
         weights = scaler / (counter + scaler)
@@ -255,9 +256,7 @@ class MappedDataset:
         for storage in self.storages:
             with _Connect(storage) as store:
                 codes = self.get_codes(store, label_key)
-                labels = (
-                    decode(codes) if isinstance(codes[0], bytes) else codes
-                )
+                labels = decode(codes) if isinstance(codes[0], bytes) else codes
                 cats = self.get_categories(store, label_key)
                 if cats is not None:
                     cats = decode(cats) if isinstance(cats[0], bytes) else cats
@@ -277,9 +276,7 @@ class MappedDataset:
                     cats_merge.update(cats)
                 else:
                     codes = self.get_codes(store, label_key)
-                    codes = (
-                        decode(codes) if isinstance(codes[0], bytes) else codes
-                    )
+                    codes = decode(codes) if isinstance(codes[0], bytes) else codes
                     cats_merge.update(codes)
         return cats_merge
 

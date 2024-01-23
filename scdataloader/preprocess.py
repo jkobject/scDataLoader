@@ -4,6 +4,7 @@ from uuid import uuid4
 import anndata as ad
 import bionty as bt
 import lamindb as ln
+import lnschema_bionty as lb
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -28,7 +29,6 @@ class Preprocessor:
 
     def __init__(
         self,
-        lb,
         filter_gene_by_counts: Union[int, bool] = False,
         filter_cell_by_counts: Union[int, bool] = False,
         normalize_total: Union[float, bool] = False,
@@ -83,7 +83,6 @@ class Preprocessor:
         self.additional_preprocess = additional_preprocess
         self.additional_postprocess = additional_postprocess
         self.force_preprocess = force_preprocess
-        self.lb = lb
         self.min_dataset_size = min_dataset_size
         self.min_valid_genes_id = min_valid_genes_id
         self.min_nnz_genes = min_nnz_genes
@@ -98,7 +97,7 @@ class Preprocessor:
 
     def __call__(
         self,
-        data: Union[ln.Dataset, AnnData] = None,
+        data: Union[ln.Collection, AnnData] = None,
         name="preprocessed dataset",
         description="preprocessed dataset using scprint",
         start_at=0,
@@ -119,7 +118,7 @@ class Preprocessor:
                 all_ready_processed_keys.add(i.initial_version.key)
         if isinstance(data, AnnData):
             return self.preprocess(data)
-        elif isinstance(data, ln.Dataset):
+        elif isinstance(data, ln.Collection):
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
                 print(i)
@@ -157,11 +156,11 @@ class Preprocessor:
                 # issues with KLlggfw6I6lvmbqiZm46
                 myfile.save()
                 files.append(myfile)
-            dataset = ln.Dataset(files, name=name, description=description)
+            dataset = ln.Collection(files, name=name, description=description)
             dataset.save()
             return dataset
         else:
-            raise ValueError("Please provide either anndata or ln.Dataset")
+            raise ValueError("Please provide either anndata or ln.Collection")
 
     def preprocess(self, adata: AnnData):
         if self.additional_preprocess is not None:
@@ -208,7 +207,7 @@ class Preprocessor:
             sc.pp.filter_cells(adata, min_counts=self.filter_cell_by_counts)
         # if lost > 50% of the dataset, drop dataset
         # load the genes
-        genesdf = self.load_genes(adata.obs.organism_ontology_term_id[0])
+        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id[0])
 
         if prevsize / adata.shape[0] > self.maxdropamount:
             raise Exception(
@@ -230,9 +229,7 @@ class Preprocessor:
         intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
         print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
         if len(intersect_genes) < self.min_valid_genes_id:
-            raise Exception(
-                "Dataset dropped due to too many genes not mapping to it"
-            )
+            raise Exception("Dataset dropped due to too many genes not mapping to it")
         adata = adata[:, list(intersect_genes)]
         # marking unseen genes
         unseen = set(genesdf.index) - set(adata.var.index)
@@ -245,28 +242,20 @@ class Preprocessor:
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
-        data_utils.validate(
-            adata, self.lb, organism=adata.obs.organism_ontology_term_id[0]
-        )
+        data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
         # length normalization
         if (
             adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
             and self.length_normalize
         ):
             subadata = data_utils.length_normalize(
-                adata[
-                    adata.obs["assay_ontology_term_id"].isin(
-                        FULL_LENGTH_ASSAYS
-                    )
-                ],
+                adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
             )
 
             adata = ad.concat(
                 [
                     adata[
-                        ~adata.obs["assay_ontology_term_id"].isin(
-                            FULL_LENGTH_ASSAYS
-                        )
+                        ~adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)
                     ],
                     subadata,
                 ],
@@ -288,17 +277,15 @@ class Preprocessor:
 
         adata.obs["outlier"] = (
             data_utils.is_outlier(adata, "total_counts", self.madoutlier)
-            | data_utils.is_outlier(
-                adata, "n_genes_by_counts", self.madoutlier
-            )
+            | data_utils.is_outlier(adata, "n_genes_by_counts", self.madoutlier)
             | data_utils.is_outlier(
                 adata, "pct_counts_in_top_20_genes", self.madoutlier
             )
         )
 
-        adata.obs["mt_outlier"] = data_utils.is_outlier(
-            adata, "pct_counts_mt", 3
-        ) | (adata.obs["pct_counts_mt"] > self.pct_mt_outlier)
+        adata.obs["mt_outlier"] = data_utils.is_outlier(adata, "pct_counts_mt", 3) | (
+            adata.obs["pct_counts_mt"] > self.pct_mt_outlier
+        )
         total_outliers = (adata.obs["outlier"] | adata.obs["mt_outlier"]).sum()
         total_cells = adata.shape[0]
         percentage_outliers = (total_outliers / total_cells) * 100
@@ -341,9 +328,7 @@ class Preprocessor:
             print("Binning data ...")
             if not isinstance(self.binning, int):
                 raise ValueError(
-                    "Binning arg must be an integer, but got {}.".format(
-                        self.binning
-                    )
+                    "Binning arg must be an integer, but got {}.".format(self.binning)
                 )
             # NOTE: the first bin is always a spectial for zero
             n_bins = self.binning
@@ -380,22 +365,6 @@ class Preprocessor:
             adata.layers[self.result_binned_key] = np.stack(binned_rows)
             adata.obsm["bin_edges"] = np.stack(bin_edges)
         return adata
-
-    def load_genes(self, organism):
-        genesdf = bt.Gene(
-            organism=self.lb.Organism.filter(ontology_id=organism).first().name
-        ).df()
-        genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
-        genesdf = genesdf.set_index("ensembl_gene_id")
-        # mitochondrial genes
-        genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
-        # ribosomal genes
-        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(
-            ("RPS", "RPL")
-        )
-        # hemoglobin genes.
-        genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
-        return genesdf
 
 
 def is_log1p(adata: AnnData) -> bool:
@@ -493,9 +462,7 @@ def additional_preprocess(adata):
     )  # multi ethnic will have to get renamed
     adata.obs["cell_culture"] = False
     # if cell_type contains the word "(cell culture)" then it is a cell culture and we mark it as so and remove this from the cell type
-    loc = adata.obs["cell_type_ontology_term_id"].str.contains(
-        "(cell culture)"
-    )
+    loc = adata.obs["cell_type_ontology_term_id"].str.contains("(cell culture)")
     if loc.sum() > 0:
         adata.obs["cell_type_ontology_term_id"] = adata.obs[
             "cell_type_ontology_term_id"
@@ -553,12 +520,8 @@ def additional_postprocess(adata):
     )  # + "_" + adata.obs['dataset_id'].astype(str)
 
     # if group is too small
-    okgroup = [
-        i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10
-    ]
-    not_okgroup = [
-        i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3
-    ]
+    okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10]
+    not_okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3]
     # set the group to empty
     adata.obs.loc[adata.obs["dpt_group"].isin(not_okgroup), "dpt_group"] = ""
     adata.obs["heat_diff"] = np.nan

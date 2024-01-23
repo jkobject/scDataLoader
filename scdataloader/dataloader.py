@@ -1,10 +1,12 @@
 import numpy as np
-from torch.utils.data import DataLoader as TorchLoader
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import WeightedRandomSampler
 from scdataloader.mapped import MappedDataset
+from torch.utils import data
 from typing import Union
 import torch
+import lightning as L
+
 
 # TODO: put in config
 COARSE_TISSUE = {
@@ -80,7 +82,7 @@ COARSE_ASSAY = {
 }
 
 
-class DataLoader(TorchLoader):
+class DataModule(L.LightningDataModule):
     """
     Base class for all data loaders
     """
@@ -88,117 +90,85 @@ class DataLoader(TorchLoader):
     def __init__(
         self,
         mapped_dataset: MappedDataset,
-        batch_size: int = 32,
         weight_scaler: int = 30,
         label_to_weight: list = [],
         validation_split: float = 0.2,
-        num_workers: int = 4,
-        collate_fn=default_collate,
-        sampler=None,
+        test_split: float = 0,
         **kwargs,
     ):
         self.validation_split = validation_split
+        self.test_split = test_split
         self.dataset = mapped_dataset
-
-        self.batch_idx = 0
-        self.batch_size = batch_size
+        self.kwargs = kwargs
         self.n_samples = len(self.dataset)
-        if sampler is None:
-            self.sampler, self.valid_sampler = self._split_sampler(
-                self.validation_split,
-                weight_scaler=weight_scaler,
-                label_to_weight=label_to_weight,
-            )
-        else:
-            self.sampler = sampler
-            self.valid_sampler = None
+        self.weight_scaler = weight_scaler
+        self.label_to_weight = label_to_weight
+        super().__init__()
 
-        self.init_kwargs = {
-            "dataset": self.dataset,
-            "batch_size": batch_size,
-            "collate_fn": collate_fn,
-            "num_workers": num_workers,
-        }
-        super().__init__(sampler=self.sampler, **self.init_kwargs, **kwargs)
-
-    def _split_sampler(self, split, label_to_weight=[], weight_scaler: int = 30):
+    def setup(self, stage=None):
         idx_full = np.arange(self.n_samples)
         np.random.shuffle(idx_full)
-        if len(label_to_weight) > 0:
+        if len(self.label_to_weight) > 0:
             weights = self.dataset.get_label_weights(
-                label_to_weight, scaler=weight_scaler
+                self.label_to_weight, scaler=self.weight_scaler
             )
         else:
             weights = np.ones(self.n_samples)
-        if isinstance(split, int):
-            assert (
-                split < self.n_samples
-            ), "validation set size is configured to be larger than entire dataset."
-            len_valid = split
+        if isinstance(self.validation_split, int):
+            len_valid = self.validation_split
         else:
-            len_valid = int(self.n_samples * split)
-        if len_valid == 0:
-            self.train_idx = idx_full
+            len_valid = int(self.n_samples * self.validation_split)
+        if isinstance(self.test_split, int):
+            len_test = self.test_split
         else:
-            self.valid_idx = idx_full[0:len_valid]
-            self.train_idx = np.delete(idx_full, np.arange(0, len_valid))
+            len_test = int(self.n_samples * self.test_split)
+        assert (
+            len_test + len_valid < self.n_samples
+        ), "test set + valid set size is configured to be larger than entire dataset."
+        if len_valid > 0:
+            valid_idx = idx_full[0:len_valid]
             valid_weights = weights.copy()
-            valid_weights[self.train_idx] = 0
-            # TODO: should we do weighted random sampling for validation set?
-            valid_sampler = WeightedRandomSampler(
+            valid_weights[~valid_idx] = 0
+            self.valid_sampler = WeightedRandomSampler(
                 valid_weights, len_valid, replacement=True
             )
+        else:
+            self.valid_sampler = None
+        if len_test > 0:
+            test_idx = idx_full[len_valid : len_valid + len_test]
+            test_weights = weights.copy()
+            test_weights[~test_idx] = 0
+            self.test_sampler = WeightedRandomSampler(
+                valid_weights, len_valid, replacement=True
+            )
+        else:
+            self.test_sampler = None
+
+        train_idx = idx_full[len_valid + len_test :]
         train_weights = weights.copy()
-        train_weights[self.valid_idx] = 0
-        train_sampler = WeightedRandomSampler(
-            train_weights, len(self.train_idx), replacement=True
+        train_weights[~train_idx] = 0
+        self.train_sampler = WeightedRandomSampler(
+            train_weights, len(train_idx), replacement=True
         )
-        # turn off shuffle option which is mutually exclusive with sampler
 
+    def train_dataloader(self):
+        return data.DataLoader(self.dataset, sampler=self.train_sampler, **self.kwargs)
+
+    def val_dataloader(self):
         return (
-            (train_sampler, valid_sampler) if len_valid != 0 else (train_sampler, None)
+            data.DataLoader(self.dataset, sampler=self.val_sampler, **self.kwargs)
+            if self.val_sampler is not None
+            else None
         )
 
-    def get_valid_dataloader(self):
-        if self.valid_sampler is None:
-            raise ValueError("No validation set is configured.")
-        return DataLoader(
-            self.dataset, batch_size=self.batch_size, sampler=self.valid_sampler
+    def test_dataloader(self):
+        return (
+            data.DataLoader(self.dataset, sampler=self.test_sampler, **self.kwargs)
+            if self.test_sampler is not None
+            else None
         )
 
-
-def weighted_random_mask_value(
-    values: Union[torch.Tensor, np.ndarray],
-    mask_ratio: float = 0.15,
-    mask_value: int = -1,
-    important_elements: Union[torch.Tensor, np.ndarray] = np.array([]),
-    important_weight: int = 0,
-    pad_value: int = 0,
-) -> torch.Tensor:
-    """
-    Randomly mask a batch of data.
-
-    Args:
-        values (array-like):
-            A batch of tokenized data, with shape (batch_size, n_features).
-        mask_ratio (float): The ratio of genes to mask, default to 0.15.
-        mask_value (int): The value to mask with, default to -1.
-        pad_value (int): The value of padding in the values, will be kept unchanged.
-
-    Returns:
-        torch.Tensor: A tensor of masked data.
-    """
-    if isinstance(values, torch.Tensor):
-        # it is crutial to clone the tensor, otherwise it changes the original tensor
-        values = values.clone().detach().numpy()
-    else:
-        values = values.copy()
-
-    for i in range(len(values)):
-        row = values[i]
-        non_padding_idx = np.nonzero(row - pad_value)[0]
-        non_padding_idx = np.setdiff1d(non_padding_idx, do_not_pad_index)
-        n_mask = int(len(non_padding_idx) * mask_ratio)
-        mask_idx = np.random.choice(non_padding_idx, n_mask, replace=False)
-        row[mask_idx] = mask_value
-    return torch.from_numpy(values).float()
+    # def teardown(self):
+    # clean up state after the trainer stops, delete files...
+    # called on every process in DDP
+    # pass

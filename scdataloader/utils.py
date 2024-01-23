@@ -4,12 +4,14 @@ import urllib
 
 import bionty as bt
 import lamindb as ln
+import lnschema_bionty as lb
 import numpy as np
 import pandas as pd
 from biomart import BiomartServer
 from django.db import IntegrityError
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
+from functools import lru_cache
 
 
 def createFoldersFor(filepath):
@@ -39,9 +41,7 @@ def _fetchFromServer(ensemble_server, attributes):
     print(attributes)
     res = pd.read_csv(
         io.StringIO(
-            ensmbl.search(
-                {"attributes": attributes}, header=1
-            ).content.decode()
+            ensmbl.search({"attributes": attributes}, header=1).content.decode()
         ),
         sep="\t",
     )
@@ -103,7 +103,7 @@ def getBiomartTable(
     return res
 
 
-def validate(adata, lb, organism):
+def validate(adata, organism):
     """
     validate checks if the adata object is valid for lamindb
 
@@ -197,6 +197,8 @@ def validate(adata, lb, organism):
     return True
 
 
+# setting a cache of 200 elements
+# @lru_cache(maxsize=200)
 def get_all_ancestors(val, df):
     if val not in df.index:
         return set()
@@ -204,9 +206,7 @@ def get_all_ancestors(val, df):
     if parents is None or len(parents) == 0:
         return set()
     else:
-        return set.union(
-            set(parents), *[get_all_ancestors(val, df) for val in parents]
-        )
+        return set.union(set(parents), *[get_all_ancestors(val, df) for val in parents])
 
 
 def get_ancestry_mapping(all_elem, onto_df):
@@ -244,7 +244,6 @@ def get_ancestry_mapping(all_elem, onto_df):
 
 
 def load_dataset_local(
-    lb,
     remote_dataset,
     download_folder,
     name,
@@ -268,9 +267,7 @@ def load_dataset_local(
         lamindb.Dataset: The local dataset.
     """
     saved_files = []
-    default_storage = ln.Storage.filter(
-        root=ln.settings.storage.as_posix()
-    ).one()
+    default_storage = ln.Storage.filter(root=ln.settings.storage.as_posix()).one()
     files = (
         remote_dataset.artifacts.all()
         if not only
@@ -293,9 +290,7 @@ def load_dataset_local(
         except IntegrityError:
             print(f"File {file.key} already exists in storage")
         # if location already has a file, don't save again
-        if use_cache and os.path.exists(
-            os.path.expanduser(download_folder + file.key)
-        ):
+        if use_cache and os.path.exists(os.path.expanduser(download_folder + file.key)):
             print(f"File {file.key} already exists in storage")
         else:
             path.download_to(download_folder + file.key)
@@ -305,13 +300,33 @@ def load_dataset_local(
         except IntegrityError:
             print(f"File {file.key} already exists in storage")
         saved_files.append(file)
-    dataset = ln.Dataset(saved_files, name=name, description=description)
+    dataset = ln.Collection(saved_files, name=name, description=description)
     dataset.save()
     return dataset
 
 
+def load_genes(organisms):
+    organismdf = []
+    if type(organisms) == str:
+        organisms = [organisms]
+    for organism in organisms:
+        genesdf = bt.Gene(
+            organism=lb.Organism.filter(ontology_id=organism).first().name
+        ).df()
+        genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
+        genesdf = genesdf.set_index("ensembl_gene_id")
+        # mitochondrial genes
+        genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
+        # ribosomal genes
+        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(("RPS", "RPL"))
+        # hemoglobin genes.
+        genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
+        genesdf["organism"] = organism
+        organismdf.append(genesdf)
+    return pd.concat(organismdf)
+
+
 def populate_my_ontology(
-    lb,
     organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
     sex=["PATO:0000384", "PATO:0000383"],
     celltypes=[],
@@ -360,9 +375,7 @@ def populate_my_ontology(
     records = lb.Phenotype.from_values(
         name,
         field=lb.Phenotype.ontology_id,
-        bionty_source=lb.BiontySource.filter(
-            entity="Phenotype", source="pato"
-        ).one(),
+        bionty_source=lb.BiontySource.filter(entity="Phenotype", source="pato").one(),
     )
     ln.save(records)
     lb.Phenotype(name="unknown", ontology_id="unknown").save()
@@ -388,9 +401,7 @@ def populate_my_ontology(
     ln.save(records)
     lb.Tissue(name="unknown", ontology_id="unknown").save()
     # DevelopmentalStage
-    names = (
-        bt.DevelopmentalStage().df().index if not dev_stages else dev_stages
-    )
+    names = bt.DevelopmentalStage().df().index if not dev_stages else dev_stages
     records = lb.DevelopmentalStage.from_values(
         names, field=lb.DevelopmentalStage.ontology_id
     )
