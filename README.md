@@ -2,6 +2,8 @@
 
 [![codecov](https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here)](https://codecov.io/gh/jkobject/scDataLoader)
 [![CI](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml)
+[![DOI](https://zenodo.org/badge/731248665.svg)](https://zenodo.org/doi/10.5281/zenodo.10573143)
+
 
 Awesome single cell dataloader created by @jkobject 
 
