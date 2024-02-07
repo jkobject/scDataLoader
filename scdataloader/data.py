@@ -6,6 +6,8 @@ import pandas as pd
 from torch.utils.data import Dataset as torchDataset
 from typing import Union
 from scdataloader import mapped
+import numpy as np
+import warnings
 
 # TODO: manage load gene embeddings to make
 # from scprint.dataloader.embedder import embed
@@ -261,6 +263,13 @@ class Dataset(torchDataset):
                     groupings.pop(i)
             self.class_groupings[label] = groupings
             if label in self.clss_to_pred:
+                # if we have added new labels, we need to update the encoder with them too.
+                mlength = len(self.mapped_dataset.encoders[label])
+                for i, v in enumerate(
+                    addition - set(self.mapped_dataset.encoders[label].keys())
+                ):
+                    self.mapped_dataset.encoders[label].update({v: mlength + i})
+                # we need to change the ordering so that the things that can't be predicted appear afterward
                 self.class_topred[label] = lclass
                 c = 0
                 update = {}
@@ -269,10 +278,29 @@ class Dataset(torchDataset):
                     if k in self.class_groupings[label].keys():
                         update.update({k: mlength + c})
                         c += 1
+                    elif k == self.mapped_dataset.unknown_class:
+                        update.update({k: v})
                     else:
                         update.update({k: v - c})
-                # if we have aded new labels, we need to update the encoder with them too.
-                for v in addition - set(self.mapped_dataset.encoders[label].keys()):
-                    update.update({v: mlength + c})
-                    c += 1
                 self.mapped_dataset.encoders[label] = update
+
+
+class SimpleAnnDataset:
+    def __init__(self, adata, obs_to_output=[], layer=None):
+        self.adata = adata
+        self.obs_to_output = obs_to_output
+        self.layer = layer
+
+    def __len__(self):
+        return self.adata.shape[0]
+
+    def __getitem__(self, idx):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            if self.layer is not None:
+                out = {"x": self.adata.layers[self.layer][idx].toarray().reshape(-1)}
+            else:
+                out = {"x": self.adata.X[idx].toarray().reshape(-1)}
+            for i in self.obs_to_output:
+                out.update({i: self.adata.obs.iloc[idx][i]})
+        return out

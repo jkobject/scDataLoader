@@ -85,6 +85,8 @@ class MappedDataset:
         self.storages = []
         self.conns = []
         self.parallel = parallel
+        self.unknown_class = unknown_class
+        self.path_list = path_list
         self._make_connections(path_list, parallel)
 
         self.n_obs_list = []
@@ -175,14 +177,14 @@ class MappedDataset:
         else:
             var_idxs = None
         with _Connect(self.storages[storage_idx]) as store:
-            out = [self.get_data_idx(store, obs_idx, var_idxs)]
+            out = {"x": self.get_data_idx(store, obs_idx, var_idxs)}
             if self.label_keys is not None:
                 for i, label in enumerate(self.label_keys):
                     label_idx = self.get_label_idx(store, obs_idx, label)
                     if label in self.encoders:
-                        out.append(self.encoders[label][label_idx])
+                        out.update({label: self.encoders[label][label_idx]})
                     else:
-                        out.append(label_idx)
+                        out.update({label: label_idx})
         return out
 
     def uns(self, idx, key):

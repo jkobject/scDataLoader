@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Optional, Union
 from uuid import uuid4
 
 import anndata as ad
@@ -48,10 +48,7 @@ class Preprocessor:
         madoutlier=5,
         pct_mt_outlier=8,
         batch_key=None,
-        erase_prev_dataset: bool = False,
-        cache: bool = True,
-        stream: bool = False,
-    ):
+    ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
 
@@ -90,79 +87,9 @@ class Preprocessor:
         self.madoutlier = madoutlier
         self.pct_mt_outlier = pct_mt_outlier
         self.batch_key = batch_key
-        self.erase_prev_dataset = erase_prev_dataset
         self.length_normalize = length_normalize
-        self.cache = cache
-        self.stream = stream
 
-    def __call__(
-        self,
-        data: Union[ln.Collection, AnnData] = None,
-        name="preprocessed dataset",
-        description="preprocessed dataset using scprint",
-        start_at=0,
-    ):
-        """
-        format controls the different input value wrapping, including categorical
-        binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.
-
-        Args:
-            adata (AnnData): The AnnData object to preprocess.
-            batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg
-                is used in the highly variable gene selection step.
-        """
-        files = []
-        all_ready_processed_keys = set()
-        if self.cache:
-            for i in ln.Artifact.filter(description="preprocessed by scprint"):
-                all_ready_processed_keys.add(i.initial_version.key)
-        if isinstance(data, AnnData):
-            return self.preprocess(data)
-        elif isinstance(data, ln.Collection):
-            for i, file in enumerate(data.artifacts.all()[start_at:]):
-                # use the counts matrix
-                print(i)
-                if file.key in all_ready_processed_keys:
-                    print(f"{file.key} is already processed")
-                    continue
-                print(file)
-                if file.backed().obs.is_primary_data.sum() == 0:
-                    print(f"{file.key} only contains non primary cells")
-                    continue
-                adata = file.load(stream=self.stream)
-
-                print(adata)
-                try:
-                    adata = self.preprocess(adata)
-
-                except ValueError as v:
-                    if v.args[0].startswith(
-                        "Dataset dropped because contains too many secondary"
-                    ):
-                        print(v)
-                        continue
-                    else:
-                        raise v
-                try:
-                    file.save()
-                except IntegrityError as e:
-                    # UNIQUE constraint failed: lnschema_bionty_organism.ontology_id
-                    print(f"seeing {e}... continuing")
-                myfile = ln.Artifact(
-                    adata,
-                    is_new_version_of=file,
-                    description="preprocessed by scprint",
-                )
-                # issues with KLlggfw6I6lvmbqiZm46
-                myfile.save()
-                files.append(myfile)
-            dataset = ln.Collection(files, name=name, description=description)
-            dataset.save()
-            return dataset
-        else:
-            raise ValueError("Please provide either anndata or ln.Collection")
-
-    def preprocess(self, adata: AnnData):
+    def __call__(self, adata) -> AnnData:
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if adata.raw is not None:
@@ -182,8 +109,7 @@ class Preprocessor:
             del adata.varp
         # check that it is a count
         if (
-            int(adata.X[:100].max()) != adata.X[:100].max()
-            and not self.force_preprocess
+            adata.X.astype(int).sum() != adata.X.sum() and not self.force_preprocess
         ):  # check if likely raw data
             raise ValueError(
                 "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
@@ -365,6 +291,88 @@ class Preprocessor:
             adata.layers[self.result_binned_key] = np.stack(binned_rows)
             adata.obsm["bin_edges"] = np.stack(bin_edges)
         return adata
+
+
+class LaminPreprocessor(Preprocessor):
+    def __init__(
+        self,
+        *args,
+        erase_prev_dataset: bool = False,
+        cache: bool = True,
+        stream: bool = False,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.erase_prev_dataset = erase_prev_dataset
+        self.cache = cache
+        self.stream = stream
+
+    def __call__(
+        self,
+        data: Union[ln.Collection, AnnData] = None,
+        name="preprocessed dataset",
+        description="preprocessed dataset using scprint",
+        start_at=0,
+    ):
+        """
+        format controls the different input value wrapping, including categorical
+        binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.
+
+        Args:
+            adata (AnnData): The AnnData object to preprocess.
+            batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg
+                is used in the highly variable gene selection step.
+        """
+        files = []
+        all_ready_processed_keys = set()
+        if self.cache:
+            for i in ln.Artifact.filter(description="preprocessed by scprint"):
+                all_ready_processed_keys.add(i.initial_version.key)
+        if isinstance(data, AnnData):
+            return self.preprocess(data)
+        elif isinstance(data, ln.Collection):
+            for i, file in enumerate(data.artifacts.all()[start_at:]):
+                # use the counts matrix
+                print(i)
+                if file.key in all_ready_processed_keys:
+                    print(f"{file.key} is already processed")
+                    continue
+                print(file)
+                if file.backed().obs.is_primary_data.sum() == 0:
+                    print(f"{file.key} only contains non primary cells")
+                    continue
+                adata = file.load(stream=self.stream)
+
+                print(adata)
+                try:
+                    adata = super.__call__(adata)
+
+                except ValueError as v:
+                    if v.args[0].startswith(
+                        "Dataset dropped because contains too many secondary"
+                    ):
+                        print(v)
+                        continue
+                    else:
+                        raise v
+                try:
+                    file.save()
+                except IntegrityError as e:
+                    # UNIQUE constraint failed: lnschema_bionty_organism.ontology_id
+                    print(f"seeing {e}... continuing")
+                myfile = ln.Artifact(
+                    adata,
+                    is_new_version_of=file,
+                    description="preprocessed by scprint",
+                )
+                # issues with KLlggfw6I6lvmbqiZm46
+                myfile.save()
+                files.append(myfile)
+            dataset = ln.Collection(files, name=name, description=description)
+            dataset.save()
+            return dataset
+        else:
+            raise ValueError("Please provide either anndata or ln.Collection")
 
 
 def is_log1p(adata: AnnData) -> bool:
