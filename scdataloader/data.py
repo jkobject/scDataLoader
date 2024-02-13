@@ -6,7 +6,6 @@ import pandas as pd
 from torch.utils.data import Dataset as torchDataset
 from typing import Union
 from scdataloader import mapped
-import numpy as np
 import warnings
 
 # TODO: manage load gene embeddings to make

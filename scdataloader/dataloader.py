@@ -1,9 +1,21 @@
 import numpy as np
-from torch.utils.data.sampler import WeightedRandomSampler, SubsetRandomSampler
-from scdataloader.mapped import MappedDataset
+import pandas as pd
+import lamindb as ln
+
+from torch.utils.data.sampler import (
+    WeightedRandomSampler,
+    SubsetRandomSampler,
+    SequentialSampler,
+)
 from torch.utils.data import DataLoader
 import lightning as L
 
+from typing import Optional
+
+from .data import Dataset
+from .collator import Collator
+from .mapped import MappedDataset
+from .utils import getBiomartTable
 
 # TODO: put in config
 COARSE_TISSUE = {
@@ -86,11 +98,24 @@ class DataModule(L.LightningDataModule):
 
     def __init__(
         self,
-        dataset: MappedDataset,
+        mdataset: Optional[MappedDataset] = None,
+        collection_name=None,
+        organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 30,
         label_to_weight: list = [],
+        label_to_pred: list = [],
         validation_split: float = 0.2,
         test_split: float = 0,
+        use_default_col=True,
+        all_labels=[],
+        hierarchical_labels=[],
+        how="most expr",
+        organism_name="organism_ontology_term_id",
+        max_len=1000,
+        add_zero_genes=100,
+        do_gene_pos=True,
+        gene_embeddings="",
+        gene_position_tolerance=10_000,
         **kwargs,
     ):
         """
@@ -104,14 +129,93 @@ class DataModule(L.LightningDataModule):
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
         """
+        if collection_name is not None:
+            mdataset = Dataset(
+                ln.Collection.filter(name=collection_name).first(),
+                organisms=organisms,
+                obs=all_labels,
+                clss_to_pred=label_to_pred,
+                hierarchical_clss=hierarchical_labels,
+            )
+            print(mdataset)
+        # and location
+        if do_gene_pos:
+            # and annotations
+            biomart = getBiomartTable(
+                attributes=["start_position", "chromosome_name"]
+            ).set_index("ensembl_gene_id")
+            biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
+            biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
+            c = []
+            i = 0
+            prev_position = -100000
+            prev_chromosome = None
+            for _, r in biomart.iterrows():
+                if (
+                    r["chromosome_name"] != prev_chromosome
+                    or r["start_position"] - prev_position > gene_position_tolerance
+                ):
+                    i += 1
+                c.append(i)
+                prev_position = r["start_position"]
+                prev_chromosome = r["chromosome_name"]
+            print(f"reduced the size to {len(set(c))/len(biomart)}")
+            biomart["pos"] = c
+            mdataset.genedf = biomart.loc[
+                mdataset.genedf[mdataset.genedf.index.isin(biomart.index)].index
+            ]
+            self.gene_pos = mdataset.genedf["pos"].tolist()
+
+        if gene_embeddings != "":
+            mdataset.genedf = mdataset.genedf.join(
+                pd.read_parquet(gene_embeddings), how="inner"
+            )
+        self.labels = {k: len(v) for k, v in mdataset.class_topred.items()}
+        # we might want not to order the genes by expression (or do it?)
+        # we might want to not introduce zeros and
+        if use_default_col:
+            kwargs["collate_fn"] = Collator(
+                organisms=organisms,
+                how=how,
+                valid_genes=mdataset.genedf.index.tolist(),
+                max_len=max_len,
+                add_zero_genes=add_zero_genes,
+                org_to_id=mdataset.encoder[organism_name],
+                tp_name="heat_diff",
+                organism_name=organism_name,
+                class_names=label_to_weight,
+            )
         self.validation_split = validation_split
         self.test_split = test_split
-        self.dataset = dataset
+        self.dataset = mdataset
         self.kwargs = kwargs
-        self.n_samples = len(self.dataset)
+        self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
         self.label_to_weight = label_to_weight
         super().__init__()
+
+    @property
+    def decoders(self):
+        decoders = {}
+        for k, v in self.dataset.encoder.items():
+            decoders[k] = {va: ke for ke, va in v.items()}
+        return decoders
+
+    @property
+    def cls_hierarchy(self):
+        cls_hierarchy = {}
+        for k, dic in self.dataset.class_groupings.items():
+            rdic = {}
+            for sk, v in dic.items():
+                rdic[self.dataset.encoder[k][sk]] = [
+                    self.dataset.encoder[k][i] for i in list(v)
+                ]
+            cls_hierarchy[k] = rdic
+        return cls_hierarchy
+
+    @property
+    def genes(self):
+        return self.dataset.genedf.index.tolist()
 
     def setup(self, stage=None):
         """
@@ -151,7 +255,7 @@ class DataModule(L.LightningDataModule):
             )
             cs = 0
             test_datasets = []
-            print("these files will be considered test datasets")
+            print("these files will be considered test datasets:")
             for i, c in enumerate(self.dataset.mapped_dataset.n_obs_list):
                 if cs + c > len_test:
                     break
@@ -166,7 +270,7 @@ class DataModule(L.LightningDataModule):
             idx_full = idx_full[len_test:]
             # test_weights = weights.copy()
             # test_weights[~test_idx] = 0
-            self.test_sampler = SubsetRandomSampler(test_idx)
+            self.test_sampler = SequentialSampler(test_idx)
         else:
             self.test_sampler = None
             test_datasets = None
@@ -176,7 +280,7 @@ class DataModule(L.LightningDataModule):
             idx_full = idx_full[len_valid:]
             # valid_weights = weights.copy()
             # valid_weights[~valid_idx] = 0
-            self.valid_sampler = SubsetRandomSampler(valid_idx)
+            self.valid_sampler = SequentialSampler(valid_idx)
         else:
             self.valid_sampler = None
 
@@ -189,8 +293,10 @@ class DataModule(L.LightningDataModule):
         )
         return test_datasets
 
-    def train_dataloader(self):
-        return DataLoader(self.dataset, sampler=self.train_sampler, **self.kwargs)
+    def train_dataloader(self, **kwargs):
+        return DataLoader(
+            self.dataset, sampler=self.train_sampler, **self.kwargs, **kwargs
+        )
 
     def val_dataloader(self):
         return (
