@@ -1,8 +1,7 @@
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Optional, Union
 from uuid import uuid4
 
 import anndata as ad
-import bionty as bt
 import lamindb as ln
 import numpy as np
 import pandas as pd
@@ -28,18 +27,15 @@ class Preprocessor:
 
     def __init__(
         self,
-        lb,
         filter_gene_by_counts: Union[int, bool] = False,
         filter_cell_by_counts: Union[int, bool] = False,
-        normalize_total: Union[float, bool] = False,
-        log1p: bool = False,
-        subset_hvg: Union[int, bool] = False,
+        normalize_sum: float = 1e4,
+        keep_norm_layer: bool = False,
+        subset_hvg: int = 0,
         hvg_flavor: str = "seurat_v3",
         binning: Optional[int] = None,
         result_binned_key: str = "X_binned",
         length_normalize: bool = False,
-        additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
-        additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         force_preprocess=False,
         min_dataset_size=100,
         min_valid_genes_id=10_000,
@@ -48,10 +44,10 @@ class Preprocessor:
         madoutlier=5,
         pct_mt_outlier=8,
         batch_key=None,
-        erase_prev_dataset: bool = False,
-        cache: bool = True,
-        stream: bool = False,
-    ):
+        skip_validate=False,
+        additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
+        additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
+    ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
 
@@ -60,7 +56,7 @@ class Preprocessor:
                 If int, filters genes with counts. Defaults to False.
             filter_cell_by_counts (int or bool, optional): Determines whether to filter cells by counts.
                 If int, filters cells with counts. Defaults to False.
-            normalize_total (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.
+            normalize_sum (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.
                 Defaults to 1e4.
             log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.
                 Defaults to True.
@@ -74,8 +70,8 @@ class Preprocessor:
         """
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
-        self.normalize_total = normalize_total
-        self.log1p = log1p
+        self.normalize_sum = normalize_sum
+        self.keep_norm_layer = keep_norm_layer
         self.subset_hvg = subset_hvg
         self.hvg_flavor = hvg_flavor
         self.binning = binning
@@ -83,7 +79,6 @@ class Preprocessor:
         self.additional_preprocess = additional_preprocess
         self.additional_postprocess = additional_postprocess
         self.force_preprocess = force_preprocess
-        self.lb = lb
         self.min_dataset_size = min_dataset_size
         self.min_valid_genes_id = min_valid_genes_id
         self.min_nnz_genes = min_nnz_genes
@@ -91,79 +86,10 @@ class Preprocessor:
         self.madoutlier = madoutlier
         self.pct_mt_outlier = pct_mt_outlier
         self.batch_key = batch_key
-        self.erase_prev_dataset = erase_prev_dataset
         self.length_normalize = length_normalize
-        self.cache = cache
-        self.stream = stream
+        self.skip_validate = skip_validate
 
-    def __call__(
-        self,
-        data: Union[ln.Dataset, AnnData] = None,
-        name="preprocessed dataset",
-        description="preprocessed dataset using scprint",
-        start_at=0,
-    ):
-        """
-        format controls the different input value wrapping, including categorical
-        binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.
-
-        Args:
-            adata (AnnData): The AnnData object to preprocess.
-            batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg
-                is used in the highly variable gene selection step.
-        """
-        files = []
-        all_ready_processed_keys = set()
-        if self.cache:
-            for i in ln.Artifact.filter(description="preprocessed by scprint"):
-                all_ready_processed_keys.add(i.initial_version.key)
-        if isinstance(data, AnnData):
-            return self.preprocess(data)
-        elif isinstance(data, ln.Dataset):
-            for i, file in enumerate(data.artifacts.all()[start_at:]):
-                # use the counts matrix
-                print(i)
-                if file.key in all_ready_processed_keys:
-                    print(f"{file.key} is already processed")
-                    continue
-                print(file)
-                if file.backed().obs.is_primary_data.sum() == 0:
-                    print(f"{file.key} only contains non primary cells")
-                    continue
-                adata = file.load(stream=self.stream)
-
-                print(adata)
-                try:
-                    adata = self.preprocess(adata)
-
-                except ValueError as v:
-                    if v.args[0].startswith(
-                        "Dataset dropped because contains too many secondary"
-                    ):
-                        print(v)
-                        continue
-                    else:
-                        raise v
-                try:
-                    file.save()
-                except IntegrityError as e:
-                    # UNIQUE constraint failed: lnschema_bionty_organism.ontology_id
-                    print(f"seeing {e}... continuing")
-                myfile = ln.Artifact(
-                    adata,
-                    is_new_version_of=file,
-                    description="preprocessed by scprint",
-                )
-                # issues with KLlggfw6I6lvmbqiZm46
-                myfile.save()
-                files.append(myfile)
-            dataset = ln.Dataset(files, name=name, description=description)
-            dataset.save()
-            return dataset
-        else:
-            raise ValueError("Please provide either anndata or ln.Dataset")
-
-    def preprocess(self, adata: AnnData):
+    def __call__(self, adata) -> AnnData:
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if adata.raw is not None:
@@ -183,8 +109,7 @@ class Preprocessor:
             del adata.varp
         # check that it is a count
         if (
-            int(adata.X[:100].max()) != adata.X[:100].max()
-            and not self.force_preprocess
+            np.abs(adata.X.astype(int) - adata.X).sum() and not self.force_preprocess
         ):  # check if likely raw data
             raise ValueError(
                 "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
@@ -208,7 +133,7 @@ class Preprocessor:
             sc.pp.filter_cells(adata, min_counts=self.filter_cell_by_counts)
         # if lost > 50% of the dataset, drop dataset
         # load the genes
-        genesdf = self.load_genes(adata.obs.organism_ontology_term_id[0])
+        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
 
         if prevsize / adata.shape[0] > self.maxdropamount:
             raise Exception(
@@ -230,9 +155,7 @@ class Preprocessor:
         intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
         print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
         if len(intersect_genes) < self.min_valid_genes_id:
-            raise Exception(
-                "Dataset dropped due to too many genes not mapping to it"
-            )
+            raise Exception("Dataset dropped due to too many genes not mapping to it")
         adata = adata[:, list(intersect_genes)]
         # marking unseen genes
         unseen = set(genesdf.index) - set(adata.var.index)
@@ -245,28 +168,21 @@ class Preprocessor:
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
-        data_utils.validate(
-            adata, self.lb, organism=adata.obs.organism_ontology_term_id[0]
-        )
+        if not self.skip_validate:
+            data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
         # length normalization
         if (
             adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
             and self.length_normalize
         ):
             subadata = data_utils.length_normalize(
-                adata[
-                    adata.obs["assay_ontology_term_id"].isin(
-                        FULL_LENGTH_ASSAYS
-                    )
-                ],
+                adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
             )
 
             adata = ad.concat(
                 [
                     adata[
-                        ~adata.obs["assay_ontology_term_id"].isin(
-                            FULL_LENGTH_ASSAYS
-                        )
+                        ~adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)
                     ],
                     subadata,
                 ],
@@ -275,10 +191,11 @@ class Preprocessor:
                 merge="only",
             )
         # step 3: normalize total
-        if self.normalize_total:
-            sc.pp.normalize_total(adata, target_sum=self.normalize_total)
-        if self.log1p and not is_log1p(adata):
-            sc.pp.log1p(adata)
+        adata.layers["clean"] = sc.pp.log1p(
+            sc.pp.normalize_total(adata, target_sum=self.normalize_sum, inplace=False)[
+                "X"
+            ]
+        )
 
         # QC
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
@@ -288,17 +205,15 @@ class Preprocessor:
 
         adata.obs["outlier"] = (
             data_utils.is_outlier(adata, "total_counts", self.madoutlier)
-            | data_utils.is_outlier(
-                adata, "n_genes_by_counts", self.madoutlier
-            )
+            | data_utils.is_outlier(adata, "n_genes_by_counts", self.madoutlier)
             | data_utils.is_outlier(
                 adata, "pct_counts_in_top_20_genes", self.madoutlier
             )
         )
 
-        adata.obs["mt_outlier"] = data_utils.is_outlier(
-            adata, "pct_counts_mt", 3
-        ) | (adata.obs["pct_counts_mt"] > self.pct_mt_outlier)
+        adata.obs["mt_outlier"] = data_utils.is_outlier(adata, "pct_counts_mt", 3) | (
+            adata.obs["pct_counts_mt"] > self.pct_mt_outlier
+        )
         total_outliers = (adata.obs["outlier"] | adata.obs["mt_outlier"]).sum()
         total_cells = adata.shape[0]
         percentage_outliers = (total_outliers / total_cells) * 100
@@ -313,16 +228,20 @@ class Preprocessor:
         if self.subset_hvg:
             sc.pp.highly_variable_genes(
                 adata,
+                layer="clean",
                 n_top_genes=self.subset_hvg,
                 batch_key=self.batch_key,
                 flavor=self.hvg_flavor,
-                subset=True,
+                subset=False,
             )
         # based on the topometry paper https://www.biorxiv.org/content/10.1101/2022.03.14.484134v2
         # https://rapids-singlecell.readthedocs.io/en/latest/api/generated/rapids_singlecell.pp.pca.html#rapids_singlecell.pp.pca
-        sc.pp.neighbors(
-            adata, n_pcs=500 if adata.shape[0] > 500 else adata.shape[0] - 2
+
+        adata.obsm["clean_pca"] = sc.pp.pca(
+            adata.layers["clean"],
+            n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
         )
+        sc.pp.neighbors(adata, use_rep="clean_pca")
         sc.tl.leiden(adata, key_added="leiden_3", resolution=3.0)
         sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
         sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
@@ -341,9 +260,7 @@ class Preprocessor:
             print("Binning data ...")
             if not isinstance(self.binning, int):
                 raise ValueError(
-                    "Binning arg must be an integer, but got {}.".format(
-                        self.binning
-                    )
+                    "Binning arg must be an integer, but got {}.".format(self.binning)
                 )
             # NOTE: the first bin is always a spectial for zero
             n_bins = self.binning
@@ -381,21 +298,87 @@ class Preprocessor:
             adata.obsm["bin_edges"] = np.stack(bin_edges)
         return adata
 
-    def load_genes(self, organism):
-        genesdf = bt.Gene(
-            organism=self.lb.Organism.filter(ontology_id=organism).first().name
-        ).df()
-        genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
-        genesdf = genesdf.set_index("ensembl_gene_id")
-        # mitochondrial genes
-        genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
-        # ribosomal genes
-        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(
-            ("RPS", "RPL")
-        )
-        # hemoglobin genes.
-        genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
-        return genesdf
+
+class LaminPreprocessor(Preprocessor):
+    def __init__(
+        self,
+        *args,
+        erase_prev_dataset: bool = False,
+        cache: bool = True,
+        stream: bool = False,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.erase_prev_dataset = erase_prev_dataset
+        self.cache = cache
+        self.stream = stream
+
+    def __call__(
+        self,
+        data: Union[ln.Collection, AnnData] = None,
+        name="preprocessed dataset",
+        description="preprocessed dataset using scprint",
+        start_at=0,
+        version="2",
+    ):
+        """
+        format controls the different input value wrapping, including categorical
+        binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.
+
+        Args:
+            adata (AnnData): The AnnData object to preprocess.
+            batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg
+                is used in the highly variable gene selection step.
+        """
+        files = []
+        all_ready_processed_keys = set()
+        if self.cache:
+            for i in ln.Artifact.filter(description=description):
+                all_ready_processed_keys.add(i.initial_version.key)
+        if isinstance(data, AnnData):
+            return self.preprocess(data)
+        elif isinstance(data, ln.Collection):
+            for i, file in enumerate(data.artifacts.all()[start_at:]):
+                # use the counts matrix
+                print(i)
+                if file.key in all_ready_processed_keys:
+                    print(f"{file.key} is already processed")
+                    continue
+                print(file)
+                if file.backed().obs.is_primary_data.sum() == 0:
+                    print(f"{file.key} only contains non primary cells")
+                    continue
+                adata = file.load(stream=self.stream)
+
+                print(adata)
+                try:
+                    adata = super().__call__(adata)
+
+                except ValueError as v:
+                    if v.args[0].startswith(
+                        "Dataset dropped because contains too many secondary"
+                    ):
+                        print(v)
+                        continue
+                    else:
+                        raise v
+                for name in ["stable_id", "created_at", "updated_at"]:
+                    if name in adata.var.columns:
+                        adata.var = adata.var.drop(columns=name)
+                myfile = ln.Artifact(
+                    adata,
+                    is_new_version_of=file,
+                    description=description,
+                    version=version,
+                )
+                # issues with KLlggfw6I6lvmbqiZm46
+                myfile.save()
+                files.append(myfile)
+            dataset = ln.Collection(files, name=name, description=description)
+            dataset.save()
+            return dataset
+        else:
+            raise ValueError("Please provide either anndata or ln.Collection")
 
 
 def is_log1p(adata: AnnData) -> bool:
@@ -494,7 +477,7 @@ def additional_preprocess(adata):
     adata.obs["cell_culture"] = False
     # if cell_type contains the word "(cell culture)" then it is a cell culture and we mark it as so and remove this from the cell type
     loc = adata.obs["cell_type_ontology_term_id"].str.contains(
-        "(cell culture)"
+        "(cell culture)", regex=False
     )
     if loc.sum() > 0:
         adata.obs["cell_type_ontology_term_id"] = adata.obs[
@@ -505,7 +488,9 @@ def additional_preprocess(adata):
             loc, "cell_type_ontology_term_id"
         ].str.replace(" (cell culture)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("(cell culture)")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains(
+        "(cell culture)", regex=False
+    )
     if loc.sum() > 0:
         adata.obs.loc[loc, "cell_culture"] = True
         adata.obs["tissue_ontology_term_id"] = adata.obs[
@@ -515,7 +500,7 @@ def additional_preprocess(adata):
             loc, "tissue_ontology_term_id"
         ].str.replace(r" \(cell culture\)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)", regex=False)
     if loc.sum() > 0:
         adata.obs.loc[loc, "cell_culture"] = True
         adata.obs["tissue_ontology_term_id"] = adata.obs[
@@ -525,7 +510,7 @@ def additional_preprocess(adata):
             loc, "tissue_ontology_term_id"
         ].str.replace(r" \(organoid\)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("CL:")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains("CL:", regex=False)
     if loc.sum() > 0:
         adata.obs["tissue_ontology_term_id"] = adata.obs[
             "tissue_ontology_term_id"
@@ -553,12 +538,8 @@ def additional_postprocess(adata):
     )  # + "_" + adata.obs['dataset_id'].astype(str)
 
     # if group is too small
-    okgroup = [
-        i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10
-    ]
-    not_okgroup = [
-        i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3
-    ]
+    okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10]
+    not_okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3]
     # set the group to empty
     adata.obs.loc[adata.obs["dpt_group"].isin(not_okgroup), "dpt_group"] = ""
     adata.obs["heat_diff"] = np.nan

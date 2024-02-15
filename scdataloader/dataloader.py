@@ -1,10 +1,21 @@
 import numpy as np
-from torch.utils.data import DataLoader as TorchLoader
-from torch.utils.data.dataloader import default_collate
-from torch.utils.data.sampler import WeightedRandomSampler
-from scdataloader.mapped import MappedDataset
-from typing import Union
-import torch
+import pandas as pd
+import lamindb as ln
+
+from torch.utils.data.sampler import (
+    WeightedRandomSampler,
+    SubsetRandomSampler,
+    SequentialSampler,
+)
+from torch.utils.data import DataLoader
+import lightning as L
+
+from typing import Optional
+
+from .data import Dataset
+from .collator import Collator
+from .mapped import MappedDataset
+from .utils import getBiomartTable
 
 # TODO: put in config
 COARSE_TISSUE = {
@@ -80,125 +91,228 @@ COARSE_ASSAY = {
 }
 
 
-class DataLoader(TorchLoader):
+class DataModule(L.LightningDataModule):
     """
     Base class for all data loaders
     """
 
     def __init__(
         self,
-        mapped_dataset: MappedDataset,
-        batch_size: int = 32,
+        mdataset: Optional[MappedDataset] = None,
+        collection_name=None,
+        organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 30,
+        train_oversampling=1,
         label_to_weight: list = [],
+        label_to_pred: list = [],
         validation_split: float = 0.2,
-        num_workers: int = 4,
-        collate_fn=default_collate,
-        sampler=None,
+        test_split: float = 0,
+        use_default_col=True,
+        all_labels=[],
+        hierarchical_labels=[],
+        how="most expr",
+        organism_name="organism_ontology_term_id",
+        max_len=1000,
+        add_zero_genes=100,
+        do_gene_pos=True,
+        gene_embeddings="",
+        gene_position_tolerance=10_000,
         **kwargs,
     ):
-        self.validation_split = validation_split
-        self.dataset = mapped_dataset
+        """
+        Initializes the DataModule.
 
-        self.batch_idx = 0
-        self.batch_size = batch_size
-        self.n_samples = len(self.dataset)
-        if sampler is None:
-            self.sampler, self.valid_sampler = self._split_sampler(
-                self.validation_split,
-                weight_scaler=weight_scaler,
-                label_to_weight=label_to_weight,
+        Args:
+            dataset (MappedDataset): The dataset to be used.
+            weight_scaler (int, optional): The weight scaler for weighted random sampling. Defaults to 30.
+            label_to_weight (list, optional): List of labels to weight. Defaults to [].
+            validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
+            test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
+            **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
+        """
+        if collection_name is not None:
+            mdataset = Dataset(
+                ln.Collection.filter(name=collection_name).first(),
+                organisms=organisms,
+                obs=all_labels,
+                clss_to_pred=label_to_pred,
+                hierarchical_clss=hierarchical_labels,
             )
-        else:
-            self.sampler = sampler
-            self.valid_sampler = None
+            print(mdataset)
+        # and location
+        if do_gene_pos:
+            # and annotations
+            biomart = getBiomartTable(
+                attributes=["start_position", "chromosome_name"]
+            ).set_index("ensembl_gene_id")
+            biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
+            biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
+            c = []
+            i = 0
+            prev_position = -100000
+            prev_chromosome = None
+            for _, r in biomart.iterrows():
+                if (
+                    r["chromosome_name"] != prev_chromosome
+                    or r["start_position"] - prev_position > gene_position_tolerance
+                ):
+                    i += 1
+                c.append(i)
+                prev_position = r["start_position"]
+                prev_chromosome = r["chromosome_name"]
+            print(f"reduced the size to {len(set(c))/len(biomart)}")
+            biomart["pos"] = c
+            mdataset.genedf = biomart.loc[
+                mdataset.genedf[mdataset.genedf.index.isin(biomart.index)].index
+            ]
+            self.gene_pos = mdataset.genedf["pos"].tolist()
 
-        self.init_kwargs = {
-            "dataset": self.dataset,
-            "batch_size": batch_size,
-            "collate_fn": collate_fn,
-            "num_workers": num_workers,
-        }
-        super().__init__(sampler=self.sampler, **self.init_kwargs, **kwargs)
+        if gene_embeddings != "":
+            mdataset.genedf = mdataset.genedf.join(
+                pd.read_parquet(gene_embeddings), how="inner"
+            )
+            if do_gene_pos:
+                self.gene_pos = mdataset.genedf["pos"].tolist()
+        self.labels = {k: len(v) for k, v in mdataset.class_topred.items()}
+        # we might want not to order the genes by expression (or do it?)
+        # we might want to not introduce zeros and
+        if use_default_col:
+            kwargs["collate_fn"] = Collator(
+                organisms=organisms,
+                how=how,
+                valid_genes=mdataset.genedf.index.tolist(),
+                max_len=max_len,
+                add_zero_genes=add_zero_genes,
+                org_to_id=mdataset.encoder[organism_name],
+                tp_name="heat_diff",
+                organism_name=organism_name,
+                class_names=label_to_weight,
+            )
+        self.validation_split = validation_split
+        self.test_split = test_split
+        self.dataset = mdataset
+        self.kwargs = kwargs
+        self.n_samples = len(mdataset)
+        self.weight_scaler = weight_scaler
+        self.train_oversampling = train_oversampling
+        self.label_to_weight = label_to_weight
+        super().__init__()
 
-    def _split_sampler(self, split, label_to_weight=[], weight_scaler: int = 30):
-        idx_full = np.arange(self.n_samples)
-        np.random.shuffle(idx_full)
-        if len(label_to_weight) > 0:
+    @property
+    def decoders(self):
+        decoders = {}
+        for k, v in self.dataset.encoder.items():
+            decoders[k] = {va: ke for ke, va in v.items()}
+        return decoders
+
+    @property
+    def cls_hierarchy(self):
+        cls_hierarchy = {}
+        for k, dic in self.dataset.class_groupings.items():
+            rdic = {}
+            for sk, v in dic.items():
+                rdic[self.dataset.encoder[k][sk]] = [
+                    self.dataset.encoder[k][i] for i in list(v)
+                ]
+            cls_hierarchy[k] = rdic
+        return cls_hierarchy
+
+    @property
+    def genes(self):
+        return self.dataset.genedf.index.tolist()
+
+    def setup(self, stage=None):
+        """
+        setup method is used to prepare the data for the training, validation, and test sets.
+        It shuffles the data, calculates weights for each set, and creates samplers for each set.
+
+        Args:
+            stage (str, optional): The stage of the model training process.
+            It can be either 'fit' or 'test'. Defaults to None.
+        """
+
+        if len(self.label_to_weight) > 0:
             weights = self.dataset.get_label_weights(
-                label_to_weight, scaler=weight_scaler
+                self.label_to_weight, scaler=self.weight_scaler
             )
         else:
             weights = np.ones(self.n_samples)
-        if isinstance(split, int):
-            assert (
-                split < self.n_samples
-            ), "validation set size is configured to be larger than entire dataset."
-            len_valid = split
+        if isinstance(self.validation_split, int):
+            len_valid = self.validation_split
         else:
-            len_valid = int(self.n_samples * split)
-        if len_valid == 0:
-            self.train_idx = idx_full
+            len_valid = int(self.n_samples * self.validation_split)
+        if isinstance(self.test_split, int):
+            len_test = self.test_split
         else:
-            self.valid_idx = idx_full[0:len_valid]
-            self.train_idx = np.delete(idx_full, np.arange(0, len_valid))
-            valid_weights = weights.copy()
-            valid_weights[self.train_idx] = 0
-            # TODO: should we do weighted random sampling for validation set?
-            valid_sampler = WeightedRandomSampler(
-                valid_weights, len_valid, replacement=True
+            len_test = int(self.n_samples * self.test_split)
+        assert (
+            len_test + len_valid < self.n_samples
+        ), "test set + valid set size is configured to be larger than entire dataset."
+        idx_full = np.arange(self.n_samples)
+        if len_test > 0:
+            # this way we work on some never seen datasets
+            # keeping at least one
+            len_test = (
+                len_test
+                if len_test > self.dataset.mapped_dataset.n_obs_list[0]
+                else self.dataset.mapped_dataset.n_obs_list[0]
             )
-        train_weights = weights.copy()
-        train_weights[self.valid_idx] = 0
-        train_sampler = WeightedRandomSampler(
-            train_weights, len(self.train_idx), replacement=True
-        )
-        # turn off shuffle option which is mutually exclusive with sampler
+            cs = 0
+            test_datasets = []
+            print("these files will be considered test datasets:")
+            for i, c in enumerate(self.dataset.mapped_dataset.n_obs_list):
+                if cs + c > len_test:
+                    break
+                else:
+                    print("    " + self.dataset.mapped_dataset.path_list[i].path)
+                    test_datasets.append(self.dataset.mapped_dataset.path_list[i].path)
+                    cs += c
 
-        return (
-            (train_sampler, valid_sampler) if len_valid != 0 else (train_sampler, None)
-        )
+            len_test = cs
+            print("perc test: ", len_test / self.n_samples)
+            test_idx = idx_full[:len_test]
+            idx_full = idx_full[len_test:]
+            self.test_sampler = SequentialSampler(test_idx)
+        else:
+            self.test_sampler = None
+            test_datasets = None
 
-    def get_valid_dataloader(self):
-        if self.valid_sampler is None:
-            raise ValueError("No validation set is configured.")
+        np.random.shuffle(idx_full)
+        if len_valid > 0:
+            valid_idx = idx_full[:len_valid]
+            idx_full = idx_full[len_valid:]
+            self.valid_sampler = SubsetRandomSampler(valid_idx)
+        else:
+            self.valid_sampler = None
+
+        weights[~idx_full] = 0
+        self.train_sampler = WeightedRandomSampler(
+            weights,
+            int(len(idx_full) * self.train_oversampling),
+            replacement=True,
+        )
+        return test_datasets
+
+    def train_dataloader(self, **kwargs):
         return DataLoader(
-            self.dataset, batch_size=self.batch_size, sampler=self.valid_sampler
+            self.dataset, sampler=self.train_sampler, **self.kwargs, **kwargs
         )
 
+    def val_dataloader(self):
+        return (
+            DataLoader(self.dataset, sampler=self.valid_sampler, **self.kwargs)
+            if self.valid_sampler is not None
+            else None
+        )
 
-def weighted_random_mask_value(
-    values: Union[torch.Tensor, np.ndarray],
-    mask_ratio: float = 0.15,
-    mask_value: int = -1,
-    important_elements: Union[torch.Tensor, np.ndarray] = np.array([]),
-    important_weight: int = 0,
-    pad_value: int = 0,
-) -> torch.Tensor:
-    """
-    Randomly mask a batch of data.
+    def test_dataloader(self):
+        return (
+            DataLoader(self.dataset, sampler=self.test_sampler, **self.kwargs)
+            if self.test_sampler is not None
+            else None
+        )
 
-    Args:
-        values (array-like):
-            A batch of tokenized data, with shape (batch_size, n_features).
-        mask_ratio (float): The ratio of genes to mask, default to 0.15.
-        mask_value (int): The value to mask with, default to -1.
-        pad_value (int): The value of padding in the values, will be kept unchanged.
-
-    Returns:
-        torch.Tensor: A tensor of masked data.
-    """
-    if isinstance(values, torch.Tensor):
-        # it is crutial to clone the tensor, otherwise it changes the original tensor
-        values = values.clone().detach().numpy()
-    else:
-        values = values.copy()
-
-    for i in range(len(values)):
-        row = values[i]
-        non_padding_idx = np.nonzero(row - pad_value)[0]
-        non_padding_idx = np.setdiff1d(non_padding_idx, do_not_pad_index)
-        n_mask = int(len(non_padding_idx) * mask_ratio)
-        mask_idx = np.random.choice(non_padding_idx, n_mask, replace=False)
-        row[mask_idx] = mask_value
-    return torch.from_numpy(values).float()
+    # def teardown(self):
+    # clean up state after the trainer stops, delete files...
+    # called on every process in DDP
+    # pass
