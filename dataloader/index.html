@@ -61,7 +61,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">dataloader</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.dataloader.DataLoader">DataLoader</a>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.dataloader.DataModule">DataModule</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.dataloader.DataModule.setup">setup</a>
+    </li>
+        </ul>
     </li>
     </ul>
                   </li>
@@ -97,34 +101,96 @@
 
 
 
-
-<h2 id="scdataloader.dataloader.DataLoader" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">DataLoader</span></code>
+<h2 id="scdataloader.dataloader.DataModule" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">DataModule</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents first">
           <p class="doc doc-class-bases">
-            Bases: <code><span title="torch.utils.data.DataLoader">DataLoader</span></code></p>
+            Bases: <code><span title="lightning.LightningDataModule">LightningDataModule</span></code></p>
 
   
       <p>Base class for all data loaders</p>
+  
+      <p>Initializes the DataModule.</p>
 
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>dataset</code></b>
+                  (<code><span title="scdataloader.mapped.MappedDataset">MappedDataset</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The dataset to be used.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>weight_scaler</code></b>
+                  (<code>int</code>, default:
+                      <code>30</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The weight scaler for weighted random sampling. Defaults to 30.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>label_to_weight</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of labels to weight. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>validation_split</code></b>
+                  (<code>float</code>, default:
+                      <code>0.2</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The proportion of the dataset to include in the validation split. Defaults to 0.2.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>test_split</code></b>
+                  (<code>float</code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The proportion of the dataset to include in the test split. Defaults to 0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>**kwargs</code></b>
+              –
+              <div class="doc-md-description">
+                <p>Additional keyword arguments passed to the pytorch DataLoader.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
                 <details class="quote">
                   <summary>Source code in <code>scdataloader/dataloader.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -147,41 +213,184 @@
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
-<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">mapped_dataset</span><span class="p">:</span> <span class="n">MappedDataset</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">mdataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MappedDataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">collection_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">organisms</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">weight_scaler</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">train_oversampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">label_to_weight</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">label_to_pred</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">validation_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">collate_fn</span><span class="o">=</span><span class="n">default_collate</span><span class="p">,</span>
-    <span class="n">sampler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">test_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">use_default_col</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">all_labels</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">hierarchical_labels</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">how</span><span class="o">=</span><span class="s2">&quot;most expr&quot;</span><span class="p">,</span>
+    <span class="n">organism_name</span><span class="o">=</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
+    <span class="n">max_len</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">add_zero_genes</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">do_gene_pos</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gene_embeddings</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">gene_position_tolerance</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">mapped_dataset</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes the DataModule.</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">batch_idx</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sampler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_sampler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_sampler</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span><span class="p">,</span>
-            <span class="n">weight_scaler</span><span class="o">=</span><span class="n">weight_scaler</span><span class="p">,</span>
-            <span class="n">label_to_weight</span><span class="o">=</span><span class="n">label_to_weight</span><span class="p">,</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (MappedDataset): The dataset to be used.</span>
+<span class="sd">        weight_scaler (int, optional): The weight scaler for weighted random sampling. Defaults to 30.</span>
+<span class="sd">        label_to_weight (list, optional): List of labels to weight. Defaults to [].</span>
+<span class="sd">        validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.</span>
+<span class="sd">        test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.</span>
+<span class="sd">        **kwargs: Additional keyword arguments passed to the pytorch DataLoader.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">collection_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mdataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
+            <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">collection_name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">(),</span>
+            <span class="n">organisms</span><span class="o">=</span><span class="n">organisms</span><span class="p">,</span>
+            <span class="n">obs</span><span class="o">=</span><span class="n">all_labels</span><span class="p">,</span>
+            <span class="n">clss_to_pred</span><span class="o">=</span><span class="n">label_to_pred</span><span class="p">,</span>
+            <span class="n">hierarchical_clss</span><span class="o">=</span><span class="n">hierarchical_labels</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">sampler</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">valid_sampler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">mdataset</span><span class="p">)</span>
+    <span class="c1"># and location</span>
+    <span class="k">if</span> <span class="n">do_gene_pos</span><span class="p">:</span>
+        <span class="c1"># and annotations</span>
+        <span class="n">biomart</span> <span class="o">=</span> <span class="n">getBiomartTable</span><span class="p">(</span>
+            <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">,</span> <span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span>
+        <span class="n">biomart</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">biomart</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+        <span class="n">biomart</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">,</span> <span class="s2">&quot;start_position&quot;</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">prev_position</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100000</span>
+        <span class="n">prev_chromosome</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">biomart</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">r</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev_chromosome</span>
+                <span class="ow">or</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">prev_position</span> <span class="o">&gt;</span> <span class="n">gene_position_tolerance</span>
+            <span class="p">):</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">prev_position</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">]</span>
+            <span class="n">prev_chromosome</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reduced the size to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">biomart</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">biomart</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">biomart</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">init_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;dataset&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
-        <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
-        <span class="s2">&quot;collate_fn&quot;</span><span class="p">:</span> <span class="n">collate_fn</span><span class="p">,</span>
-        <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="n">num_workers</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">init_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gene_embeddings</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">gene_embeddings</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">do_gene_pos</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">class_topred</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="c1"># we might want not to order the genes by expression (or do it?)</span>
+    <span class="c1"># we might want to not introduce zeros and</span>
+    <span class="k">if</span> <span class="n">use_default_col</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;collate_fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Collator</span><span class="p">(</span>
+            <span class="n">organisms</span><span class="o">=</span><span class="n">organisms</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="n">how</span><span class="p">,</span>
+            <span class="n">valid_genes</span><span class="o">=</span><span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="n">max_len</span><span class="o">=</span><span class="n">max_len</span><span class="p">,</span>
+            <span class="n">add_zero_genes</span><span class="o">=</span><span class="n">add_zero_genes</span><span class="p">,</span>
+            <span class="n">org_to_id</span><span class="o">=</span><span class="n">mdataset</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="n">organism_name</span><span class="p">],</span>
+            <span class="n">tp_name</span><span class="o">=</span><span class="s2">&quot;heat_diff&quot;</span><span class="p">,</span>
+            <span class="n">organism_name</span><span class="o">=</span><span class="n">organism_name</span><span class="p">,</span>
+            <span class="n">class_names</span><span class="o">=</span><span class="n">label_to_weight</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="n">test_split</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">mdataset</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mdataset</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span> <span class="o">=</span> <span class="n">weight_scaler</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_oversampling</span> <span class="o">=</span> <span class="n">train_oversampling</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label_to_weight</span> <span class="o">=</span> <span class="n">label_to_weight</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
                 </details>
 
@@ -198,10 +407,203 @@
 
 
 
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="scdataloader.dataloader.DataModule.setup" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">setup</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>setup method is used to prepare the data for the training, validation, and test sets.
+It shuffles the data, calculates weights for each set, and creates samplers for each set.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>stage</code></b>
+                  (<code>str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The stage of the model training process.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/dataloader.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    setup method is used to prepare the data for the training, validation, and test sets.</span>
+<span class="sd">    It shuffles the data, calculates weights for each set, and creates samplers for each set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stage (str, optional): The stage of the model training process.</span>
+<span class="sd">        It can be either &#39;fit&#39; or &#39;test&#39;. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_to_weight</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">get_label_weights</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_to_weight</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">len_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">len_valid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">len_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">len_test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">len_test</span> <span class="o">+</span> <span class="n">len_valid</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+    <span class="p">),</span> <span class="s2">&quot;test set + valid set size is configured to be larger than entire dataset.&quot;</span>
+    <span class="n">idx_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">len_test</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># this way we work on some never seen datasets</span>
+        <span class="c1"># keeping at least one</span>
+        <span class="n">len_test</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">len_test</span>
+            <span class="k">if</span> <span class="n">len_test</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">n_obs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">n_obs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">test_datasets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;these files will be considered test datasets:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">n_obs_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">cs</span> <span class="o">+</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="n">len_test</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">path_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">test_datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">path_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">cs</span> <span class="o">+=</span> <span class="n">c</span>
+
+        <span class="n">len_test</span> <span class="o">=</span> <span class="n">cs</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;perc test: &quot;</span><span class="p">,</span> <span class="n">len_test</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">test_idx</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[:</span><span class="n">len_test</span><span class="p">]</span>
+        <span class="n">idx_full</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[</span><span class="n">len_test</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span> <span class="o">=</span> <span class="n">SequentialSampler</span><span class="p">(</span><span class="n">test_idx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">test_datasets</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx_full</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">len_valid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">valid_idx</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[:</span><span class="n">len_valid</span><span class="p">]</span>
+        <span class="n">idx_full</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[</span><span class="n">len_valid</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_sampler</span> <span class="o">=</span> <span class="n">SubsetRandomSampler</span><span class="p">(</span><span class="n">valid_idx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_sampler</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">weights</span><span class="p">[</span><span class="o">~</span><span class="n">idx_full</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="n">WeightedRandomSampler</span><span class="p">(</span>
+        <span class="n">weights</span><span class="p">,</span>
+        <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idx_full</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_oversampling</span><span class="p">),</span>
+        <span class="n">replacement</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">test_datasets</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
 
   </div>
 
   </div>
+
 
 </div>
               

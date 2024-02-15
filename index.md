@@ -25,6 +25,8 @@ It allows you to:
 
 I needed to create this Data Loader for my PhD project. I am using it to load & preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.
 
+![scdataloader.drawio.png]()
+
 ## Install it from PyPI
 
 ```bash
