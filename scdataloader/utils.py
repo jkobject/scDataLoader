@@ -4,7 +4,6 @@ import urllib
 
 import bionty as bt
 import lamindb as ln
-import lnschema_bionty as lb
 import numpy as np
 import pandas as pd
 from biomart import BiomartServer
@@ -126,8 +125,7 @@ def validate(adata, organism):
     Returns:
         bool: True if the adata object is valid
     """
-    organism = lb.Organism.filter(ontology_id=organism).one().name
-    lb.settings.organism = organism
+    organism = bt.Organism.filter(ontology_id=organism).one().name
 
     if adata.var.index.duplicated().any():
         raise ValueError("Duplicate gene names found in adata.var.index")
@@ -146,33 +144,33 @@ def validate(adata, organism):
             raise ValueError(
                 f"Column '{val}' is missing in the provided anndata object."
             )
-    bionty_source = lb.BiontySource.filter(
+    bionty_source = bt.PublicSource.filter(
         entity="DevelopmentalStage", organism=organism
     ).one()
 
-    if not lb.Ethnicity.validate(
+    if not bt.Ethnicity.validate(
         adata.obs["self_reported_ethnicity_ontology_term_id"],
         field="ontology_id",
     ).all():
         raise ValueError("Invalid ethnicity ontology term id found")
-    if not lb.Organism.validate(
+    if not bt.Organism.validate(
         adata.obs["organism_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid organism ontology term id found")
-    if not lb.Phenotype.validate(
+    if not bt.Phenotype.validate(
         adata.obs["sex_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid sex ontology term id found")
-    if not lb.Disease.validate(
+    if not bt.Disease.validate(
         adata.obs["disease_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid disease ontology term id found")
-    if not lb.CellType.validate(
+    if not bt.CellType.validate(
         adata.obs["cell_type_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid cell type ontology term id found")
     if (
-        not lb.DevelopmentalStage.filter(bionty_source=bionty_source)
+        not bt.DevelopmentalStage.filter(bionty_source=bionty_source)
         .validate(
             adata.obs["development_stage_ontology_term_id"],
             field="ontology_id",
@@ -180,16 +178,16 @@ def validate(adata, organism):
         .all()
     ):
         raise ValueError("Invalid dev stage ontology term id found")
-    if not lb.Tissue.validate(
+    if not bt.Tissue.validate(
         adata.obs["tissue_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid tissue ontology term id found")
-    if not lb.ExperimentalFactor.validate(
+    if not bt.ExperimentalFactor.validate(
         adata.obs["assay_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid assay ontology term id found")
     if (
-        not lb.Gene.filter(organism=lb.settings.organism)
+        not bt.Gene.filter(organism=bt.settings.organism)
         .validate(adata.var.index, field="ensembl_gene_id")
         .all()
     ):
@@ -282,8 +280,8 @@ def load_dataset_local(
         if len(organism) == 0:
             print("No organism detected")
             continue
-        organism = lb.Organism.filter(ontology_id=organism[0]).one().name
-        # lb.settings.organism = organism
+        organism = bt.Organism.filter(ontology_id=organism[0]).one().name
+        # bt.settings.organism = organism
         path = file.path
         try:
             file.save()
@@ -310,9 +308,10 @@ def load_genes(organisms):
     if type(organisms) == str:
         organisms = [organisms]
     for organism in organisms:
-        genesdf = bt.Gene(
-            organism=lb.Organism.filter(ontology_id=organism).first().name
+        genesdf = bt.Gene.filter(
+            organism_id=bt.Organism.filter(ontology_id=organism).first().id
         ).df()
+        genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
         genesdf = genesdf.set_index("ensembl_gene_id")
         # mitochondrial genes
@@ -341,11 +340,11 @@ def populate_my_ontology(
 
     run this function just one for each new lamin storage
 
-    erase everything with lb.$ontology.filter().delete()
+    erase everything with bt.$ontology.filter().delete()
 
     add whatever value you need afterward like it is done here with:
 
-    `lb.$ontology(name="ddd", ontology_id="ddddd").save()`
+    `bt.$ontology(name="ddd", ontology_id="ddddd").save()`
 
     `df["assay_ontology_term_id"].unique()`
 
@@ -361,69 +360,72 @@ def populate_my_ontology(
         dev_stages (list, optional): List of developmental stages. Defaults to [].
     """
 
-    names = bt.CellType().df().index if not celltypes else celltypes
-    records = lb.CellType.from_values(names, field=lb.CellType.ontology_id)
+    names = bt.CellType.from_public().df().index if not celltypes else celltypes
+    records = bt.CellType.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.CellType(name="unknown", ontology_id="unknown").save()
+    bt.CellType(name="unknown", ontology_id="unknown").save()
     # Organism
-    # names = bt.Organism().df().index if not organisms else organisms
-    # records = lb.Organism.from_values(names, field=lb.Organism.ontology_id)
-    # ln.save(records)
-    # lb.Organism(name="unknown", ontology_id="unknown").save()
+    names = bt.Organism.from_public().df().index if not organisms else organisms
+    records = [
+        i[0] if type(i) is list else i
+        for i in [bt.Organism.from_public(ontology_id=i) for i in names]
+    ]
+    ln.save(records)
+    bt.Organism(name="unknown", ontology_id="unknown").save()
     # Phenotype
-    name = bt.Phenotype().df().index if not sex else sex
-    records = lb.Phenotype.from_values(
-        name,
-        field=lb.Phenotype.ontology_id,
-        bionty_source=lb.BiontySource.filter(entity="Phenotype", source="pato").one(),
-    )
+    names = bt.Phenotype.from_public().df().index if not sex else sex
+    records = [
+        bt.Phenotype.from_public(
+            ontology_id=i,
+            public_source=bt.PublicSource.filter(
+                entity="Phenotype", source="pato"
+            ).one(),
+        )
+        for i in names
+    ]
     ln.save(records)
-    lb.Phenotype(name="unknown", ontology_id="unknown").save()
+    bt.Phenotype(name="unknown", ontology_id="unknown").save()
     # ethnicity
-    names = bt.Ethnicity().df().index if not ethnicities else ethnicities
-    records = lb.Ethnicity.from_values(names, field=lb.Ethnicity.ontology_id)
+    names = bt.Ethnicity.from_public().df().index if not ethnicities else ethnicities
+    records = bt.Ethnicity.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.Ethnicity(
+    bt.Ethnicity(
         name="unknown", ontology_id="unknown"
     ).save()  # multi ethnic will have to get renamed
     # ExperimentalFactor
-    names = bt.ExperimentalFactor().df().index if not assays else assays
-    records = lb.ExperimentalFactor.from_values(
-        names, field=lb.ExperimentalFactor.ontology_id
-    )
+    names = bt.ExperimentalFactor.from_public().df().index if not assays else assays
+    records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
-    # lookup = lb.ExperimentalFactor.lookup()
+    bt.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
+    # lookup = bt.ExperimentalFactor.lookup()
     # lookup.smart_seq_v4.parents.add(lookup.smart_like)
     # Tissue
-    names = bt.Tissue().df().index if not tissues else tissues
-    records = lb.Tissue.from_values(names, field=lb.Tissue.ontology_id)
+    names = bt.Tissue.from_public().df().index if not tissues else tissues
+    records = bt.Tissue.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.Tissue(name="unknown", ontology_id="unknown").save()
+    bt.Tissue(name="unknown", ontology_id="unknown").save()
     # DevelopmentalStage
-    names = bt.DevelopmentalStage().df().index if not dev_stages else dev_stages
-    records = lb.DevelopmentalStage.from_values(
-        names, field=lb.DevelopmentalStage.ontology_id
+    names = (
+        bt.DevelopmentalStage.from_public().df().index if not dev_stages else dev_stages
     )
+    records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
+    bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
     # Disease
-    names = bt.Disease().df().index if not diseases else diseases
-    records = lb.Disease.from_values(names, field=lb.Disease.ontology_id)
+    names = bt.Disease.from_public().df().index if not diseases else diseases
+    records = bt.Disease.from_values(names, field="ontology_id")
     ln.save(records)
-    lb.Disease(name="normal", ontology_id="PATO:0000461").save()
-    lb.Disease(name="unknown", ontology_id="unknown").save()
+    bt.Disease(name="normal", ontology_id="PATO:0000461").save()
+    bt.Disease(name="unknown", ontology_id="unknown").save()
     # genes
-    for organism in organisms:
+    for organism in ["NCBITaxon:10090", "NCBITaxon:9606"]:
         # convert onto to name
-        organism = lb.Organism.filter(ontology_id=organism).one().name
-        names = bt.Gene(organism=organism).df()["ensembl_gene_id"]
-        records = lb.Gene.from_values(
+        organism = bt.Organism.filter(ontology_id=organism).one().name
+        names = bt.Gene.public(organism=organism).df()["ensembl_gene_id"]
+        records = bt.Gene.from_values(
             names,
             field="ensembl_gene_id",
-            bionty_source=lb.BiontySource.filter(
-                entity="Gene", organism=organism
-            ).first(),
+            organism=organism,
         )
         ln.save(records)
 

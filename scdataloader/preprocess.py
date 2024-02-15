@@ -2,9 +2,7 @@ from typing import Any, Callable, Optional, Union
 from uuid import uuid4
 
 import anndata as ad
-import bionty as bt
 import lamindb as ln
-import lnschema_bionty as lb
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -31,15 +29,13 @@ class Preprocessor:
         self,
         filter_gene_by_counts: Union[int, bool] = False,
         filter_cell_by_counts: Union[int, bool] = False,
-        normalize_total: Union[float, bool] = False,
-        log1p: bool = False,
-        subset_hvg: Union[int, bool] = False,
+        normalize_sum: float = 1e4,
+        keep_norm_layer: bool = False,
+        subset_hvg: int = 0,
         hvg_flavor: str = "seurat_v3",
         binning: Optional[int] = None,
         result_binned_key: str = "X_binned",
         length_normalize: bool = False,
-        additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
-        additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         force_preprocess=False,
         min_dataset_size=100,
         min_valid_genes_id=10_000,
@@ -48,6 +44,9 @@ class Preprocessor:
         madoutlier=5,
         pct_mt_outlier=8,
         batch_key=None,
+        skip_validate=False,
+        additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
+        additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -57,7 +56,7 @@ class Preprocessor:
                 If int, filters genes with counts. Defaults to False.
             filter_cell_by_counts (int or bool, optional): Determines whether to filter cells by counts.
                 If int, filters cells with counts. Defaults to False.
-            normalize_total (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.
+            normalize_sum (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.
                 Defaults to 1e4.
             log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.
                 Defaults to True.
@@ -71,8 +70,8 @@ class Preprocessor:
         """
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
-        self.normalize_total = normalize_total
-        self.log1p = log1p
+        self.normalize_sum = normalize_sum
+        self.keep_norm_layer = keep_norm_layer
         self.subset_hvg = subset_hvg
         self.hvg_flavor = hvg_flavor
         self.binning = binning
@@ -88,6 +87,7 @@ class Preprocessor:
         self.pct_mt_outlier = pct_mt_outlier
         self.batch_key = batch_key
         self.length_normalize = length_normalize
+        self.skip_validate = skip_validate
 
     def __call__(self, adata) -> AnnData:
         if self.additional_preprocess is not None:
@@ -109,7 +109,7 @@ class Preprocessor:
             del adata.varp
         # check that it is a count
         if (
-            adata.X.astype(int).sum() != adata.X.sum() and not self.force_preprocess
+            np.abs(adata.X.astype(int) - adata.X).sum() and not self.force_preprocess
         ):  # check if likely raw data
             raise ValueError(
                 "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
@@ -133,7 +133,7 @@ class Preprocessor:
             sc.pp.filter_cells(adata, min_counts=self.filter_cell_by_counts)
         # if lost > 50% of the dataset, drop dataset
         # load the genes
-        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id[0])
+        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
 
         if prevsize / adata.shape[0] > self.maxdropamount:
             raise Exception(
@@ -168,7 +168,8 @@ class Preprocessor:
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
-        data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
+        if not self.skip_validate:
+            data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
         # length normalization
         if (
             adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
@@ -190,10 +191,11 @@ class Preprocessor:
                 merge="only",
             )
         # step 3: normalize total
-        if self.normalize_total:
-            sc.pp.normalize_total(adata, target_sum=self.normalize_total)
-        if self.log1p and not is_log1p(adata):
-            sc.pp.log1p(adata)
+        adata.layers["clean"] = sc.pp.log1p(
+            sc.pp.normalize_total(adata, target_sum=self.normalize_sum, inplace=False)[
+                "X"
+            ]
+        )
 
         # QC
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
@@ -226,16 +228,20 @@ class Preprocessor:
         if self.subset_hvg:
             sc.pp.highly_variable_genes(
                 adata,
+                layer="clean",
                 n_top_genes=self.subset_hvg,
                 batch_key=self.batch_key,
                 flavor=self.hvg_flavor,
-                subset=True,
+                subset=False,
             )
         # based on the topometry paper https://www.biorxiv.org/content/10.1101/2022.03.14.484134v2
         # https://rapids-singlecell.readthedocs.io/en/latest/api/generated/rapids_singlecell.pp.pca.html#rapids_singlecell.pp.pca
-        sc.pp.neighbors(
-            adata, n_pcs=500 if adata.shape[0] > 500 else adata.shape[0] - 2
+
+        adata.obsm["clean_pca"] = sc.pp.pca(
+            adata.layers["clean"],
+            n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
         )
+        sc.pp.neighbors(adata, use_rep="clean_pca")
         sc.tl.leiden(adata, key_added="leiden_3", resolution=3.0)
         sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
         sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
@@ -313,6 +319,7 @@ class LaminPreprocessor(Preprocessor):
         name="preprocessed dataset",
         description="preprocessed dataset using scprint",
         start_at=0,
+        version="2",
     ):
         """
         format controls the different input value wrapping, including categorical
@@ -326,7 +333,7 @@ class LaminPreprocessor(Preprocessor):
         files = []
         all_ready_processed_keys = set()
         if self.cache:
-            for i in ln.Artifact.filter(description="preprocessed by scprint"):
+            for i in ln.Artifact.filter(description=description):
                 all_ready_processed_keys.add(i.initial_version.key)
         if isinstance(data, AnnData):
             return self.preprocess(data)
@@ -345,7 +352,7 @@ class LaminPreprocessor(Preprocessor):
 
                 print(adata)
                 try:
-                    adata = super.__call__(adata)
+                    adata = super().__call__(adata)
 
                 except ValueError as v:
                     if v.args[0].startswith(
@@ -355,15 +362,14 @@ class LaminPreprocessor(Preprocessor):
                         continue
                     else:
                         raise v
-                try:
-                    file.save()
-                except IntegrityError as e:
-                    # UNIQUE constraint failed: lnschema_bionty_organism.ontology_id
-                    print(f"seeing {e}... continuing")
+                for name in ["stable_id", "created_at", "updated_at"]:
+                    if name in adata.var.columns:
+                        adata.var = adata.var.drop(columns=name)
                 myfile = ln.Artifact(
                     adata,
                     is_new_version_of=file,
-                    description="preprocessed by scprint",
+                    description=description,
+                    version=version,
                 )
                 # issues with KLlggfw6I6lvmbqiZm46
                 myfile.save()
@@ -470,7 +476,9 @@ def additional_preprocess(adata):
     )  # multi ethnic will have to get renamed
     adata.obs["cell_culture"] = False
     # if cell_type contains the word "(cell culture)" then it is a cell culture and we mark it as so and remove this from the cell type
-    loc = adata.obs["cell_type_ontology_term_id"].str.contains("(cell culture)")
+    loc = adata.obs["cell_type_ontology_term_id"].str.contains(
+        "(cell culture)", regex=False
+    )
     if loc.sum() > 0:
         adata.obs["cell_type_ontology_term_id"] = adata.obs[
             "cell_type_ontology_term_id"
@@ -480,7 +488,9 @@ def additional_preprocess(adata):
             loc, "cell_type_ontology_term_id"
         ].str.replace(" (cell culture)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("(cell culture)")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains(
+        "(cell culture)", regex=False
+    )
     if loc.sum() > 0:
         adata.obs.loc[loc, "cell_culture"] = True
         adata.obs["tissue_ontology_term_id"] = adata.obs[
@@ -490,7 +500,7 @@ def additional_preprocess(adata):
             loc, "tissue_ontology_term_id"
         ].str.replace(r" \(cell culture\)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)", regex=False)
     if loc.sum() > 0:
         adata.obs.loc[loc, "cell_culture"] = True
         adata.obs["tissue_ontology_term_id"] = adata.obs[
@@ -500,7 +510,7 @@ def additional_preprocess(adata):
             loc, "tissue_ontology_term_id"
         ].str.replace(r" \(organoid\)", "")
 
-    loc = adata.obs["tissue_ontology_term_id"].str.contains("CL:")
+    loc = adata.obs["tissue_ontology_term_id"].str.contains("CL:", regex=False)
     if loc.sum() > 0:
         adata.obs["tissue_ontology_term_id"] = adata.obs[
             "tissue_ontology_term_id"

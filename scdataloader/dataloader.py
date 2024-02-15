@@ -102,6 +102,7 @@ class DataModule(L.LightningDataModule):
         collection_name=None,
         organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 30,
+        train_oversampling=1,
         label_to_weight: list = [],
         label_to_pred: list = [],
         validation_split: float = 0.2,
@@ -170,6 +171,8 @@ class DataModule(L.LightningDataModule):
             mdataset.genedf = mdataset.genedf.join(
                 pd.read_parquet(gene_embeddings), how="inner"
             )
+            if do_gene_pos:
+                self.gene_pos = mdataset.genedf["pos"].tolist()
         self.labels = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
@@ -191,6 +194,7 @@ class DataModule(L.LightningDataModule):
         self.kwargs = kwargs
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
+        self.train_oversampling = train_oversampling
         self.label_to_weight = label_to_weight
         super().__init__()
 
@@ -268,28 +272,24 @@ class DataModule(L.LightningDataModule):
             print("perc test: ", len_test / self.n_samples)
             test_idx = idx_full[:len_test]
             idx_full = idx_full[len_test:]
-            # test_weights = weights.copy()
-            # test_weights[~test_idx] = 0
             self.test_sampler = SequentialSampler(test_idx)
         else:
             self.test_sampler = None
             test_datasets = None
 
+        np.random.shuffle(idx_full)
         if len_valid > 0:
             valid_idx = idx_full[:len_valid]
             idx_full = idx_full[len_valid:]
-            # valid_weights = weights.copy()
-            # valid_weights[~valid_idx] = 0
-            self.valid_sampler = SequentialSampler(valid_idx)
+            self.valid_sampler = SubsetRandomSampler(valid_idx)
         else:
             self.valid_sampler = None
 
-        np.random.shuffle(idx_full)
-        train_idx = idx_full[len_valid:]
-        train_weights = weights.copy()
-        train_weights[~train_idx] = 0
+        weights[~idx_full] = 0
         self.train_sampler = WeightedRandomSampler(
-            train_weights, len(train_idx), replacement=True
+            weights,
+            int(len(idx_full) * self.train_oversampling),
+            replacement=True,
         )
         return test_datasets
 

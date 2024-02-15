@@ -149,6 +149,7 @@ class Dataset(torchDataset):
 
     def __getitem__(self, *args, **kwargs):
         item = self.mapped_dataset.__getitem__(*args, **kwargs)
+        #item.update({"unseen_genes": self.get_unseen_mapped_dataset_elements(*args, **kwargs)})
         # ret = {}
         # ret["count"] = item[0]
         # for i, val in enumerate(self.obs):
