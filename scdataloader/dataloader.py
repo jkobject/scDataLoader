@@ -141,27 +141,31 @@ class DataModule(L.LightningDataModule):
             print(mdataset)
         # and location
         if do_gene_pos:
-            # and annotations
-            biomart = getBiomartTable(
-                attributes=["start_position", "chromosome_name"]
-            ).set_index("ensembl_gene_id")
-            biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
-            biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
-            c = []
-            i = 0
-            prev_position = -100000
-            prev_chromosome = None
-            for _, r in biomart.iterrows():
-                if (
-                    r["chromosome_name"] != prev_chromosome
-                    or r["start_position"] - prev_position > gene_position_tolerance
-                ):
-                    i += 1
-                c.append(i)
-                prev_position = r["start_position"]
-                prev_chromosome = r["chromosome_name"]
-            print(f"reduced the size to {len(set(c))/len(biomart)}")
-            biomart["pos"] = c
+            if type(do_gene_pos) is str:
+                print("seeing a string: loading gene positions as biomart parquet file")
+                biomart = pd.read_parquet(do_gene_pos)
+            else:
+                # and annotations
+                biomart = getBiomartTable(
+                    attributes=["start_position", "chromosome_name"]
+                ).set_index("ensembl_gene_id")
+                biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
+                biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
+                c = []
+                i = 0
+                prev_position = -100000
+                prev_chromosome = None
+                for _, r in biomart.iterrows():
+                    if (
+                        r["chromosome_name"] != prev_chromosome
+                        or r["start_position"] - prev_position > gene_position_tolerance
+                    ):
+                        i += 1
+                    c.append(i)
+                    prev_position = r["start_position"]
+                    prev_chromosome = r["chromosome_name"]
+                print(f"reduced the size to {len(set(c))/len(biomart)}")
+                biomart["pos"] = c
             mdataset.genedf = biomart.loc[
                 mdataset.genedf[mdataset.genedf.index.isin(biomart.index)].index
             ]
