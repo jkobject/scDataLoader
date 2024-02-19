@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 import lamindb as ln
-import lnschema_bionty as lb
+import bionty as bt
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
 from typing import Union
@@ -149,7 +149,12 @@ class Dataset(torchDataset):
 
     def __getitem__(self, *args, **kwargs):
         item = self.mapped_dataset.__getitem__(*args, **kwargs)
-        #item.update({"unseen_genes": self.get_unseen_mapped_dataset_elements(*args, **kwargs)})
+        # import pdb
+
+        # pdb.set_trace()
+        # item.update(
+        #    {"unseen_genes": self.get_unseen_mapped_dataset_elements(*args, **kwargs)}
+        # )
         # ret = {}
         # ret["count"] = item[0]
         # for i, val in enumerate(self.obs):
@@ -189,7 +194,7 @@ class Dataset(torchDataset):
     #    embeddings = []
     #    for o in self.organisms:
     #        genedf = genedfs[genedfs.organism == o]
-    #        org_name = lb.Organism.filter(ontology_id=o).one().scientific_name
+    #        org_name = bt.Organismntology_id=o).one().scientific_name
     #        embedding = embed(
     #            genedf=genedf,
     #            organism=org_name,
@@ -223,37 +228,37 @@ class Dataset(torchDataset):
                 )
             elif label == "cell_type_ontology_term_id":
                 parentdf = (
-                    lb.CellType.filter()
+                    bt.CellType.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
             elif label == "tissue_ontology_term_id":
                 parentdf = (
-                    lb.Tissue.filter()
+                    bt.Tissue.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
             elif label == "disease_ontology_term_id":
                 parentdf = (
-                    lb.Disease.filter()
+                    bt.Disease.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
             elif label == "development_stage_ontology_term_id":
                 parentdf = (
-                    lb.DevelopmentalStage.filter()
+                    bt.DevelopmentalStage.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
             elif label == "assay_ontology_term_id":
                 parentdf = (
-                    lb.ExperimentalFactor.filter()
+                    bt.ExperimentalFactor.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
             elif label == "self_reported_ethnicity_ontology_term_id":
                 parentdf = (
-                    lb.Ethnicity.filter()
+                    bt.Ethnicity.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
@@ -267,6 +272,9 @@ class Dataset(torchDataset):
             cats = self.mapped_dataset.get_merged_categories(label)
             addition = set(LABELS_TOADD.get(label, {}).values())
             cats |= addition
+            # import pdb
+
+            # pdb.set_trace()
             groupings, _, lclass = get_ancestry_mapping(cats, parentdf)
             for i, j in groupings.items():
                 if len(j) == 0:
