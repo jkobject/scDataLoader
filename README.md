@@ -36,7 +36,7 @@ the idea is to use it to train models like scGPT / GeneFormer (and soon, scPrint
 
 Currently one would have to use the preprocess function to make the dataset fit for different tools like scGPT / Geneformer. But I would want to enable it through different Collators. This is still missing and a WIP... (please do contribute!)
 
-![](docs/scdataloader.drawio.png)
+![docs/scdataloader.drawio.png]()
 
 ## Install it from PyPI
 
