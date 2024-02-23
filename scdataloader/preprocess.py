@@ -30,8 +30,9 @@ class Preprocessor:
         filter_gene_by_counts: Union[int, bool] = False,
         filter_cell_by_counts: Union[int, bool] = False,
         normalize_sum: float = 1e4,
-        keep_norm_layer: bool = False,
         subset_hvg: int = 0,
+        use_layer: Optional[str] = None,
+        is_symbol: bool = False,
         hvg_flavor: str = "seurat_v3",
         binning: Optional[int] = None,
         result_binned_key: str = "X_binned",
@@ -71,7 +72,6 @@ class Preprocessor:
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
         self.normalize_sum = normalize_sum
-        self.keep_norm_layer = keep_norm_layer
         self.subset_hvg = subset_hvg
         self.hvg_flavor = hvg_flavor
         self.binning = binning
@@ -88,6 +88,8 @@ class Preprocessor:
         self.batch_key = batch_key
         self.length_normalize = length_normalize
         self.skip_validate = skip_validate
+        self.use_layer = use_layer
+        self.is_symbol = is_symbol
 
     def __call__(self, adata) -> AnnData:
         if self.additional_preprocess is not None:
@@ -95,6 +97,8 @@ class Preprocessor:
         if adata.raw is not None:
             adata.X = adata.raw.X
             del adata.raw
+        if self.use_layer is not None:
+            adata.X = adata.layers[self.use_layer]
         if adata.layers is not None:
             del adata.layers
         if len(adata.varm.keys()) > 0:
@@ -108,24 +112,28 @@ class Preprocessor:
         if len(adata.varp.keys()) > 0:
             del adata.varp
         # check that it is a count
-        if (
-            np.abs(adata.X.astype(int) - adata.X).sum() and not self.force_preprocess
-        ):  # check if likely raw data
-            raise ValueError(
-                "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
-            )
+        if np.abs(adata.X.astype(int) - adata.X).sum():  # check if likely raw data
+            if not self.force_preprocess:
+                raise ValueError(
+                    "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
+                )
+            else:
+                print(
+                    "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
+                )
             # please check layers
             # if not available count drop
         # # cleanup and dropping low expressed genes and unexpressed cells
         prevsize = adata.shape[0]
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
+        if "assay_ontology_term_id" in adata.obs.columns:
+            is_slide = adata.obs.assay_ontology_term_id == "EFO:0030062"
+        else:
+            is_slide = False
         adata = adata[
             (adata.obs["nnz"] > self.min_nnz_genes)
             # or if slide-seq
-            | (
-                (adata.obs.assay_ontology_term_id == "EFO:0030062")
-                & (adata.obs["nnz"] > (self.min_nnz_genes / 3))
-            )
+            | ((is_slide) & (adata.obs["nnz"] > (self.min_nnz_genes / 3)))
         ]
         if self.filter_gene_by_counts:
             sc.pp.filter_genes(adata, min_counts=self.filter_gene_by_counts)
@@ -146,11 +154,27 @@ class Preprocessor:
                 + str(adata.shape[0])
             )
         # dropping non primary
-        adata = adata[adata.obs.is_primary_data]
+        if "is_primary_data" in adata.obs.columns:
+            adata = adata[adata.obs.is_primary_data]
         if adata.shape[0] < self.min_dataset_size:
             raise ValueError(
                 "Dataset dropped because contains too many secondary cells"
             )
+        if self.is_symbol:
+            genesdf["ensembl_gene_id"] = genesdf.index
+            var = (
+                adata.var.merge(
+                    genesdf.drop_duplicates("symbol").set_index("symbol", drop=False),
+                    left_index=True,
+                    right_index=True,
+                    how="inner",
+                )
+                .sort_values(by="ensembl_gene_id")
+                .set_index("ensembl_gene_id")
+            )
+            adata = adata[:, var["symbol"]]
+            adata.var = var
+            genesdf = genesdf.set_index("ensembl_gene_id")
 
         intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
         print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
@@ -170,26 +194,28 @@ class Preprocessor:
         adata.uns["unseen_genes"] = list(unseen)
         if not self.skip_validate:
             data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
-        # length normalization
-        if (
-            adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
-            and self.length_normalize
-        ):
-            subadata = data_utils.length_normalize(
-                adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
-            )
+            # length normalization
+            if (
+                adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
+                and self.length_normalize
+            ):
+                subadata = data_utils.length_normalize(
+                    adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
+                )
 
-            adata = ad.concat(
-                [
-                    adata[
-                        ~adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)
+                adata = ad.concat(
+                    [
+                        adata[
+                            ~adata.obs["assay_ontology_term_id"].isin(
+                                FULL_LENGTH_ASSAYS
+                            )
+                        ],
+                        subadata,
                     ],
-                    subadata,
-                ],
-                axis=0,
-                join="outer",
-                merge="only",
-            )
+                    axis=0,
+                    join="outer",
+                    merge="only",
+                )
         # step 3: normalize total
         adata.layers["clean"] = sc.pp.log1p(
             sc.pp.normalize_total(adata, target_sum=self.normalize_sum, inplace=False)[

@@ -482,3 +482,14 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
         urllib.request.urlretrieve(url, loc)
     # Load the data from the file
     return pd.read_csv(loc, **kwargs)
+
+
+def translate(val, t="cell_type"):
+    if t=="cell_type":
+        obj = bt.CellType.public(organism="all")
+    elif t=="assay":
+        obj = bt.ExperimentalFactor.public( )
+    if type(val) is str:
+        return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
+    elif type(val) is list:
+        return {i: obj.search(i, field=obj.ontology_id).name.iloc[0] for i in set(val)}

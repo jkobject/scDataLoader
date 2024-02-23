@@ -40,7 +40,6 @@ class Collator:
             how (str, optional): Method for selecting gene expression. Defaults to "most expr".
         """
         self.organisms = organisms
-        self.valid_genes = valid_genes
         self.max_len = max_len
         self.n_bins = n_bins
         self.add_zero_genes = add_zero_genes
@@ -101,11 +100,20 @@ class Collator:
             if len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
             if self.how == "most expr":
+                # nnz_loc = np.where(expr > 0)[0]
+                # ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                # loc = np.argsort(expr[nnz_loc])[-(ma) :][::-1]
+                nnz_loc = 1_000_000
                 loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
                 nnz_loc = np.where(expr > 0)[0]
                 loc = nnz_loc[
-                    np.random.choice(len(nnz_loc), self.max_len, replace=False)
+                    np.random.choice(
+                        len(nnz_loc),
+                        self.max_len,  # if self.max_len < len(nnz_loc) else len(nnz_loc),
+                        replace=False,
+                        # p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected
+                    )
                 ]
             elif self.how == "all":
                 loc = np.arange(len(expr))
@@ -114,7 +122,16 @@ class Collator:
             if self.add_zero_genes > 0 and self.how != "all":
                 zero_loc = np.where(expr == 0)[0]
                 zero_loc = [
-                    np.random.choice(len(zero_loc), self.add_zero_genes, replace=False)
+                    np.random.choice(
+                        len(zero_loc),
+                        self.add_zero_genes
+                        + (
+                            0
+                            if self.max_len < len(nnz_loc)
+                            else self.max_len - len(nnz_loc)
+                        ),
+                        replace=False,
+                    )
                 ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
             exprs.append(expr[loc])
