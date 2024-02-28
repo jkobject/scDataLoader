@@ -303,7 +303,7 @@ def load_dataset_local(
     return dataset
 
 
-def load_genes(organisms):
+def load_genes(organisms="NCBITaxon:9606"):
     organismdf = []
     if type(organisms) == str:
         organisms = [organisms]
@@ -313,7 +313,7 @@ def load_genes(organisms):
         ).df()
         genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
-        genesdf = genesdf.set_index("ensembl_gene_id")
+        genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes
         genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
         # ribosomal genes
@@ -405,9 +405,7 @@ def populate_my_ontology(
     ln.save(records, parents=bool(tissues))
     bt.Tissue(name="unknown", ontology_id="unknown").save()
     # DevelopmentalStage
-    names = (
-        bt.DevelopmentalStage.public().df().index if not dev_stages else dev_stages
-    )
+    names = bt.DevelopmentalStage.public().df().index if not dev_stages else dev_stages
     records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
     ln.save(records, parents=bool(dev_stages))
     bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
@@ -485,10 +483,10 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
 
 
 def translate(val, t="cell_type"):
-    if t=="cell_type":
+    if t == "cell_type":
         obj = bt.CellType.public(organism="all")
-    elif t=="assay":
-        obj = bt.ExperimentalFactor.public( )
+    elif t == "assay":
+        obj = bt.ExperimentalFactor.public()
     if type(val) is str:
         return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
     elif type(val) is list:
