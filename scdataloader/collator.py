@@ -103,7 +103,7 @@ class Collator:
                 # nnz_loc = np.where(expr > 0)[0]
                 # ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
                 # loc = np.argsort(expr[nnz_loc])[-(ma) :][::-1]
-                nnz_loc = 1_000_000
+                nnz_loc = [1] * 30_000
                 loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
                 nnz_loc = np.where(expr > 0)[0]
@@ -121,7 +121,7 @@ class Collator:
                 raise ValueError("how must be either most expr or random expr")
             if self.add_zero_genes > 0 and self.how != "all":
                 zero_loc = np.where(expr == 0)[0]
-                zero_loc = [
+                zero_loc = zero_loc[
                     np.random.choice(
                         len(zero_loc),
                         self.add_zero_genes

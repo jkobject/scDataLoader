@@ -187,10 +187,6 @@ class MappedDataset:
                         out.update({label: label_idx})
         return out
 
-    def uns(self, idx, key):
-        storage = self.storages[self.storage_idx[idx]]
-        return storage["uns"][key]
-
     def get_data_idx(
         self,
         storage: StorageType,
