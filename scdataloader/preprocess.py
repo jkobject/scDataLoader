@@ -48,6 +48,7 @@ class Preprocessor:
         skip_validate=False,
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
+        do_postp=True,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -90,6 +91,7 @@ class Preprocessor:
         self.skip_validate = skip_validate
         self.use_layer = use_layer
         self.is_symbol = is_symbol
+        self.do_postp = do_postp
 
     def __call__(self, adata) -> AnnData:
         if self.additional_preprocess is not None:
@@ -262,19 +264,19 @@ class Preprocessor:
             )
         # based on the topometry paper https://www.biorxiv.org/content/10.1101/2022.03.14.484134v2
         # https://rapids-singlecell.readthedocs.io/en/latest/api/generated/rapids_singlecell.pp.pca.html#rapids_singlecell.pp.pca
-
-        adata.obsm["clean_pca"] = sc.pp.pca(
-            adata.layers["clean"],
-            n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
-        )
-        sc.pp.neighbors(adata, use_rep="clean_pca")
-        sc.tl.leiden(adata, key_added="leiden_3", resolution=3.0)
-        sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
-        sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
-        sc.tl.umap(adata)
-        # additional
-        if self.additional_postprocess is not None:
-            adata = self.additional_postprocess(adata)
+        if self.do_postp:
+            adata.obsm["clean_pca"] = sc.pp.pca(
+                adata.layers["clean"],
+                n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
+            )
+            sc.pp.neighbors(adata, use_rep="clean_pca")
+            sc.tl.leiden(adata, key_added="leiden_3", resolution=3.0)
+            sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
+            sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
+            sc.tl.umap(adata)
+            # additional
+            if self.additional_postprocess is not None:
+                adata = self.additional_postprocess(adata)
         adata = adata[:, adata.var.sort_index().index]
         # create random ids for all cells
         adata.obs.index = [str(uuid4()) for _ in range(adata.shape[0])]
