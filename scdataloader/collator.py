@@ -100,11 +100,11 @@ class Collator:
             if len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
             if self.how == "most expr":
-                # nnz_loc = np.where(expr > 0)[0]
-                # ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
-                # loc = np.argsort(expr[nnz_loc])[-(ma) :][::-1]
-                nnz_loc = [1] * 30_000
-                loc = np.argsort(expr)[-(self.max_len) :][::-1]
+                nnz_loc = np.where(expr > 0)[0]
+                ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                loc = np.argsort(expr)[-(ma):][::-1]
+                # nnz_loc = [1] * 30_000
+                # loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
                 nnz_loc = np.where(expr > 0)[0]
                 loc = nnz_loc[
