@@ -11,7 +11,7 @@ from django.db import IntegrityError
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from functools import lru_cache
-
+from collections import Counter
 
 def createFoldersFor(filepath):
     """
@@ -487,7 +487,13 @@ def translate(val, t="cell_type"):
         obj = bt.CellType.public(organism="all")
     elif t == "assay":
         obj = bt.ExperimentalFactor.public()
+    elif t == "tissue":
+        obj = bt.Tissue.public()
     if type(val) is str:
         return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
-    elif type(val) is list:
+    elif type(val) is list or type(val) is set:
         return {i: obj.search(i, field=obj.ontology_id).name.iloc[0] for i in set(val)}
+    elif type(val) is dict or type(val) is Counter:
+        return {
+            obj.search(k, field=obj.ontology_id).name.iloc[0]: v for k, v in val.items()
+        }

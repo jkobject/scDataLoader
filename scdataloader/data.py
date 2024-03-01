@@ -111,6 +111,8 @@ class Dataset(torchDataset):
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
         )
+        self.class_groupings = {}
+        self.class_topred = {}
         # generate tree from ontologies
         if len(self.hierarchical_clss) > 0:
             self.define_hierarchies(self.hierarchical_clss)
@@ -176,11 +178,12 @@ class Dataset(torchDataset):
         print("     {} genes".format(self.genedf.shape[0]))
         print("     {} labels".format(len(self.obs)))
         print("     {} organisms".format(len(self.organisms)))
-        print(
-            "dataset contains {} classes to predict".format(
-                sum([len(self.class_topred[i]) for i in self.class_topred])
+        if len(self.class_topred) > 0:
+            print(
+                "dataset contains {} classes to predict".format(
+                    sum([len(self.class_topred[i]) for i in self.class_topred])
+                )
             )
-        )
         # print("embedding size is {}".format(self.gene_embedding.shape[1]))
         return ""
 
