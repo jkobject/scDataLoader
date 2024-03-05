@@ -20,6 +20,7 @@ class Collator:
         tp_name=None,
         organism_name="organism_ontology_term_id",
         class_names=[],
+        genelist=[],
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -52,6 +53,8 @@ class Collator:
             if org_to_id is not None
             else set(organisms)
         )
+        if self.how == "some":
+            assert len(genelist) > 0, "if how is some, genelist must be provided"
         self.organism_name = organism_name
         self.tp_name = tp_name
         self.class_names = class_names
@@ -59,6 +62,7 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.genedf = load_genes(organisms)
+        self.to_subset = {}
         for organism in set(self.genedf.organism):
             ogenedf = self.genedf[self.genedf.organism == organism]
             org = org_to_id[organism] if org_to_id is not None else organism
@@ -67,6 +71,9 @@ class Collator:
             )
             if len(valid_genes) > 0:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
+            if len(genelist) > 0:
+                df = ogenedf[ogenedf.index.isin(valid_genes)]
+                self.to_subset.update({org: df.index.isin(genelist)})
 
     def __call__(self, batch):
         """
@@ -91,6 +98,7 @@ class Collator:
         other_classes = []
         gene_locs = []
         tp = []
+        nnz_loc = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
@@ -110,16 +118,18 @@ class Collator:
                 loc = nnz_loc[
                     np.random.choice(
                         len(nnz_loc),
-                        self.max_len,  # if self.max_len < len(nnz_loc) else len(nnz_loc),
+                        self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc),
                         replace=False,
                         # p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected
                     )
                 ]
-            elif self.how == "all":
+            elif self.how in ["all", "some"]:
                 loc = np.arange(len(expr))
             else:
                 raise ValueError("how must be either most expr or random expr")
-            if self.add_zero_genes > 0 and self.how != "all":
+            if (
+                (self.add_zero_genes > 0) or (self.max_len > len(nnz_loc))
+            ) and self.how not in ["all", "some"]:
                 zero_loc = np.where(expr == 0)[0]
                 zero_loc = zero_loc[
                     np.random.choice(
@@ -134,8 +144,13 @@ class Collator:
                     )
                 ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
-            exprs.append(expr[loc])
-            gene_locs.append(loc + self.start_idx[organism_id])
+            expr = expr[loc]
+            loc = loc + self.start_idx[organism_id]
+            if self.how == "some":
+                expr = expr[self.to_subset[organism_id]]
+                loc = loc[self.to_subset[organism_id]]
+            exprs.append(expr)
+            gene_locs.append(loc)
 
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])

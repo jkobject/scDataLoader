@@ -482,13 +482,15 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
     return pd.read_csv(loc, **kwargs)
 
 
-def translate(val, t="cell_type"):
-    if t == "cell_type":
+def translate(val, t="cell_type_ontology_term_id"):
+    if t == "cell_type_ontology_term_id":
         obj = bt.CellType.public(organism="all")
-    elif t == "assay":
+    elif t == "assay_ontology_term_id":
         obj = bt.ExperimentalFactor.public()
-    elif t == "tissue":
+    elif t == "tissue_ontology_term_id":
         obj = bt.Tissue.public()
+    else:
+        return None
     if type(val) is str:
         return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
     elif type(val) is list or type(val) is set:
