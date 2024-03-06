@@ -93,6 +93,22 @@ class MappedDataset:
         for storage in self.storages:
             with _Connect(storage) as store:
                 X = store["X"]
+                index = (
+                    store["var"]["ensembl_gene_id"]
+                    if "ensembl_gene_id" in store["var"]
+                    else store["var"]["_index"]
+                )
+                if join_vars == "None":
+                    if not all(
+                        [
+                            i <= j
+                            for i, j in zip(
+                                index[:99],
+                                index[1:100],
+                            )
+                        ]
+                    ):
+                        raise ValueError("The variables are not sorted.")
                 if isinstance(X, ArrayTypes):  # type: ignore
                     self.n_obs_list.append(X.shape[0])
                 else:

@@ -167,25 +167,27 @@ class Dataset(torchDataset):
         return item
 
     def __repr__(self):
-        print(
-            "total dataset size is {} Gb".format(
+        return (
+            "total dataset size is {} Gb\n".format(
                 sum([file.size for file in self.lamin_dataset.artifacts.all()]) / 1e9
             )
-        )
-        print("---")
-        print("dataset contains:")
-        print("     {} cells".format(self.mapped_dataset.__len__()))
-        print("     {} genes".format(self.genedf.shape[0]))
-        print("     {} labels".format(len(self.obs)))
-        print("     {} organisms".format(len(self.organisms)))
-        if len(self.class_topred) > 0:
-            print(
-                "dataset contains {} classes to predict".format(
+            + "---\n"
+            + "dataset contains:\n"
+            + "     {} cells\n".format(self.mapped_dataset.__len__())
+            + "     {} genes\n".format(self.genedf.shape[0])
+            + "     {} labels\n".format(len(self.obs))
+            + "     {} clss_to_pred\n".format(len(self.clss_to_pred))
+            + "     {} hierarchical_clss\n".format(len(self.hierarchical_clss))
+            + "     {} join_vars\n".format(len(self.join_vars))
+            + "     {} organisms\n".format(len(self.organisms))
+            + (
+                "dataset contains {} classes to predict\n".format(
                     sum([len(self.class_topred[i]) for i in self.class_topred])
                 )
+                if len(self.class_topred) > 0
+                else ""
             )
-        # print("embedding size is {}".format(self.gene_embedding.shape[1]))
-        return ""
+        )
 
     def get_label_weights(self, *args, **kwargs):
         return self.mapped_dataset.get_label_weights(*args, **kwargs)
@@ -213,6 +215,7 @@ class Dataset(torchDataset):
     #    return pd.concat(embeddings)
 
     def define_hierarchies(self, labels):
+        # TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with
         self.class_groupings = {}
         self.class_topred = {}
         for label in labels:

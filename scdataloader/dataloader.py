@@ -125,7 +125,7 @@ class DataModule(L.LightningDataModule):
 
         Args:
             dataset (MappedDataset): The dataset to be used.
-            weight_scaler (int, optional): The weight scaler for weighted random sampling. Defaults to 30.
+            weight_scaler (int, optional): how much more you will see the most present vs less present category
             label_to_weight (list, optional): List of labels to weight. Defaults to [].
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
@@ -201,7 +201,27 @@ class DataModule(L.LightningDataModule):
         self.weight_scaler = weight_scaler
         self.train_oversampling = train_oversampling
         self.label_to_weight = label_to_weight
+        self.train_weights = None
         super().__init__()
+
+    def __repr__(self):
+        return (
+            f"DataLoader(\n"
+            f"\twith a dataset=({self.dataset.__repr__()}\n)\n"
+            f"\tvalidation_split={self.validation_split},\n"
+            f"\ttest_split={self.test_split},\n"
+            f"\tn_samples={self.n_samples},\n"
+            f"\tweight_scaler={self.weight_scaler},\n"
+            f"\ttrain_oversampling={self.train_oversampling},\n"
+            f"\tlabel_to_weight={self.label_to_weight}\n"
+            + (
+                "\twith train_dataset size of=("
+                + str((self.train_weights != 0).sum())
+                + ")\n)"
+            )
+            if self.train_weights is not None
+            else ")"
+        )
 
     @property
     def decoders(self):
@@ -275,45 +295,48 @@ class DataModule(L.LightningDataModule):
 
             len_test = cs
             print("perc test: ", len_test / self.n_samples)
-            test_idx = idx_full[:len_test]
+            self.text_idx = idx_full[:len_test]
             idx_full = idx_full[len_test:]
-            self.test_sampler = SequentialSampler(test_idx)
         else:
-            self.test_sampler = None
-            test_datasets = None
+            self.text_idx = None
 
         np.random.shuffle(idx_full)
         if len_valid > 0:
-            valid_idx = idx_full[:len_valid]
+            self.valid_idx = idx_full[:len_valid].copy()
             idx_full = idx_full[len_valid:]
-            self.valid_sampler = SubsetRandomSampler(valid_idx)
         else:
-            self.valid_sampler = None
+            self.valid_idx = None
 
-        weights[~idx_full] = 0
-        self.train_sampler = WeightedRandomSampler(
-            weights,
-            int(len(idx_full) * self.train_oversampling),
-            replacement=True,
-        )
+        weights[~np.isin(np.arange(self.n_samples), idx_full)] = 0
+
+        self.train_weights = weights
+        self.idx_full = idx_full
+
         return test_datasets
 
     def train_dataloader(self, **kwargs):
-        return DataLoader(
-            self.dataset, sampler=self.train_sampler, **self.kwargs, **kwargs
+        train_sampler = WeightedRandomSampler(
+            self.train_weights,
+            int(len(self.idx_full) * self.train_oversampling),
+            replacement=True,
         )
+        return DataLoader(self.dataset, sampler=train_sampler, **self.kwargs, **kwargs)
 
     def val_dataloader(self):
         return (
-            DataLoader(self.dataset, sampler=self.valid_sampler, **self.kwargs)
-            if self.valid_sampler is not None
+            DataLoader(
+                self.dataset, sampler=SubsetRandomSampler(self.valid_idx), **self.kwargs
+            )
+            if self.valid_idx is not None
             else None
         )
 
     def test_dataloader(self):
         return (
-            DataLoader(self.dataset, sampler=self.test_sampler, **self.kwargs)
-            if self.test_sampler is not None
+            DataLoader(
+                self.dataset, sampler=SequentialSampler(self.test_idx), **self.kwargs
+            )
+            if self.test_idx is not None
             else None
         )
 
