@@ -247,7 +247,7 @@ def get_ancestry_mapping(all_elem: list, onto_df: pd.DataFrame):
 
 
 def load_dataset_local(
-    remote_dataset: lamindb.Dataset,
+    remote_dataset: ln.Collection,
     download_folder: str,
     name: str,
     description: str,
