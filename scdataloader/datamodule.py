@@ -10,7 +10,7 @@ from torch.utils.data.sampler import (
 from torch.utils.data import DataLoader
 import lightning as L
 
-from typing import Optional
+from typing import Optional, Union
 
 from .data import Dataset
 from .collator import Collator
@@ -105,15 +105,15 @@ class DataModule(L.LightningDataModule):
         gene_position_tolerance: int = 10_000,
         label_to_weight: list = [],
         # this is for the mappedCollection
-        label_to_pred: list[str] = ["organism_ontology_term_id"],
-        all_labels: list[str] = ["organism_ontology_term_id", "heat_diff"],
-        hierarchical_labels: list[str] = [],
+        label_to_pred: list = ["organism_ontology_term_id"],
+        all_labels: list = ["organism_ontology_term_id", "heat_diff"],
+        hierarchical_labels: list = [],
         # this is for the collator
         how: str = "most expr",
         organism_name: str = "organism_ontology_term_id",
         max_len: int = 1000,
         add_zero_genes: int = 100,
-        do_gene_pos: bool = True,
+        do_gene_pos: Union[bool, str] = True,
         tp_name: str = "heat_diff",
         **kwargs,
     ):
