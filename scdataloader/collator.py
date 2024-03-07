@@ -9,14 +9,14 @@ class Collator:
     def __init__(
         self,
         organisms: list,
+        how="all",
         org_to_id: dict = None,
         valid_genes: list = [],
         max_len=2000,
-        n_bins=0,
-        add_zero_genes=200,
+        add_zero_genes=0,
         logp1=False,
         norm_to=None,
-        how="all",
+        n_bins=0,
         tp_name=None,
         organism_name="organism_ontology_term_id",
         class_names=[],
@@ -28,17 +28,27 @@ class Collator:
         allowing for various configurations such as maximum gene list length, normalization,
         and selection method for gene expression.
 
+        This Collator should work with scVI's dataloader as well!
+
         Args:
             organisms (list): List of organisms to be considered for gene expression data.
+                it will drop any other organism it sees (might lead to batches of different sizes!)
+            how (flag, optional): Method for selecting gene expression. Defaults to "most expr".
+                one of ["most expr", "random expr", "all", "some"]:
+                "most expr": selects the max_len most expressed genes,
+                if less genes are expressed, will sample random unexpressed genes,
+                "random expr": uses a random set of max_len expressed genes.
+                if less genes are expressed, will sample random unexpressed genes
+                "all": uses all genes
+                "some": uses only the genes provided through the genelist param
             org_to_id (dict): Dictionary mapping organisms to their respective IDs.
-            labels (list, optional): List of labels for the data. Defaults to [].
             valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].
-            max_len (int, optional): Maximum length of the gene list. Defaults to 2000.
-            n_bins (int, optional): Number of bins for binning the data. Defaults to 0.
-            add_zero_genes (int, optional): Number of zero genes to add. Defaults to 200.
+                it will drop any other genes from the input expression data (usefull when your model only works on some genes)
+            max_len (int, optional): Maximum number of genes to use (for random expr and most expr). Defaults to 2000.
+            n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.
+            add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.
             logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.
             norm_to (str, optional): Normalization method to be applied. Defaults to None.
-            how (str, optional): Method for selecting gene expression. Defaults to "most expr".
         """
         self.organisms = organisms
         self.max_len = max_len
@@ -195,6 +205,9 @@ class Collator:
 
 class AnnDataCollator(Collator):
     def __init__(self, *args, **kwargs):
+        """
+        AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)
+        """
         super().__init__(*args, **kwargs)
 
     def __call__(self, batch):
@@ -250,28 +263,14 @@ class AnnDataCollator(Collator):
         }
 
 
-class SCVICollator(Collator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, batch):
-        expr = batch["x"]
-        total_count = expr.sum(axis=1)
-        if self.how == "most expr":
-            loc = np.argsort(expr)[:, -(self.max_len) :][:, ::-1]
-        else:
-            raise ValueError("how must be either most expr or random expr")
-        if self.logp1:
-            expr = np.log2(1 + expr)
-        return {
-            "x": Tensor(expr[np.arange(expr.shape[0])[:, None], loc]),
-            "genes": Tensor(loc.copy()).int(),
-            "depth": Tensor(total_count),
-        }
-
-
 class GeneformerCollator(Collator):
     def __init__(self, *args, gene_norm_list: list, **kwargs):
+        """
+        GeneformerCollator to finish
+
+        Args:
+            gene_norm_list (list): the normalization of expression through all datasets, per gene.
+        """
         super().__init__(*args, **kwargs)
         self.gene_norm_list = gene_norm_list
 
@@ -283,6 +282,10 @@ class GeneformerCollator(Collator):
 
 
 class scGPTCollator(Collator):
+    """
+    scGPTCollator to finish
+    """
+
     def __call__(self, batch):
         super().__call__(batch)
         # binning

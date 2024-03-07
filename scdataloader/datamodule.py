@@ -92,43 +92,52 @@ COARSE_ASSAY = {
 
 
 class DataModule(L.LightningDataModule):
-    """
-    Base class for all data loaders
-    """
-
     def __init__(
         self,
-        mdataset: Optional[MappedDataset] = None,
-        collection_name=None,
+        collection_name: str,
         organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 4,
-        train_oversampling=1,
-        label_to_weight: list = [],
-        label_to_pred: list = ["organism_ontology_term_id"],
+        train_oversampling: float = 1,
         validation_split: float = 0.2,
         test_split: float = 0,
-        use_default_col=True,
-        all_labels=["organism_ontology_term_id", "heat_diff"],
-        hierarchical_labels=[],
-        how="most expr",
-        organism_name="organism_ontology_term_id",
-        max_len=1000,
-        add_zero_genes=100,
-        do_gene_pos=True,
-        gene_embeddings="",
-        gene_position_tolerance=10_000,
-        tp_name="heat_diff",
+        gene_embeddings: str = "",
+        use_default_col: bool = True,
+        gene_position_tolerance: int = 10_000,
+        label_to_weight: list = [],
+        # this is for the mappedCollection
+        label_to_pred: list[str] = ["organism_ontology_term_id"],
+        all_labels: list[str] = ["organism_ontology_term_id", "heat_diff"],
+        hierarchical_labels: list[str] = [],
+        # this is for the collator
+        how: str = "most expr",
+        organism_name: str = "organism_ontology_term_id",
+        max_len: int = 1000,
+        add_zero_genes: int = 100,
+        do_gene_pos: bool = True,
+        tp_name: str = "heat_diff",
         **kwargs,
     ):
         """
-        Initializes the DataModule.
+        DataModule a pytorch lighting datamodule directly from a lamin Collection.
+        it can work with bare pytorch too
+
+        It implements train / val / test dataloaders. the train is weighted random, val is random, test is one to many separated datasets.
+        This is where the mappedCollection, dataset, and collator are combined to create the dataloaders.
 
         Args:
-            dataset (MappedDataset): The dataset to be used.
-            weight_scaler (int, optional): how much more you will see the most present vs less present category
-            label_to_weight (list, optional): List of labels to weight. Defaults to [].
+            collection_name (str): The lamindb collection to be used.
+            weight_scaler (int, optional): how much more you will see the most present vs less present category.
+            gene_position_tolerance (int, optional): The tolerance for gene position. Defaults to 10_000.
+                any genes within this distance of each other will be considered at the same position.
+            gene_embeddings (str, optional): The path to the gene embeddings file. Defaults to "".
+                the file must have ensembl_gene_id as index.
+                This is used to subset the available genes further to the ones that have embeddings in your model.
+            organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
+            label_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
+                it will use a full dataset and will round to the nearest dataset's cell count.
+            **other args: see @file data.py and @file collator.py for more details
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
         """
         if collection_name is not None:
@@ -225,6 +234,12 @@ class DataModule(L.LightningDataModule):
 
     @property
     def decoders(self):
+        """
+        decoders the decoders for any labels that would have been encoded
+
+        Returns:
+            dict[str, dict[int, str]]
+        """
         decoders = {}
         for k, v in self.dataset.encoder.items():
             decoders[k] = {va: ke for ke, va in v.items()}
@@ -232,6 +247,12 @@ class DataModule(L.LightningDataModule):
 
     @property
     def cls_hierarchy(self):
+        """
+        cls_hierarchy the hierarchy of labels for any cls that would have a hierarchy
+
+        Returns:
+            dict[str, dict[str, str]]
+        """
         cls_hierarchy = {}
         for k, dic in self.dataset.class_groupings.items():
             rdic = {}
@@ -244,6 +265,12 @@ class DataModule(L.LightningDataModule):
 
     @property
     def genes(self):
+        """
+        genes the genes used in this datamodule
+
+        Returns:
+            list
+        """
         return self.dataset.genedf.index.tolist()
 
     def setup(self, stage=None):

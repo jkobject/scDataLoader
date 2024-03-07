@@ -4,9 +4,12 @@ import lamindb as ln
 import bionty as bt
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
-from typing import Union
+from typing import Union, Optional, Literal
 from scdataloader import mapped
 import warnings
+
+from anndata import AnnData
+
 
 # TODO: manage load gene embeddings to make
 # from scprint.dataloader.embedder import embed
@@ -51,33 +54,37 @@ LABELS_TOADD = {
 @dataclass
 class Dataset(torchDataset):
     """
-    Dataset class to load a bunch of anndata from a lamin dataset in a memory efficient way.
+    Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.
 
-    For an example, see :meth:`~lamindb.Dataset.mapped`.
+    This serves as a wrapper around lamin's mappedCollection to provide more features,
+    mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species
+
+    For an example of mappedDataset, see :meth:`~lamindb.Dataset.mapped`.
 
     .. note::
 
-        A similar data loader exists `here
+        A related data loader exists `here
         <https://github.com/Genentech/scimilarity>`__.
 
-    Attributes:
+    Args:
     ----
         lamin_dataset (lamindb.Dataset): lamin dataset to load
         genedf (pd.Dataframe): dataframe containing the genes to load
-        gene_embedding: dataframe containing the gene embeddings
         organisms (list[str]): list of organisms to load
-        obs (list[str]): list of observations to load
+            (for now only validates the the genes map to this organism)
+        obs (list[str]): list of observations to load from the Collection
         clss_to_pred (list[str]): list of observations to encode
-        hierarchical_clss: list of observations to map to a hierarchy
+        join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
+        hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
     """
 
     lamin_dataset: ln.Collection
-    genedf: pd.DataFrame = None
+    genedf: Optional[pd.DataFrame] = None
     # gene_embedding: pd.DataFrame = None  # TODO: make it part of specialized dataset
-    organisms: Union[list[str], str] = field(
+    organisms: Optional[Union[list[str], str]] = field(
         default_factory=["NCBITaxon:9606", "NCBITaxon:10090"]
     )
-    obs: list[str] = field(
+    obs: Optional[list[str]] = field(
         default_factory=[
             "self_reported_ethnicity_ontology_term_id",
             "assay_ontology_term_id",
@@ -94,10 +101,10 @@ class Dataset(torchDataset):
         ]
     )
     # set of obs to prepare for prediction (encode)
-    clss_to_pred: list[str] = field(default_factory=list)
+    clss_to_pred: Optional[list[str]] = field(default_factory=list)
     # set of obs that need to be hierarchically prepared
-    hierarchical_clss: list[str] = field(default_factory=list)
-    join_vars: str = "None"
+    hierarchical_clss: Optional[list[str]] = field(default_factory=list)
+    join_vars: Optional[Literal["auto", "inner", "None"]] = "None"
 
     def __post_init__(self):
         self.mapped_dataset = mapped.mapped(
@@ -192,29 +199,10 @@ class Dataset(torchDataset):
     def get_label_weights(self, *args, **kwargs):
         return self.mapped_dataset.get_label_weights(*args, **kwargs)
 
-    def get_unseen_mapped_dataset_elements(self, idx):
+    def get_unseen_mapped_dataset_elements(self, idx: int):
         return [str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")]
 
-    # def load_embeddings(self, genedfs, embedding_size=128, cache=True):
-    #    embeddings = []
-    #    for o in self.organisms:
-    #        genedf = genedfs[genedfs.organism == o]
-    #        org_name = bt.Organismntology_id=o).one().scientific_name
-    #        embedding = embed(
-    #            genedf=genedf,
-    #            organism=org_name,
-    #            cache=cache,
-    #            fasta_path="/tmp/data/fasta/",
-    #            embedding_size=embedding_size,
-    #        )
-    #        genedf = pd.concat(
-    #            [genedf.set_index("ensembl_gene_id"), embedding], axis=1, join="inner"
-    #        )
-    #        genedf.columns = genedf.columns.astype(str)
-    #        embeddings.append(genedf)
-    #    return pd.concat(embeddings)
-
-    def define_hierarchies(self, labels):
+    def define_hierarchies(self, labels: list[str]):
         # TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with
         self.class_groupings = {}
         self.class_topred = {}
@@ -330,7 +318,22 @@ class Dataset(torchDataset):
 
 
 class SimpleAnnDataset:
-    def __init__(self, adata, obs_to_output=[], layer=None):
+    def __init__(
+        self,
+        adata: AnnData,
+        obs_to_output: Optional[list[str]] = [],
+        layer: Optional[str] = None,
+    ):
+        """
+        SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
+        scDataloader and with your model during inference.
+
+        Args:
+        ----
+            adata (anndata.AnnData): anndata object to use
+            obs_to_output (list[str]): list of observations to output from anndata.obs
+            layer (str): layer of the anndata to use
+        """
         self.adata = adata
         self.obs_to_output = obs_to_output
         self.layer = layer

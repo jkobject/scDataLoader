@@ -37,18 +37,18 @@ class Preprocessor:
         binning: Optional[int] = None,
         result_binned_key: str = "X_binned",
         length_normalize: bool = False,
-        force_preprocess=False,
-        min_dataset_size=100,
-        min_valid_genes_id=10_000,
-        min_nnz_genes=200,
-        maxdropamount=2,
-        madoutlier=5,
-        pct_mt_outlier=8,
-        batch_key=None,
-        skip_validate=False,
+        force_preprocess: bool = False,
+        min_dataset_size: int = 100,
+        min_valid_genes_id: int = 10_000,
+        min_nnz_genes: int = 200,
+        maxdropamount: int = 2,
+        madoutlier: int = 5,
+        pct_mt_outlier: int = 8,
+        batch_key: Optional[str] = None,
+        skip_validate: bool = False,
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
-        do_postp=True,
+        do_postp: bool = True,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -69,6 +69,26 @@ class Preprocessor:
             binning (int, optional): Determines whether to bin the data into discrete values of number of bins provided.
             result_binned_key (str, optional): Specifies the key of :class:`~anndata.AnnData` to store the binned data.
                 Defaults to "X_binned".
+            length_normalize (bool, optional): Determines whether to length normalize the data.
+                Defaults to False.
+            force_preprocess (bool, optional): Determines whether to bypass the check of raw counts.
+                Defaults to False.
+            min_dataset_size (int, optional): The minimum size required for a dataset to be kept.
+                Defaults to 100.
+            min_valid_genes_id (int, optional): The minimum number of valid genes to keep a dataset.
+                Defaults to 10_000.
+            min_nnz_genes (int, optional): The minimum number of non-zero genes to keep a cell.
+                Defaults to 200.
+            maxdropamount (int, optional): The maximum amount of dropped cells per dataset. (2 for 50% drop, 3 for 33% drop, etc.)
+                Defaults to 2.
+            madoutlier (int, optional): The maximum absolute deviation of the outlier samples.
+                Defaults to 5.
+            pct_mt_outlier (int, optional): The maximum percentage of mitochondrial genes outlier.
+                Defaults to 8.
+            batch_key (str, optional): The key of :class:`~anndata.AnnData.obs` to use for batch information.
+                This arg is used in the highly variable gene selection step.
+            skip_validate (bool, optional): Determines whether to skip the validation step.
+                Defaults to False.
         """
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
