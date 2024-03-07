@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://www.jkobject.com/scdataloader/collator/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>collator - scdataloader</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "collator";
+        var mkdocs_page_input_path = "collator.md";
+        var mkdocs_page_url = "/scdataloader/collator/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> scdataloader
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Example notebooks</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/1_download_and_preprocess/">one-off preparation and download of the database (optional)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/2_create_dataloader/">Create the dataloader</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../dataset/">dataset</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">collator</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.collator.Collator">Collator</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.collator.Collator.__call__">__call__()</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.collator.AnnDataCollator">AnnDataCollator</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">scdataloader</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">documentation</li>
+      <li class="breadcrumb-item active">collator</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation-for-collator">Documentation for <code>Collator</code></h1>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="scdataloader.collator.Collator" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">Collator</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>This class is responsible for collating data for the scPRINT model. It handles the
+organization and preparation of gene expression data from different organisms,
+allowing for various configurations such as maximum gene list length, normalization,
+and selection method for gene expression.</p>
+<p>This Collator should work with scVI's dataloader as well!</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>organisms</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>List of organisms to be considered for gene expression data.
+it will drop any other organism it sees (might lead to batches of different sizes!)</p>
+              </div>
+            </li>
+            <li>
+              <b><code>how</code></b>
+                  (<code>flag</code>, default:
+                      <code>&#39;all&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Method for selecting gene expression. Defaults to "most expr".
+one of ["most expr", "random expr", "all", "some"]:
+"most expr": selects the max_len most expressed genes,
+if less genes are expressed, will sample random unexpressed genes,
+"random expr": uses a random set of max_len expressed genes.
+if less genes are expressed, will sample random unexpressed genes
+"all": uses all genes
+"some": uses only the genes provided through the genelist param</p>
+              </div>
+            </li>
+            <li>
+              <b><code>org_to_id</code></b>
+                  (<code>dict</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary mapping organisms to their respective IDs.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>valid_genes</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of genes from the datasets, to be considered. Defaults to [].
+it will drop any other genes from the input expression data (usefull when your model only works on some genes)</p>
+              </div>
+            </li>
+            <li>
+              <b><code>max_len</code></b>
+                  (<code>int</code>, default:
+                      <code>2000</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Maximum number of genes to use (for random expr and most expr). Defaults to 2000.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_bins</code></b>
+                  (<code>int</code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>add_zero_genes</code></b>
+                  (<code>int</code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of additional unexpressed genes to add to the input data. Defaults to 0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>logp1</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, logp1 normalization is applied. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>norm_to</code></b>
+                  (<code>str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Normalization method to be applied. Defaults to None.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+                <details class="quote">
+                  <summary>Source code in <code>scdataloader/collator.py</code></summary>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">organisms</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">org_to_id</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">valid_genes</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">max_len</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="n">add_zero_genes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">logp1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">norm_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">tp_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">organism_name</span><span class="o">=</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
+    <span class="n">class_names</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">genelist</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is responsible for collating data for the scPRINT model. It handles the</span>
+<span class="sd">    organization and preparation of gene expression data from different organisms,</span>
+<span class="sd">    allowing for various configurations such as maximum gene list length, normalization,</span>
+<span class="sd">    and selection method for gene expression.</span>
+
+<span class="sd">    This Collator should work with scVI&#39;s dataloader as well!</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        organisms (list): List of organisms to be considered for gene expression data.</span>
+<span class="sd">            it will drop any other organism it sees (might lead to batches of different sizes!)</span>
+<span class="sd">        how (flag, optional): Method for selecting gene expression. Defaults to &quot;most expr&quot;.</span>
+<span class="sd">            one of [&quot;most expr&quot;, &quot;random expr&quot;, &quot;all&quot;, &quot;some&quot;]:</span>
+<span class="sd">            &quot;most expr&quot;: selects the max_len most expressed genes,</span>
+<span class="sd">            if less genes are expressed, will sample random unexpressed genes,</span>
+<span class="sd">            &quot;random expr&quot;: uses a random set of max_len expressed genes.</span>
+<span class="sd">            if less genes are expressed, will sample random unexpressed genes</span>
+<span class="sd">            &quot;all&quot;: uses all genes</span>
+<span class="sd">            &quot;some&quot;: uses only the genes provided through the genelist param</span>
+<span class="sd">        org_to_id (dict): Dictionary mapping organisms to their respective IDs.</span>
+<span class="sd">        valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].</span>
+<span class="sd">            it will drop any other genes from the input expression data (usefull when your model only works on some genes)</span>
+<span class="sd">        max_len (int, optional): Maximum number of genes to use (for random expr and most expr). Defaults to 2000.</span>
+<span class="sd">        n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.</span>
+<span class="sd">        add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.</span>
+<span class="sd">        logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.</span>
+<span class="sd">        norm_to (str, optional): Normalization method to be applied. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organisms</span> <span class="o">=</span> <span class="n">organisms</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">=</span> <span class="n">max_len</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span> <span class="o">=</span> <span class="n">n_bins</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_zero_genes</span> <span class="o">=</span> <span class="n">add_zero_genes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logp1</span> <span class="o">=</span> <span class="n">logp1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="o">=</span> <span class="n">norm_to</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">org_to_id</span> <span class="o">=</span> <span class="n">org_to_id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">=</span> <span class="n">how</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">set</span><span class="p">([</span><span class="n">org_to_id</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">org_to_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;some&quot;</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">genelist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;if how is some, genelist must be provided&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span> <span class="o">=</span> <span class="n">organism_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span> <span class="o">=</span> <span class="n">tp_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="n">class_names</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span><span class="p">):</span>
+        <span class="n">ogenedf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span> <span class="o">==</span> <span class="n">organism</span><span class="p">]</span>
+        <span class="n">org</span> <span class="o">=</span> <span class="n">org_to_id</span><span class="p">[</span><span class="n">organism</span><span class="p">]</span> <span class="k">if</span> <span class="n">org_to_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">organism</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">org</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span> <span class="o">==</span> <span class="n">organism</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]}</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">org</span><span class="p">:</span> <span class="n">ogenedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)})</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">genelist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">ogenedf</span><span class="p">[</span><span class="n">ogenedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">org</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">genelist</span><span class="p">)})</span>
+</code></pre></div></td></tr></table></div>
+                </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.collator.Collator.__call__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__call__</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p><strong>call</strong> is a special method in Python that is called when an instance of the class is called.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>batch</code></b>
+                  (<code>list[dict[str</code>)
+              –
+              <div class="doc-md-description">
+                <p>array]]): List of dicts of arrays containing gene expression data.
+the first list is for the different samples, the second list is for the different elements with
+elem["x"]: gene expression
+elem["organism_name"]: organism ontology term id
+elem["tp_name"]: heat diff
+elem["class_names.."]: other classes</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+            –
+            <div class="doc-md-description">
+              <p>list[Tensor]: List of tensors containing the collated data.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/collator.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    __call__ is a special method in Python that is called when an instance of the class is called.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.</span>
+<span class="sd">            the first list is for the different samples, the second list is for the different elements with</span>
+<span class="sd">            elem[&quot;x&quot;]: gene expression</span>
+<span class="sd">            elem[&quot;organism_name&quot;]: organism ontology term id</span>
+<span class="sd">            elem[&quot;tp_name&quot;]: heat diff</span>
+<span class="sd">            elem[&quot;class_names..&quot;]: other classes</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[Tensor]: List of tensors containing the collated data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># do count selection</span>
+    <span class="c1"># get the unseen info and don&#39;t add any unseen</span>
+    <span class="c1"># get the I most expressed genes, add randomly some unexpressed genes that are not unseen</span>
+    <span class="n">exprs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total_count</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">other_classes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gene_locs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nnz_loc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+        <span class="n">organism_id</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">organism_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+        <span class="n">total_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;most expr&quot;</span><span class="p">:</span>
+            <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">expr</span><span class="p">)[</span><span class="o">-</span><span class="p">(</span><span class="n">ma</span><span class="p">):][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># nnz_loc = [1] * 30_000</span>
+            <span class="c1"># loc = np.argsort(expr)[-(self.max_len) :][::-1]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;random expr&quot;</span><span class="p">:</span>
+            <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">nnz_loc</span><span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">),</span>
+                    <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="c1"># p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;some&quot;</span><span class="p">]:</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;how must be either most expr or random expr&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_zero_genes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">))</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;some&quot;</span><span class="p">]:</span>
+            <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">zero_loc</span><span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">zero_loc</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_zero_genes</span>
+                    <span class="o">+</span> <span class="p">(</span>
+                        <span class="mi">0</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span>
+                    <span class="p">),</span>
+                    <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">loc</span><span class="p">,</span> <span class="n">zero_loc</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;some&quot;</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
+        <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">gene_locs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">other_classes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span><span class="p">])</span>
+
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+    <span class="n">gene_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gene_locs</span><span class="p">)</span>
+    <span class="n">total_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">other_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span>
+
+    <span class="c1"># normalize counts</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">expr</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_count</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logp1</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">expr</span><span class="p">)</span>
+
+    <span class="c1"># do binning of counts</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># find the associated gene ids (given the species)</span>
+
+    <span class="c1"># get the NN cells</span>
+
+    <span class="c1"># do encoding / selection a la scGPT</span>
+
+    <span class="c1"># do encoding of graph location</span>
+    <span class="c1"># encode all the edges in some sparse way</span>
+    <span class="c1"># normalizing total counts between 0,1</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span>
+        <span class="s2">&quot;genes&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">gene_locs</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+        <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+        <span class="s2">&quot;tp&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span>
+        <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">total_count</span><span class="p">),</span>
+    <span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="scdataloader.collator.AnnDataCollator" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">AnnDataCollator</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.collator.Collator" href="#scdataloader.collator.Collator">Collator</a></code></p>
+
+  
+      <p>AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)</p>
+
+                <details class="quote">
+                  <summary>Source code in <code>scdataloader/collator.py</code></summary>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AnnDataCollator Collator to use if working with AnnData&#39;s experimental dataloader (it is very slow!!!)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+                </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../datamodule/" class="btn btn-neutral float-left" title="datamodule"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../datamodule/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

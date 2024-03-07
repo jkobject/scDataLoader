@@ -59,11 +59,23 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.LaminPreprocessor">LaminPreprocessor</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__()</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_preprocess">additional_preprocess()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_postprocess">additional_postprocess()</a>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../collator/">collator</a>
                   </li>
               </ul>
       </div>
@@ -518,6 +530,498 @@ Defaults to False.</p>
 
   </div>
 
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="scdataloader.preprocess.LaminPreprocessor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">LaminPreprocessor</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.Preprocessor" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a></code></p>
+
+
+                <details class="quote">
+                  <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="n">erase_prev_dataset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">erase_prev_dataset</span> <span class="o">=</span> <span class="n">erase_prev_dataset</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">stream</span>
+</code></pre></div></td></tr></table></div>
+                </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="scdataloader.preprocess.LaminPreprocessor.__call__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__call__</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>format controls the different input value wrapping, including categorical
+binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adata</code></b>
+                  (<code><span title="anndata.AnnData">AnnData</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The AnnData object to preprocess.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>batch_key</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The key of AnnData.obs to use for batch information. This arg
+is used in the highly variable gene selection step.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;preprocessed dataset using scprint&quot;</span><span class="p">,</span>
+    <span class="n">start_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    format controls the different input value wrapping, including categorical</span>
+<span class="sd">    binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        adata (AnnData): The AnnData object to preprocess.</span>
+<span class="sd">        batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg</span>
+<span class="sd">            is used in the highly variable gene selection step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_ready_processed_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ln</span><span class="o">.</span><span class="n">Artifact</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">):</span>
+            <span class="n">all_ready_processed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">initial_version</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="n">start_at</span><span class="p">:]):</span>
+            <span class="c1"># use the counts matrix</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="n">all_ready_processed_keys</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> is already processed&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">backed</span><span class="p">()</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">is_primary_data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> only contains non primary cells&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">adata</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">adata</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">v</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+                    <span class="s2">&quot;Dataset dropped because contains too many secondary&quot;</span>
+                <span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;stable_id&quot;</span><span class="p">,</span> <span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;updated_at&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">adata</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">myfile</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Artifact</span><span class="p">(</span>
+                <span class="n">adata</span><span class="p">,</span>
+                <span class="n">is_new_version_of</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># issues with KLlggfw6I6lvmbqiZm46</span>
+            <span class="n">myfile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myfile</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide either anndata or ln.Collection&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="scdataloader.preprocess.additional_preprocess" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_preprocess</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;multiethnic&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;American&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Jewish Israeli&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;na&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)</span>  <span class="c1"># multi ethnic will have to get renamed</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_culture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># if cell_type contains the word &quot;(cell culture)&quot; then it is a cell culture and we mark it as so and remove this from the cell type</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
+        <span class="s2">&quot;(cell culture)&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">loc</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;cell_culture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; (cell culture)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
+        <span class="s2">&quot;(cell culture)&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">loc</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;cell_culture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;tissue_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; \(cell culture\)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;(organoid)&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loc</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;cell_culture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;tissue_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; \(organoid\)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;CL:&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loc</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;tissue_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="scdataloader.preprocess.additional_postprocess" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_postprocess</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+          <details class="quote">
+            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+    <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>
+    <span class="c1"># compute neighbors</span>
+    <span class="c1"># need to be connectivities and same labels [cell type, assay, dataset, disease]</span>
+    <span class="c1"># define the &quot;neighbor&quot; up to 10(N) cells and add to obs</span>
+    <span class="c1"># define the &quot;next time point&quot; up to 5(M) cells and add to obs  # step 1: filter genes</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">diffmap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+    <span class="c1"># create a meta group</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dpt_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden_1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="o">+</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="o">+</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="o">+</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># + &quot;_&quot; + adata.obs[&#39;dataset_id&#39;].astype(str)</span>
+
+    <span class="c1"># if group is too small</span>
+    <span class="n">okgroup</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dpt_group&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">]</span>
+    <span class="n">not_okgroup</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dpt_group&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="c1"># set the group to empty</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dpt_group&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">not_okgroup</span><span class="p">),</span> <span class="s2">&quot;dpt_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;heat_diff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="c1"># for each group</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">okgroup</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># get the best root cell</span>
+        <span class="n">eq</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">dpt_group</span> <span class="o">==</span> <span class="n">val</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">eq</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">root_ixs</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;X_diffmap&quot;</span><span class="p">][</span><span class="n">eq</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;iroot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_ixs</span>
+        <span class="c1"># compute the diffusion pseudo time from it</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">dpt</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">eq</span><span class="p">,</span> <span class="s2">&quot;heat_diff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">eq</span><span class="p">,</span> <span class="s2">&quot;dpt_pseudotime&quot;</span><span class="p">]</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dpt_pseudotime&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># sort so that the next time points are aligned for all groups</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;dpt_group&quot;</span><span class="p">,</span> <span class="s2">&quot;heat_diff&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="c1"># to query N next time points we just get the N elements below and check they are in the group</span>
+    <span class="c1"># to query the N nearest neighbors we just get the N elements above and N below and check they are in the group</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</code></pre></div></td></tr></table></div>
+          </details>
   </div>
 
 </div>

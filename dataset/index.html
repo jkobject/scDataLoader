@@ -57,6 +57,8 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.data.Dataset">Dataset</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.data.SimpleAnnDataset">SimpleAnnDataset</a>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
@@ -64,6 +66,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../collator/">collator</a>
                   </li>
               </ul>
       </div>
@@ -133,6 +137,90 @@ join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
 hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
 </code></pre>
 
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="scdataloader.data.SimpleAnnDataset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">SimpleAnnDataset</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
+scDataloader and with your model during inference.</p>
+      <hr />
+<pre><code>adata (anndata.AnnData): anndata object to use
+obs_to_output (list[str]): list of observations to output from anndata.obs
+layer (str): layer of the anndata to use
+</code></pre>
+
+                <details class="quote">
+                  <summary>Source code in <code>scdataloader/data.py</code></summary>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
+    <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of</span>
+<span class="sd">    scDataloader and with your model during inference.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    ----</span>
+<span class="sd">        adata (anndata.AnnData): anndata object to use</span>
+<span class="sd">        obs_to_output (list[str]): list of observations to output from anndata.obs</span>
+<span class="sd">        layer (str): layer of the anndata to use</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_to_output</span> <span class="o">=</span> <span class="n">obs_to_output</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>
+</code></pre></div></td></tr></table></div>
+                </details>
 
   
 
