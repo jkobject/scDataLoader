@@ -61,29 +61,29 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.utils">utils</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.createFoldersFor">createFoldersFor</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.createFoldersFor">createFoldersFor()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.is_outlier">is_outlier</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.is_outlier">is_outlier()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.length_normalize">length_normalize</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.length_normalize">length_normalize()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.pd_load_cached">pd_load_cached</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.pd_load_cached">pd_load_cached()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology()</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.validate">validate</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.validate">validate()</a>
     </li>
         </ul>
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../dataloader/">dataloader</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
                   </li>
               </ul>
       </div>
@@ -117,6 +117,7 @@
 
 
 
+
 <h2 id="scdataloader.utils" class="doc doc-heading">
           <code>scdataloader.utils</code>
 
@@ -139,6 +140,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -179,6 +181,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -404,6 +407,7 @@
 
 
 
+
 <h3 id="scdataloader.utils.get_ancestry_mapping" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">get_ancestry_mapping</span></code>
 
@@ -546,6 +550,7 @@
 
 
 
+
 <h3 id="scdataloader.utils.is_outlier" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">is_outlier</span></code>
 
@@ -622,7 +627,9 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">433</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
 <span class="normal">434</span>
 <span class="normal">435</span>
 <span class="normal">436</span>
@@ -636,9 +643,7 @@
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">447</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -663,6 +668,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -734,7 +740,9 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">452</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
 <span class="normal">453</span>
 <span class="normal">454</span>
 <span class="normal">455</span>
@@ -744,9 +752,7 @@
 <span class="normal">459</span>
 <span class="normal">460</span>
 <span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">):</span>
+<span class="normal">462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -767,6 +773,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -1012,6 +1019,7 @@
 
 
 
+
 <h3 id="scdataloader.utils.pd_load_cached" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">pd_load_cached</span></code>
 
@@ -1092,7 +1100,9 @@
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">467</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
 <span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
@@ -1107,9 +1117,7 @@
 <span class="normal">479</span>
 <span class="normal">480</span>
 <span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pd_load_cached</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pd_load_cached</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    pd_load_cached downloads a file from a url and loads it as a pandas dataframe</span>
 
@@ -1135,6 +1143,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -1360,9 +1369,7 @@
 <span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">organisms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">sex</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
     <span class="n">celltypes</span><span class="o">=</span><span class="p">[],</span>
@@ -1397,20 +1404,20 @@
 <span class="sd">        dev_stages (list, optional): List of developmental stages. Defaults to [].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span> <span class="k">else</span> <span class="n">celltypes</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span> <span class="k">else</span> <span class="n">celltypes</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">celltypes</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># Organism</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">organisms</span> <span class="k">else</span> <span class="n">organisms</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">organisms</span> <span class="k">else</span> <span class="n">organisms</span>
     <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">i</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_public</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
     <span class="p">]</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">organisms</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># Phenotype</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
     <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_public</span><span class="p">(</span>
             <span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
@@ -1420,38 +1427,36 @@
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
     <span class="p">]</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">sex</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># ethnicity</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span> <span class="k">else</span> <span class="n">ethnicities</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span> <span class="k">else</span> <span class="n">ethnicities</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ethnicities</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span>
     <span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>  <span class="c1"># multi ethnic will have to get renamed</span>
     <span class="c1"># ExperimentalFactor</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span> <span class="k">else</span> <span class="n">assays</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span> <span class="k">else</span> <span class="n">assays</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">assays</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># lookup = bt.ExperimentalFactor.lookup()</span>
     <span class="c1"># lookup.smart_seq_v4.parents.add(lookup.smart_like)</span>
     <span class="c1"># Tissue</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span> <span class="k">else</span> <span class="n">tissues</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span> <span class="k">else</span> <span class="n">tissues</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tissues</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># DevelopmentalStage</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span> <span class="k">else</span> <span class="n">dev_stages</span>
-    <span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span> <span class="k">else</span> <span class="n">dev_stages</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">dev_stages</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># Disease</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">from_public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span> <span class="k">else</span> <span class="n">diseases</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span> <span class="k">else</span> <span class="n">diseases</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
-    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">diseases</span><span class="p">))</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;PATO:0000461&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># genes</span>
@@ -1473,6 +1478,7 @@
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -1831,7 +1837,7 @@
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../preprocess/" class="btn btn-neutral float-left" title="preprocess"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../dataloader/" class="btn btn-neutral float-right" title="dataloader">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../datamodule/" class="btn btn-neutral float-right" title="datamodule">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -1857,7 +1863,7 @@
       <span><a href="../preprocess/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../dataloader/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../datamodule/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

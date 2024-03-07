@@ -63,7 +63,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../dataloader/">dataloader</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
                   </li>
               </ul>
       </div>
@@ -97,6 +97,7 @@
 
 
 
+
 <h2 id="scdataloader.data.Dataset" class="doc doc-heading">
           <code>scdataloader.data.Dataset</code>
 
@@ -113,20 +114,23 @@
             Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
   
-      <p>Dataset class to load a bunch of anndata from a lamin dataset in a memory efficient way.</p>
-<p>For an example, see :meth:<code>~lamindb.Dataset.mapped</code>.</p>
+      <p>Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.</p>
+<p>This serves as a wrapper around lamin's mappedCollection to provide more features,
+mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species</p>
+<p>For an example of mappedDataset, see :meth:<code>~lamindb.Dataset.mapped</code>.</p>
 <p>.. note::</p>
-<pre><code>A similar data loader exists `here
+<pre><code>A related data loader exists `here
 &lt;https://github.com/Genentech/scimilarity&gt;`__.
 </code></pre>
       <hr />
 <pre><code>lamin_dataset (lamindb.Dataset): lamin dataset to load
 genedf (pd.Dataframe): dataframe containing the genes to load
-gene_embedding: dataframe containing the gene embeddings
 organisms (list[str]): list of organisms to load
-obs (list[str]): list of observations to load
+    (for now only validates the the genes map to this organism)
+obs (list[str]): list of observations to load from the Collection
 clss_to_pred (list[str]): list of observations to encode
-hierarchical_clss: list of observations to map to a hierarchy
+join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
+hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
 </code></pre>
 
 
@@ -147,7 +151,6 @@ hierarchical_clss: list of observations to map to a hierarchy
   </div>
 
   </div>
-
 
 </div>
               
