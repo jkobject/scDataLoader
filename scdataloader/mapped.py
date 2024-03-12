@@ -195,12 +195,13 @@ class MappedDataset:
         with _Connect(self.storages[storage_idx]) as store:
             out = {"x": self.get_data_idx(store, obs_idx, var_idxs)}
             if self.label_keys is not None:
-                for i, label in enumerate(self.label_keys):
+                for _, label in enumerate(self.label_keys):
                     label_idx = self.get_label_idx(store, obs_idx, label)
                     if label in self.encoders:
                         out.update({label: self.encoders[label][label_idx]})
                     else:
                         out.update({label: label_idx})
+                out.update({"dataset": storage_idx})
         return out
 
     def get_data_idx(

@@ -17,79 +17,6 @@ from .collator import Collator
 from .mapped import MappedDataset
 from .utils import getBiomartTable
 
-# TODO: put in config
-COARSE_TISSUE = {
-    "adipose tissue": "",
-    "bladder organ": "",
-    "blood": "",
-    "bone marrow": "",
-    "brain": "",
-    "breast": "",
-    "esophagus": "",
-    "eye": "",
-    "embryo": "",
-    "fallopian tube": "",
-    "gall bladder": "",
-    "heart": "",
-    "intestine": "",
-    "kidney": "",
-    "liver": "",
-    "lung": "",
-    "lymph node": "",
-    "musculature of body": "",
-    "nose": "",
-    "ovary": "",
-    "pancreas": "",
-    "placenta": "",
-    "skin of body": "",
-    "spinal cord": "",
-    "spleen": "",
-    "stomach": "",
-    "thymus": "",
-    "thyroid gland": "",
-    "tongue": "",
-    "uterus": "",
-}
-
-COARSE_ANCESTRY = {
-    "African": "",
-    "Chinese": "",
-    "East Asian": "",
-    "Eskimo": "",
-    "European": "",
-    "Greater Middle Eastern  (Middle Eastern, North African or Persian)": "",
-    "Hispanic or Latin American": "",
-    "Native American": "",
-    "Oceanian": "",
-    "South Asian": "",
-}
-
-COARSE_DEVELOPMENT_STAGE = {
-    "Embryonic human": "",
-    "Fetal": "",
-    "Immature": "",
-    "Mature": "",
-}
-
-COARSE_ASSAY = {
-    "10x 3'": "",
-    "10x 5'": "",
-    "10x multiome": "",
-    "CEL-seq2": "",
-    "Drop-seq": "",
-    "GEXSCOPE technology": "",
-    "inDrop": "",
-    "microwell-seq": "",
-    "sci-Plex": "",
-    "sci-RNA-seq": "",
-    "Seq-Well": "",
-    "Slide-seq": "",
-    "Smart-seq": "",
-    "SPLiT-seq": "",
-    "TruDrop": "",
-    "Visium Spatial Gene Expression": "",
-}
-
 
 class DataModule(L.LightningDataModule):
     def __init__(
@@ -273,6 +200,10 @@ class DataModule(L.LightningDataModule):
         """
         return self.dataset.genedf.index.tolist()
 
+    @property
+    def num_datasets(self):
+        return len(self.dataset.mapped_dataset.storages)
+
     def setup(self, stage=None):
         """
         setup method is used to prepare the data for the training, validation, and test sets.
@@ -301,6 +232,7 @@ class DataModule(L.LightningDataModule):
             len_test + len_valid < self.n_samples
         ), "test set + valid set size is configured to be larger than entire dataset."
         idx_full = np.arange(self.n_samples)
+        test_datasets = []
         if len_test > 0:
             # this way we work on some never seen datasets
             # keeping at least one
@@ -310,7 +242,6 @@ class DataModule(L.LightningDataModule):
                 else self.dataset.mapped_dataset.n_obs_list[0]
             )
             cs = 0
-            test_datasets = []
             print("these files will be considered test datasets:")
             for i, c in enumerate(self.dataset.mapped_dataset.n_obs_list):
                 if cs + c > len_test:
@@ -322,10 +253,10 @@ class DataModule(L.LightningDataModule):
 
             len_test = cs
             print("perc test: ", len_test / self.n_samples)
-            self.text_idx = idx_full[:len_test]
+            self.test_idx = idx_full[:len_test]
             idx_full = idx_full[len_test:]
         else:
-            self.text_idx = None
+            self.test_idx = None
 
         np.random.shuffle(idx_full)
         if len_valid > 0:

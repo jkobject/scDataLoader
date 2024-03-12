@@ -87,7 +87,7 @@ class Collator:
 
     def __call__(self, batch):
         """
-        __call__ is a special method in Python that is called when an instance of the class is called.
+        __call__ applies the collator to a minibatch of data
 
         Args:
             batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.
@@ -108,9 +108,11 @@ class Collator:
         other_classes = []
         gene_locs = []
         tp = []
+        dataset = []
         nnz_loc = []
         for elem in batch:
             organism_id = elem[self.organism_name]
+            dataset.append(elem["dataset"])
             if organism_id not in self.organism_ids:
                 continue
             expr = np.array(elem["x"])
@@ -174,6 +176,7 @@ class Collator:
         gene_locs = np.array(gene_locs)
         total_count = np.array(total_count)
         other_classes = np.array(other_classes)
+        dataset = np.array(dataset)
 
         # normalize counts
         if self.norm_to is not None:
@@ -200,6 +203,7 @@ class Collator:
             "class": Tensor(other_classes).int(),
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
+            "dataset": Tensor(dataset).int(),
         }
 
 
@@ -207,6 +211,9 @@ class AnnDataCollator(Collator):
     def __init__(self, *args, **kwargs):
         """
         AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)
+
+        Args:
+            @see Collator
         """
         super().__init__(*args, **kwargs)
 

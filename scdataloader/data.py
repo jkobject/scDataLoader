@@ -10,45 +10,9 @@ import warnings
 
 from anndata import AnnData
 
-
-# TODO: manage load gene embeddings to make
-# from scprint.dataloader.embedder import embed
 from scdataloader.utils import get_ancestry_mapping, load_genes
 
-LABELS_TOADD = {
-    "assay_ontology_term_id": {
-        "10x transcription profiling": "EFO:0030003",
-        "spatial transcriptomics": "EFO:0008994",
-        "10x 3' transcription profiling": "EFO:0030003",
-        "10x 5' transcription profiling": "EFO:0030004",
-    },
-    "disease_ontology_term_id": {
-        "metabolic disease": "MONDO:0005066",
-        "chronic kidney disease": "MONDO:0005300",
-        "chromosomal disorder": "MONDO:0019040",
-        "infectious disease": "MONDO:0005550",
-        "inflammatory disease": "MONDO:0021166",
-        # "immune system disease",
-        "disorder of development or morphogenesis": "MONDO:0021147",
-        "mitochondrial disease": "MONDO:0044970",
-        "psychiatric disorder": "MONDO:0002025",
-        "cancer or benign tumor": "MONDO:0002025",
-        "neoplasm": "MONDO:0005070",
-    },
-    "cell_type_ontology_term_id": {
-        "progenitor cell": "CL:0011026",
-        "hematopoietic cell": "CL:0000988",
-        "myoblast": "CL:0000056",
-        "myeloid cell": "CL:0000763",
-        "neuron": "CL:0000540",
-        "electrically active cell": "CL:0000211",
-        "epithelial cell": "CL:0000066",
-        "secretory cell": "CL:0000151",
-        "stem cell": "CL:0000034",
-        "non-terminally differentiated cell": "CL:0000055",
-        "supporting cell": "CL:0000630",
-    },
-}
+from .config import LABELS_TOADD
 
 
 @dataclass
@@ -80,7 +44,6 @@ class Dataset(torchDataset):
 
     lamin_dataset: ln.Collection
     genedf: Optional[pd.DataFrame] = None
-    # gene_embedding: pd.DataFrame = None  # TODO: make it part of specialized dataset
     organisms: Optional[Union[list[str], str]] = field(
         default_factory=["NCBITaxon:9606", "NCBITaxon:10090"]
     )
