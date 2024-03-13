@@ -1,6 +1,6 @@
 import numpy as np
 from .utils import load_genes
-from torch import Tensor
+from torch import Tensor, long
 
 # class SimpleCollator:
 
@@ -203,7 +203,7 @@ class Collator:
             "class": Tensor(other_classes).int(),
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
-            "dataset": Tensor(dataset).int(),
+            "dataset": Tensor(dataset).to(long),
         }
 
 
