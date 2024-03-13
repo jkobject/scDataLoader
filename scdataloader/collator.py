@@ -112,9 +112,9 @@ class Collator:
         nnz_loc = []
         for elem in batch:
             organism_id = elem[self.organism_name]
-            dataset.append(elem["dataset"])
             if organism_id not in self.organism_ids:
                 continue
+            dataset.append(elem["dataset"])
             expr = np.array(elem["x"])
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
