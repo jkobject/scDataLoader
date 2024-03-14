@@ -114,7 +114,8 @@ class Collator:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
                 continue
-            dataset.append(elem["dataset"])
+            if "dataset" in elem:
+                dataset.append(elem["dataset"])
             expr = np.array(elem["x"])
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
@@ -197,14 +198,16 @@ class Collator:
         # do encoding of graph location
         # encode all the edges in some sparse way
         # normalizing total counts between 0,1
-        return {
+        ret = {
             "x": Tensor(expr),
             "genes": Tensor(gene_locs).int(),
             "class": Tensor(other_classes).int(),
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
-            "dataset": Tensor(dataset).to(long),
         }
+        if len(dataset) > 0:
+            ret.update({"dataset": Tensor(dataset).to(long)})
+        return ret
 
 
 class AnnDataCollator(Collator):
