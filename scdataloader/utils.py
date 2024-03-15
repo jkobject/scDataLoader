@@ -29,7 +29,9 @@ def createFoldersFor(filepath: str):
             os.mkdir(prevval)
 
 
-def _fetchFromServer(ensemble_server: str, attributes: list):
+def _fetchFromServer(
+    ensemble_server: str, attributes: list, database: str = "hsapiens_gene_ensembl"
+):
     """
     Fetches data from the specified ensemble server.
 
@@ -41,7 +43,7 @@ def _fetchFromServer(ensemble_server: str, attributes: list):
         pd.DataFrame: A pandas DataFrame containing the fetched data.
     """
     server = BiomartServer(ensemble_server)
-    ensmbl = server.datasets["hsapiens_gene_ensembl"]
+    ensmbl = server.datasets[database]
     print(attributes)
     res = pd.read_csv(
         io.StringIO(
@@ -58,6 +60,7 @@ def getBiomartTable(
     cache_folder: str = "/tmp/biomart/",
     attributes: List[str] = [],
     bypass_attributes: bool = False,
+    database: str = "hsapiens_gene_ensembl",
 ):
     """generate a genelist dataframe from ensembl's biomart
 
@@ -93,7 +96,7 @@ def getBiomartTable(
     else:
         print("downloading gene names from biomart")
 
-        res = _fetchFromServer(ensemble_server, attr + attributes)
+        res = _fetchFromServer(ensemble_server, attr + attributes, database=database)
         res.to_csv(cachefile, index=False)
 
     res.columns = attr + attributes
@@ -175,7 +178,7 @@ def validate(adata: AnnData, organism: str):
     ).all():
         raise ValueError("Invalid cell type ontology term id found")
     if (
-        not bt.DevelopmentalStage.filter(bionty_source=bionty_source)
+        not bt.DevelopmentalStage.filter(public_source=bionty_source)
         .validate(
             adata.obs["development_stage_ontology_term_id"],
             field="ontology_id",
@@ -191,11 +194,9 @@ def validate(adata: AnnData, organism: str):
         adata.obs["assay_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid assay ontology term id found")
-    if (
-        not bt.Gene.filter(organism=bt.settings.organism)
-        .validate(adata.var.index, field="ensembl_gene_id")
-        .all()
-    ):
+    if not bt.Gene.validate(
+        adata.var.index, field="ensembl_gene_id", organism=organism
+    ).all():
         raise ValueError("Invalid gene ensembl id found")
     return True
 
@@ -308,7 +309,7 @@ def load_dataset_local(
     return dataset
 
 
-def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):
+def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
     organismdf = []
     if type(organisms) == str:
         organisms = [organisms]

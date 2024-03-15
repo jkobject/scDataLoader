@@ -103,9 +103,7 @@ class DataModule(L.LightningDataModule):
                     prev_chromosome = r["chromosome_name"]
                 print(f"reduced the size to {len(set(c))/len(biomart)}")
                 biomart["pos"] = c
-            mdataset.genedf = biomart.loc[
-                mdataset.genedf[mdataset.genedf.index.isin(biomart.index)].index
-            ]
+            mdataset.genedf = biomart.loc[mdataset.genedf.index]
             self.gene_pos = mdataset.genedf["pos"].tolist()
 
         if gene_embeddings != "":

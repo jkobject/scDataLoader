@@ -49,6 +49,7 @@ class Preprocessor:
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         do_postp: bool = True,
+        organisms: list[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -96,6 +97,7 @@ class Preprocessor:
         self.subset_hvg = subset_hvg
         self.hvg_flavor = hvg_flavor
         self.binning = binning
+        self.organisms = organisms
         self.result_binned_key = result_binned_key
         self.additional_preprocess = additional_preprocess
         self.additional_postprocess = additional_postprocess
@@ -114,6 +116,11 @@ class Preprocessor:
         self.do_postp = do_postp
 
     def __call__(self, adata) -> AnnData:
+        if adata.obs.organism_ontology_term_id.iloc[0] not in self.organisms:
+            raise ValueError(
+                "we cannot work with this organism",
+                adata.obs.organism_ontology_term_id.iloc[0],
+            )
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if adata.raw is not None:
@@ -122,12 +129,13 @@ class Preprocessor:
         if self.use_layer is not None:
             adata.X = adata.layers[self.use_layer]
         if adata.layers is not None:
+            print("Dropping layers: ", adata.layers.keys())
             del adata.layers
         if len(adata.varm.keys()) > 0:
             del adata.varm
-        if len(adata.obsm.keys()) > 0:
+        if len(adata.obsm.keys()) > 0 and self.do_postp:
             del adata.obsm
-        if len(adata.obsp.keys()) > 0:
+        if len(adata.obsp.keys()) > 0 and self.do_postp:
             del adata.obsp
         if len(adata.uns.keys()) > 0:
             del adata.uns
@@ -382,15 +390,15 @@ class LaminPreprocessor(Preprocessor):
         all_ready_processed_keys = set()
         if self.cache:
             for i in ln.Artifact.filter(description=description):
-                all_ready_processed_keys.add(i.initial_version.key)
+                all_ready_processed_keys.add(i.stem_uid)
         if isinstance(data, AnnData):
-            return self.preprocess(data)
+            return super().__call__(data)
         elif isinstance(data, ln.Collection):
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
                 print(i)
-                if file.key in all_ready_processed_keys:
-                    print(f"{file.key} is already processed")
+                if file.stem_uid in all_ready_processed_keys:
+                    print(f"{file.stem_uid} is already processed")
                     continue
                 print(file)
                 if file.backed().obs.is_primary_data.sum() == 0:
@@ -406,6 +414,9 @@ class LaminPreprocessor(Preprocessor):
                     if v.args[0].startswith(
                         "Dataset dropped because contains too many secondary"
                     ):
+                        print(v)
+                        continue
+                    elif v.args[0].startswith("we cannot work with this organism"):
                         print(v)
                         continue
                     else:

@@ -75,10 +75,9 @@ class Collator:
         self.to_subset = {}
         for organism in set(self.genedf.organism):
             ogenedf = self.genedf[self.genedf.organism == organism]
+            tot = self.genedf[self.genedf.index.isin(valid_genes)]
             org = org_to_id[organism] if org_to_id is not None else organism
-            self.start_idx.update(
-                {org: np.where(self.genedf.organism == organism)[0][0]}
-            )
+            self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
             if len(valid_genes) > 0:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
             if len(genelist) > 0:
