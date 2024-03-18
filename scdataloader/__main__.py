@@ -1,10 +1,14 @@
 import argparse
-from scdataloader.preprocess import LaminPreprocessor
+from scdataloader.preprocess import (
+    LaminPreprocessor,
+    additional_preprocess,
+    additional_postprocess,
+)
 import lamindb as ln
 from typing import Optional, Union
 
 
-# scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" --description="preprocessed for scprint" --new_name="scprint main"
+# scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" --description="preprocessed for scprint" --new_name="scprint main" --start_at=39
 def main():
     parser = argparse.ArgumentParser(
         description="Preprocess datasets in a given lamindb collection."
@@ -117,7 +121,7 @@ def main():
     parser.add_argument(
         "--maxdropamount",
         type=int,
-        default=2,
+        default=50,
         help="Specifies the maximum drop amount.",
     )
     parser.add_argument(
@@ -182,6 +186,8 @@ def main():
         batch_key=args.batch_key,
         skip_validate=args.skip_validate,
         do_postp=args.do_postp,
+        additional_preprocess=additional_preprocess,
+        additional_postprocess=additional_postprocess,
     )
 
     # Preprocess the dataset

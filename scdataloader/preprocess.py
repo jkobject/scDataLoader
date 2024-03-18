@@ -41,7 +41,7 @@ class Preprocessor:
         min_dataset_size: int = 100,
         min_valid_genes_id: int = 10_000,
         min_nnz_genes: int = 200,
-        maxdropamount: int = 2,
+        maxdropamount: int = 50,
         madoutlier: int = 5,
         pct_mt_outlier: int = 8,
         batch_key: Optional[str] = None,
@@ -129,6 +129,13 @@ class Preprocessor:
         if self.use_layer is not None:
             adata.X = adata.layers[self.use_layer]
         if adata.layers is not None:
+            if "counts" in adata.layers.keys():
+                if np.abs(adata.X[:50_000].astype(int) - adata.X[:50_000]).sum():
+                    print("X was not raw counts, using 'counts' layer")
+                    import pdb
+
+                    pdb.set_trace()
+                    adata.X = adata.layers["counts"].copy()
             print("Dropping layers: ", adata.layers.keys())
             del adata.layers
         if len(adata.varm.keys()) > 0:
@@ -142,7 +149,10 @@ class Preprocessor:
         if len(adata.varp.keys()) > 0:
             del adata.varp
         # check that it is a count
-        if np.abs(adata.X.astype(int) - adata.X).sum():  # check if likely raw data
+        print("checking raw counts")
+        if np.abs(
+            adata.X[:50_000].astype(int) - adata.X[:50_000]
+        ).sum():  # check if likely raw data
             if not self.force_preprocess:
                 raise ValueError(
                     "Data is not raw counts, please check layers, find raw data, or bypass with force_preprocess"
@@ -156,15 +166,7 @@ class Preprocessor:
         # # cleanup and dropping low expressed genes and unexpressed cells
         prevsize = adata.shape[0]
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
-        if "assay_ontology_term_id" in adata.obs.columns:
-            is_slide = adata.obs.assay_ontology_term_id == "EFO:0030062"
-        else:
-            is_slide = False
-        adata = adata[
-            (adata.obs["nnz"] > self.min_nnz_genes)
-            # or if slide-seq
-            | ((is_slide) & (adata.obs["nnz"] > (self.min_nnz_genes / 3)))
-        ]
+        adata = adata[(adata.obs["nnz"] > self.min_nnz_genes)]
         if self.filter_gene_by_counts:
             sc.pp.filter_genes(adata, min_counts=self.filter_gene_by_counts)
         if self.filter_cell_by_counts:
@@ -187,9 +189,12 @@ class Preprocessor:
         if "is_primary_data" in adata.obs.columns:
             adata = adata[adata.obs.is_primary_data]
         if adata.shape[0] < self.min_dataset_size:
-            raise ValueError(
-                "Dataset dropped because contains too many secondary cells"
+            raise Exception("Dataset dropped due to too many secondary cells")
+        print(
+            "removed {} cells, {} renamining".format(
+                prevsize - adata.shape[0], adata.shape[0]
             )
+        )
         if self.is_symbol:
             genesdf["ensembl_gene_id"] = genesdf.index
             var = (
@@ -223,12 +228,14 @@ class Preprocessor:
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
         if not self.skip_validate:
+            print("validating")
             data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
             # length normalization
             if (
                 adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
                 and self.length_normalize
             ):
+                print("doing length norm")
                 subadata = data_utils.length_normalize(
                     adata[adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS)],
                 )
@@ -246,15 +253,11 @@ class Preprocessor:
                     join="outer",
                     merge="only",
                 )
-        # step 3: normalize total
-        adata.layers["clean"] = sc.pp.log1p(
-            sc.pp.normalize_total(adata, target_sum=self.normalize_sum, inplace=False)[
-                "X"
-            ]
-        )
 
         # QC
+
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
+        print("startin QC")
         sc.pp.calculate_qc_metrics(
             adata, qc_vars=["mt", "ribo", "hb"], inplace=True, percent_top=[20]
         )
@@ -280,19 +283,26 @@ class Preprocessor:
         #    raise Exception("More than 50% of the dataset has been dropped due to outliers.")
         # adata = adata[(~adata.obs.outlier) & (~adata.obs.mt_outlier)].copy()
         # remaining
-        # step 5: subset hvg
-        if self.subset_hvg:
-            sc.pp.highly_variable_genes(
-                adata,
-                layer="clean",
-                n_top_genes=self.subset_hvg,
-                batch_key=self.batch_key,
-                flavor=self.hvg_flavor,
-                subset=False,
-            )
+
         # based on the topometry paper https://www.biorxiv.org/content/10.1101/2022.03.14.484134v2
         # https://rapids-singlecell.readthedocs.io/en/latest/api/generated/rapids_singlecell.pp.pca.html#rapids_singlecell.pp.pca
         if self.do_postp:
+            print("normalize")
+            adata.layers["clean"] = sc.pp.log1p(
+                sc.pp.normalize_total(
+                    adata, target_sum=self.normalize_sum, inplace=False
+                )["X"]
+            )
+            # step 5: subset hvg
+            if self.subset_hvg:
+                sc.pp.highly_variable_genes(
+                    adata,
+                    layer="clean",
+                    n_top_genes=self.subset_hvg,
+                    batch_key=self.batch_key,
+                    flavor=self.hvg_flavor,
+                    subset=False,
+                )
             adata.obsm["clean_pca"] = sc.pp.pca(
                 adata.layers["clean"],
                 n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
@@ -352,6 +362,7 @@ class Preprocessor:
                 bin_edges.append(np.concatenate([[0], bins]))
             adata.layers[self.result_binned_key] = np.stack(binned_rows)
             adata.obsm["bin_edges"] = np.stack(bin_edges)
+        print("done")
         return adata
 
 
@@ -411,16 +422,17 @@ class LaminPreprocessor(Preprocessor):
                     adata = super().__call__(adata)
 
                 except ValueError as v:
-                    if v.args[0].startswith(
-                        "Dataset dropped because contains too many secondary"
-                    ):
-                        print(v)
-                        continue
-                    elif v.args[0].startswith("we cannot work with this organism"):
+                    if v.args[0].startswith("we cannot work with this organism"):
                         print(v)
                         continue
                     else:
                         raise v
+                except Exception as e:
+                    if e.args[0].startswith("Dataset dropped due to"):
+                        print(e)
+                        continue
+                    else:
+                        raise e
                 for name in ["stable_id", "created_at", "updated_at"]:
                     if name in adata.var.columns:
                         adata.var = adata.var.drop(columns=name)
@@ -557,7 +569,7 @@ def additional_preprocess(adata):
         ].astype(str)
         adata.obs.loc[loc, "tissue_ontology_term_id"] = adata.obs.loc[
             loc, "tissue_ontology_term_id"
-        ].str.replace(r" \(cell culture\)", "")
+        ].str.replace(" (cell culture)", "")
 
     loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)", regex=False)
     if loc.sum() > 0:
@@ -567,7 +579,7 @@ def additional_preprocess(adata):
         ].astype(str)
         adata.obs.loc[loc, "tissue_ontology_term_id"] = adata.obs.loc[
             loc, "tissue_ontology_term_id"
-        ].str.replace(r" \(organoid\)", "")
+        ].str.replace(" (organoid)", "")
 
     loc = adata.obs["tissue_ontology_term_id"].str.contains("CL:", regex=False)
     if loc.sum() > 0:
@@ -622,3 +634,211 @@ def additional_postprocess(adata):
     # to query N next time points we just get the N elements below and check they are in the group
     # to query the N nearest neighbors we just get the N elements above and N below and check they are in the group
     return adata
+
+
+"""
+block_size = 500_000
+num_blocks = int(np.ceil(len(adata) / block_size))
+sexr = {
+    "Male": "PATO:0000384",
+    "Female": "PATO:0000383",
+}
+tissuer = {
+    "Kidney": "UBERON:0002113",
+    "Lung": "UBERON:0002048",
+    "Heart": "UBERON:0000948",
+    "Liver": "UBERON:0002107",
+    "Brain": "UBERON:0000955",
+    "BAT": "UBERON:0001348",
+    "Jejunum": "UBERON:0002115",
+    "Colon": "UBERON:0001155",
+    "Ileum": "UBERON:0002116",
+    "Stomach": "UBERON:0000945",
+    "gWAT": "UBERON:0001347",
+    "Duodenum": "UBERON:0002114",
+    "iWAT": "UBERON:0001347",
+    "Muscle": "UBERON:0001630",
+}
+ager = {
+    "03_months": "MmusDv:0000063",
+    "16_months": "MmusDv:0000087",
+    "06_months": "MmusDv:0000077",
+    "23_months": "MmusDv:0000127",
+    "12_months": "MmusDv:0000083",
+    "21_months": "MmusDv:0000125",
+}
+
+celltyper = {
+    "Proximal tubule cells": "epithelial cell of proximal tubule",
+    "Vascular endothelial cells": "endothelial cell of vascular tree",
+    "Intestinal epithelial cells": "intestinal epithelial cell",
+    "Hepatocytes": "hepatocyte",
+    "Fibroblasts": "fibroblast",
+    "Lymphoid cells_T cells": "T cell",
+    "Myeloid cells": "myeloid cell",
+    "Brown adipocytes": "brown fat cell",
+    "Lymphoid cells_B cells": "B cell",
+    "Adipocytes": "fat cell",
+    "Type II alveolar epithelial cells": "type II pneumocyte",
+    "Colonic epithelial cells": "colon epithelial cell",
+    "Mural cells": "mural cell",
+    "Cerebellum granule neurons": "cerebellar neuron",
+    "Goblet cells": "goblet cell",
+    "Vascular endothelial cells_General capillary cells": "endothelial cell of vascular tree",
+    "Ventricular cardiomyocytes": "regular ventricular cardiac myocyte",
+    "Type II myonuclei": "type II muscle cell",
+    "Thick ascending limb of LOH cells": "vasa recta ascending limb cell",
+    "Gastric mucous cells": "mucous cell of stomach",
+    "Distal convoluted tubule cells": "kidney distal convoluted tubule epithelial cell",
+    "Adipoce stem and progenitor cells": "hepatic oval stem cell",
+    "Chief cells": "chief cell of parathyroid gland",
+    "Paneth cells": "paneth cell",
+    "Myeloid cells_Alveolar macrophages": "alveolar macrophage",
+    "Lymphoid cells_Plasma cells": "plasma cell",
+    "Secretory cells": "secretory cell",
+    "Lymphoid cells_Resting B cells": "B cell",
+    "Cortical projection neurons 1": "corticothalamic-projecting glutamatergic cortical neuron",
+    "Endocardial endothelial cells": "endocardial cell",
+    "Type I alveolar epithelial cells": "type I pneumocyte",
+    "Interbrain and midbrain neurons 1": "midbrain dopaminergic neuron",
+    "Interbrain and midbrain neurons 2": "midbrain dopaminergic neuron",
+    "Myeloid cells_Monocytes": "monocyte",
+    "Myeloid cells_Dendritic cells": "myeloid dendritic cell",
+    "Oligodendrocytes": "oligodendrocyte",
+    "Lymphatic endothelial cells": "endothelial cell of lymphatic vessel",
+    "Enteroendocrine cells": "enteroendocrine cell",
+    "Vascular endothelial cells_Aerocytes": "endothelial cell of vascular tree",
+    "Gastric epithelial cells": "epithelial cell of stomach",
+    "Fibro–adipogenic progenitors": "fibro/adipogenic progenitor cell",
+    "Parietal cells": "parietal cell",
+    "Astrocytes": "astrocyte",
+    "Connecting tubule cells": "kidney connecting tubule beta-intercalated cell",
+    "Hepatic stellate cells": "hepatic stellate cell",
+    "Striatal neurons 1": "striatum neuron",
+    "Mesothelial cells": "mesothelial cell",
+    "Lymphoid cells_Cycling B cells": "germinal center B cell",
+    "Type B intercalated cells": "renal beta-intercalated cell",
+    "Type A intercalated cells": "renal alpha-intercalated cell",
+    "Myeloid cells_Neutrophils": "neutrophil",
+    "Principal cells": "renal principal cell",
+    "Cortical projection neurons 2": "corticothalamic-projecting glutamatergic cortical neuron",
+    "Muc2-producing goblet cells": "intestine goblet cell",
+    "OB neurons 1": "olfactory bulb interneuron",
+    "Atrial cardiomyocytes": "regular atrial cardiac myocyte",
+    "Lymphoid cells": "leukocyte",
+    "Skeletal muscle cells": "cell of skeletal muscle",
+    "Neural cells": "neural cell",
+    "Cerebellum interneurons": "cerebellar neuron",
+    "Interneurons 1": "interneuron",
+    "Descending thin limb of LOH cells": "vasa recta descending limb cell",
+    "Tuft cells": "intestinal tuft cell",
+    "Oligodendrocyte progenitor cells": "oligodendrocyte precursor cell",
+    "Enteric glia": "enteroglial cell",
+    "Endothelial cells": "endothelial cell",
+    "Dentate gyrus neurons": "dentate gyrus neuron",
+    "Myeloid cells_Interstitial macrophages": "tissue-resident macrophage",
+    "Ciliated cells": "ciliated cell",
+    "Microglia": "microglial cell",
+    "Interneurons 2": "interneuron",
+    "Ncam1 positive cells": "parafollicular cell",
+    "Rdh16 positive cells": "unknown",
+    "Circulating hepatoblasts": "hepatoblast",
+    "Enteric neurons": "enteric neuron",
+    "Ascending thin limb of LOH cells": "vasa recta ascending limb cell",
+    "Mfge8 positive cells": "unknown",
+    "Cholangiocytes": "cholangiocyte",
+    "Podocytes": "podocyte",
+    "Muscle satellite cells": "skeletal muscle satellite cell",
+    "Purkinje neurons": "Purkinje cell",
+    "Juxtaglomerular cells": "juxtaglomerular complex cell",
+    "Ngf positive cells": "neurogliaform cell",
+    "Bergmann glia": "Bergmann glial cell",
+    "Megf11 positive cells": "unknown",
+    "Myotendinous junction myonuclei": "unknown",
+    "Vascular leptomeningeal cells": "vascular leptomeningeal cell",
+    "Urothelial cells": "urothelial cell",
+    "Tenocytes": "tendon cell",
+    "Myelinating Schwann cells": "myelinating Schwann cell",
+    "Epididymal cells": "epididymis glandular cell",
+    "Muc6-producing goblet cells": "lung goblet cell",
+    "Type I myonuclei": "type I muscle cell",
+    "OB neurons 2": "olfactory bulb interneuron",
+    "Sis positive cells": "unknown",
+    "Lgr5 positive cells": "unknown",
+    "Macula densa cells": "macula densa epithelial cell",
+    "Choroid plexus epithelial cells": "choroid plexus epithelial cell",
+    "Cortical projection neurons 3": "corticothalamic-projecting glutamatergic cortical neuron",
+    "Interstitial cells of Cajal": "interstitial cell of Cajal",
+    "Cacna1b positive cells": "unknown",
+    "Hindbrain neurons 2": "neuron",
+    "Myeloid cells_Basophils": "basophil",
+    "Ependymal cells": "ependymal cell",
+    "Muc5ac-producing goblet cells": "lung goblet cell",
+    "Myeloid cells_Mast cells": "mast cell",
+    "Pulmonary neuroendocrine cells": "lung neuroendocrine cell",
+    "Basal cells": "basal cell",
+    "OB neurons 3": "olfactory bulb interneuron",
+    "Non-myelinating Schwann cells": "non-myelinating Schwann cell",
+    "Asic2 positive cells": "unknown",
+    "Striatal neurons 2": "striatum neuron",
+    "Erythroblasts": "erythroblast",
+    "Hindbrain neurons 1": "neuron",
+    "Neuromuscular junction myonuclei": "unknown",
+    "Habenula neurons": "unknown",
+    "Pituitary cells": "pituitary gland cell",
+    "Unipolar brush cells": "unipolar brush cell",
+    "Pde4c positive cells": "unknown",
+    "Pancreatic acinar cells": "pancreatic acinar cell",
+    "Inferior olivary nucleus neurons": "bushy cell",
+    "Colec10 positive cells": "unknown",
+    "Fcgbp positive cells": "unknown",
+    "Fut9 positive cells": "unknown",
+    "Mirg positive cells": "unknown",
+    "Alox15 positive cells": "unknown",
+    "Osteoblasts": "osteoblast",
+}
+genesdf = utils.load_genes("NCBITaxon:10090")
+{k: v if v =="unknown" else bt.CellType.filter(name=v).one().ontology_id for k, v in celltyper.items()}
+
+adata.obs["organism_ontology_term_id"] = "NCBITaxon:10090"
+adata.obs["tissue_ontology_term_id"] = adata.obs["Organ_name"].replace(tissuer)
+adata.obs["cell_type_ontology_term_id"] = adata.obs["Main_cell_type"].replace(
+    celltyper
+)
+adata.obs["disease_ontology_term_id"] = "PATO:0000461"
+adata.obs["assay_ontology_term_id"] = "unknown"
+adata.obs["self_reported_ethnicity_ontology_term_id"] = "unknown"
+adata.obs["development_stage_ontology_term_id"] = adata.obs["Age_group"].replace(
+    ager
+)
+adata.obs["sex_ontology_term_id"] = adata.obs["Gender"].replace(sexr)
+
+for i in range(num_blocks):
+    start_index = i * block_size
+    end_index = min((i + 1) * block_size, len(adata))
+    block = adata[start_index:end_index].to_memory()
+    # process block here
+
+    block = block[(block.obs["Gene_count"] > 400)]
+    
+    intersect_genes = set(block.var.index).intersection(set(genesdf.index))
+    print(f"Removed {len(block.var.index) - len(intersect_genes)} genes.")
+    block = block[:, list(intersect_genes)]
+    # marking unseen genes
+    unseen = set(genesdf.index) - set(block.var.index)
+    # adding them to adata
+    emptyda = ad.AnnData(
+        csr_matrix((block.shape[0], len(unseen)), dtype=np.float32),
+        var=pd.DataFrame(index=list(unseen)),
+        obs=pd.DataFrame(index=block.obs.index),
+    )
+    block = ad.concat([block, emptyda], axis=1, join="outer", merge="only")
+    # do a validation function
+    block.uns["unseen_genes"] = list(unseen)
+    block = block[:, block.var.sort_index().index]
+    block.var[genesdf.columns] = genesdf.loc[block.var.index]
+    for name in ["stable_id", "created_at", "updated_at"]:
+        if name in block.var.columns:
+            block.var = block.var.drop(columns=name)
+    block.write_h5ad('zhang2024_adata_'+str(i)+".h5ad")
+"""
