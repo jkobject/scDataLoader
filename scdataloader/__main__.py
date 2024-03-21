@@ -188,10 +188,11 @@ def main():
         do_postp=args.do_postp,
         additional_preprocess=additional_preprocess,
         additional_postprocess=additional_postprocess,
+        keep_files=False,
     )
 
     # Preprocess the dataset
-    preprocessed_dataset = preprocessor(
+    preprocessor(
         collection,
         name=args.new_name,
         description=args.description,

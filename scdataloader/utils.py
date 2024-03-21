@@ -415,6 +415,17 @@ def populate_my_ontology(
     records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
     ln.save(records, parents=bool(dev_stages))
     bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
+
+    names = bt.DevelopmentalStage.public(organism="mouse").df().name
+    bionty_source = bt.PublicSource.filter(
+        entity="DevelopmentalStage", organism="mouse"
+    ).one()
+    records = [
+        bt.DevelopmentalStage.from_public(name=i, public_source=bionty_source)
+        for i in names.tolist()
+    ]
+    records[-4] = records[-4][0]
+    ln.save(records)
     # Disease
     names = bt.Disease.public().df().index if not diseases else diseases
     records = bt.Disease.from_values(names, field="ontology_id")

@@ -9,6 +9,7 @@ import scanpy as sc
 from anndata import AnnData
 from django.db import IntegrityError
 from scipy.sparse import csr_matrix
+import os
 
 from scdataloader import utils as data_utils
 
@@ -50,6 +51,7 @@ class Preprocessor:
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         do_postp: bool = True,
         organisms: list[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
+        use_raw: bool = True,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -114,27 +116,25 @@ class Preprocessor:
         self.use_layer = use_layer
         self.is_symbol = is_symbol
         self.do_postp = do_postp
+        self.use_raw = use_raw
 
     def __call__(self, adata) -> AnnData:
-        if adata.obs.organism_ontology_term_id.iloc[0] not in self.organisms:
+        if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
-                adata.obs.organism_ontology_term_id.iloc[0],
+                adata[0].obs.organism_ontology_term_id.iloc[0],
             )
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
-        if adata.raw is not None:
+        if adata.raw is not None and self.use_raw:
             adata.X = adata.raw.X
             del adata.raw
         if self.use_layer is not None:
             adata.X = adata.layers[self.use_layer]
         if adata.layers is not None:
             if "counts" in adata.layers.keys():
-                if np.abs(adata.X[:50_000].astype(int) - adata.X[:50_000]).sum():
+                if np.abs(adata[:50_000].X.astype(int) - adata[:50_000].X).sum():
                     print("X was not raw counts, using 'counts' layer")
-                    import pdb
-
-                    pdb.set_trace()
                     adata.X = adata.layers["counts"].copy()
             print("Dropping layers: ", adata.layers.keys())
             del adata.layers
@@ -151,7 +151,7 @@ class Preprocessor:
         # check that it is a count
         print("checking raw counts")
         if np.abs(
-            adata.X[:50_000].astype(int) - adata.X[:50_000]
+            adata[:50_000].X.astype(int) - adata[:50_000].X
         ).sum():  # check if likely raw data
             if not self.force_preprocess:
                 raise ValueError(
@@ -257,6 +257,9 @@ class Preprocessor:
         # QC
 
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
+        for name in ["stable_id", "created_at", "updated_at"]:
+            if name in adata.var.columns:
+                adata.var = adata.var.drop(columns=name)
         print("startin QC")
         sc.pp.calculate_qc_metrics(
             adata, qc_vars=["mt", "ribo", "hb"], inplace=True, percent_top=[20]
@@ -373,12 +376,14 @@ class LaminPreprocessor(Preprocessor):
         erase_prev_dataset: bool = False,
         cache: bool = True,
         stream: bool = False,
+        keep_files: bool = True,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.erase_prev_dataset = erase_prev_dataset
         self.cache = cache
         self.stream = stream
+        self.keep_files = keep_files
 
     def __call__(
         self,
@@ -386,7 +391,7 @@ class LaminPreprocessor(Preprocessor):
         name="preprocessed dataset",
         description="preprocessed dataset using scprint",
         start_at=0,
-        version="2",
+        version=2,
     ):
         """
         format controls the different input value wrapping, including categorical
@@ -415,11 +420,49 @@ class LaminPreprocessor(Preprocessor):
                 if file.backed().obs.is_primary_data.sum() == 0:
                     print(f"{file.key} only contains non primary cells")
                     continue
-                adata = file.load(stream=self.stream)
+                if file.size <= 20_000_000_000:
+                    adata = file.load(stream=self.stream)
+                    print(adata)
+                else:
+                    badata = file.backed()
+                    print(badata)
 
-                print(adata)
                 try:
-                    adata = super().__call__(adata)
+                    if file.size > 20_000_000_000:
+                        print(
+                            f"dividing the dataset as it is too large: {file.size//1_000_000_000}Gb"
+                        )
+                        num_blocks = int(np.ceil(file.size / 8_000_000_000))
+                        block_size = int(
+                            (np.ceil(badata.shape[0] / 30_000) * 30_000) // num_blocks
+                        )
+                        for i in range(num_blocks):
+                            start_index = i * block_size
+                            end_index = min((i + 1) * block_size, badata.shape[0])
+                            block = badata[start_index:end_index].to_memory()
+                            print(block)
+                            block = super().__call__(block)
+                            myfile = ln.Artifact(
+                                block,
+                                is_new_version_of=file,
+                                description=description,
+                                version=str(version) + "_s" + str(i),
+                            )
+                            myfile.save()
+                            if self.keep_files:
+                                files.append(myfile)
+
+                    else:
+                        adata = super().__call__(adata)
+                        myfile = ln.Artifact(
+                            adata,
+                            is_new_version_of=file,
+                            description=description,
+                            version=str(version),
+                        )
+                        myfile.save()
+                        if self.keep_files:
+                            files.append(myfile)
 
                 except ValueError as v:
                     if v.args[0].startswith("we cannot work with this organism"):
@@ -433,21 +476,14 @@ class LaminPreprocessor(Preprocessor):
                         continue
                     else:
                         raise e
-                for name in ["stable_id", "created_at", "updated_at"]:
-                    if name in adata.var.columns:
-                        adata.var = adata.var.drop(columns=name)
-                myfile = ln.Artifact(
-                    adata,
-                    is_new_version_of=file,
-                    description=description,
-                    version=version,
-                )
+
                 # issues with KLlggfw6I6lvmbqiZm46
-                myfile.save()
-                files.append(myfile)
-            dataset = ln.Collection(files, name=name, description=description)
-            dataset.save()
-            return dataset
+            if self.keep_files:
+                dataset = ln.Collection(files, name=name, description=description)
+                dataset.save()
+                return dataset
+            else:
+                return
         else:
             raise ValueError("Please provide either anndata or ln.Collection")
 
@@ -637,8 +673,6 @@ def additional_postprocess(adata):
 
 
 """
-block_size = 500_000
-num_blocks = int(np.ceil(len(adata) / block_size))
 sexr = {
     "Male": "PATO:0000384",
     "Female": "PATO:0000383",
