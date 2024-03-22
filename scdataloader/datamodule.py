@@ -7,14 +7,14 @@ from torch.utils.data.sampler import (
     SubsetRandomSampler,
     SequentialSampler,
 )
-from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import DataLoader, Sampler
 import lightning as L
 
-from typing import Optional, Union
+from typing import Optional, Union, Sequence
 
 from .data import Dataset
 from .collator import Collator
-from .mapped import MappedDataset
 from .utils import getBiomartTable
 
 
@@ -22,26 +22,27 @@ class DataModule(L.LightningDataModule):
     def __init__(
         self,
         collection_name: str,
+        label_to_weight: list = ["organism_ontology_term_id"],
         organisms: list = ["NCBITaxon:9606"],
-        weight_scaler: int = 4,
-        train_oversampling: float = 1,
+        weight_scaler: int = 10,
+        train_oversampling_per_epoch: float = 0.1,
         validation_split: float = 0.2,
         test_split: float = 0,
         gene_embeddings: str = "",
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
-        label_to_weight: list = [],
         # this is for the mappedCollection
         label_to_pred: list = ["organism_ontology_term_id"],
-        all_labels: list = ["organism_ontology_term_id", "heat_diff"],
+        all_labels: list = ["organism_ontology_term_id"],
         hierarchical_labels: list = [],
         # this is for the collator
-        how: str = "most expr",
+        how: str = "random expr",
         organism_name: str = "organism_ontology_term_id",
         max_len: int = 1000,
         add_zero_genes: int = 100,
         do_gene_pos: Union[bool, str] = True,
-        tp_name: str = "heat_diff",
+        tp_name: Optional[str] = None, #"heat_diff"
+        assays_to_drop: list = ["EFO:0008853","EFO:0010961", "EFO:0030007", "EFO:0030062"],
         **kwargs,
     ):
         """
@@ -75,7 +76,7 @@ class DataModule(L.LightningDataModule):
                 clss_to_pred=label_to_pred,
                 hierarchical_clss=hierarchical_labels,
             )
-            print(mdataset)
+            print(mdataset) 
         # and location
         if do_gene_pos:
             if type(do_gene_pos) is str:
@@ -131,11 +132,13 @@ class DataModule(L.LightningDataModule):
         self.test_split = test_split
         self.dataset = mdataset
         self.kwargs = kwargs
+        self.assays_to_drop = assays_to_drop
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
-        self.train_oversampling = train_oversampling
+        self.train_oversampling_per_epoch = train_oversampling_per_epoch
         self.label_to_weight = label_to_weight
         self.train_weights = None
+        self.train_labels = None
         super().__init__()
 
     def __repr__(self):
@@ -146,7 +149,7 @@ class DataModule(L.LightningDataModule):
             f"\ttest_split={self.test_split},\n"
             f"\tn_samples={self.n_samples},\n"
             f"\tweight_scaler={self.weight_scaler},\n"
-            f"\ttrain_oversampling={self.train_oversampling},\n"
+            f"\train_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
             f"\tlabel_to_weight={self.label_to_weight}\n"
             + (
                 "\twith train_dataset size of=("
@@ -211,13 +214,13 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
-
         if len(self.label_to_weight) > 0:
-            weights = self.dataset.get_label_weights(
+            weights, labels = self.dataset.get_label_weights(
                 self.label_to_weight, scaler=self.weight_scaler
             )
         else:
-            weights = np.ones(self.n_samples)
+            weights = np.ones(1)
+            labels = np.zeros(self.n_samples)
         if isinstance(self.validation_split, int):
             len_valid = self.validation_split
         else:
@@ -229,7 +232,15 @@ class DataModule(L.LightningDataModule):
         assert (
             len_test + len_valid < self.n_samples
         ), "test set + valid set size is configured to be larger than entire dataset."
-        idx_full = np.arange(self.n_samples)
+        
+        idx_full = []
+        if len(self.assays_to_drop) > 0:
+            for i, a in enumerate(self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id")):
+                if a not in self.assays_to_drop:
+                    idx_full.append(i)
+            idx_full = np.array(idx_full)
+        else:
+            idx_full = np.arange(self.n_samples)
         test_datasets = []
         if len_test > 0:
             # this way we work on some never seen datasets
@@ -262,19 +273,21 @@ class DataModule(L.LightningDataModule):
             idx_full = idx_full[len_valid:]
         else:
             self.valid_idx = None
-
-        weights[~np.isin(np.arange(self.n_samples), idx_full)] = 0
+        weights = np.concatenate([weights, np.zeros(1)])
+        labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
 
         self.train_weights = weights
+        self.train_labels = labels
         self.idx_full = idx_full
 
         return test_datasets
 
     def train_dataloader(self, **kwargs):
-        train_sampler = WeightedRandomSampler(
+        train_sampler = LabelWeightedSampler(
             self.train_weights,
-            int(len(self.idx_full) * self.train_oversampling),
-            replacement=True,
+            self.train_labels,
+            num_samples=int(self.n_samples*self.train_oversampling_per_epoch),
+            #replacement=True,
         )
         return DataLoader(self.dataset, sampler=train_sampler, **self.kwargs, **kwargs)
 
@@ -300,3 +313,59 @@ class DataModule(L.LightningDataModule):
     # clean up state after the trainer stops, delete files...
     # called on every process in DDP
     # pass
+
+
+class CustomWeightedRandomSampler(WeightedRandomSampler):
+    """WeightedRandomSampler except allows for more than 2^24 samples to be sampled"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __iter__(self):
+        rand_tensor = np.random.choice(range(0, len(self.weights)),
+                                        size=self.num_samples,
+                                        p=self.weights.numpy() / torch.sum(self.weights).numpy(),
+                                        replace=self.replacement)
+        rand_tensor = torch.from_numpy(rand_tensor)
+        return iter(rand_tensor.tolist())
+    
+class LabelWeightedSampler(Sampler[int]):
+
+    label_weights: Sequence[float]
+    klass_indices: Sequence[Sequence[int]]
+    num_samples: int
+
+    # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
+    # this will result a class-balanced sampling, no matter how imbalance the labels are.
+    # NOTE: here we use replacement=True, you can change it if you don't upsample a class.
+    def __init__(self, label_weights: Sequence[float], labels: Sequence[int], num_samples: int) -> None:
+        """
+
+        :param label_weights: list(len=num_classes)[float], weights for each class.
+        :param labels: list(len=dataset_len)[int], labels of a dataset.
+        :param num_samples: number of samples.
+        """
+
+        super(LabelWeightedSampler, self).__init__(None)
+
+        self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
+        self.labels        = torch.as_tensor(labels, dtype=torch.int)
+        self.num_samples   = num_samples
+        self.n_klass       = len(label_weights)
+        # list of tensor.
+        self.klass_indices = [(self.labels == i_klass).nonzero().squeeze()
+                                for i_klass in range(self.n_klass)]
+
+    def __iter__(self):
+        sample_labels = torch.multinomial(self.label_weights,
+                                            num_samples=self.num_samples,
+                                            replacement=True)
+        sample_indices = torch.empty_like(sample_labels)
+        for i_klass in range(self.n_klass):
+            left_inds  = (sample_labels == i_klass).nonzero().squeeze()
+            right_inds = torch.randint(len(self.klass_indices[i_klass]), size=(len(left_inds), ))
+            sample_indices[left_inds] = self.klass_indices[i_klass][right_inds]
+
+        return iter(sample_indices.tolist())
+
+    def __len__(self):
+        return self.num_samples

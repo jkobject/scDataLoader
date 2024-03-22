@@ -260,9 +260,12 @@ class MappedDataset:
             else:
                 labels += "_" + self.get_merged_labels(val).astype(str).astype("O")
         counter = Counter(labels)  # type: ignore
-        counter = np.array([counter[label] for label in labels])
+        #counter = np.array([counter[label] for label in labels])
+        rn = {n: i for i, n in enumerate(counter.keys())}
+        labels = np.array([rn[label] for label in labels])
+        counter = np.array(list(counter.values()))
         weights = scaler / (counter + scaler)
-        return weights
+        return weights, labels
 
     def get_merged_labels(self, label_key: str):
         """Get merged labels."""

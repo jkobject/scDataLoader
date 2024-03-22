@@ -58,9 +58,9 @@ class Dataset(torchDataset):
             "sex_ontology_term_id",
             #'dataset_id',
             #'cell_culture',
-            "dpt_group",
-            "heat_diff",
-            "nnz",
+            #"dpt_group",
+            #"heat_diff",
+            #"nnz",
         ]
     )
     # set of obs to prepare for prediction (encode)
