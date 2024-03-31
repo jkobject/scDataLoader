@@ -283,6 +283,11 @@ class DataModule(L.LightningDataModule):
         return test_datasets
 
     def train_dataloader(self, **kwargs):
+        #train_sampler = WeightedRandomSampler(
+        #    self.train_weights[self.train_labels],
+        #    int(self.n_samples*self.train_oversampling_per_epoch),
+        #    replacement=True,
+        #)
         train_sampler = LabelWeightedSampler(
             self.train_weights,
             self.train_labels,
@@ -309,25 +314,6 @@ class DataModule(L.LightningDataModule):
             else None
         )
 
-    # def teardown(self):
-    # clean up state after the trainer stops, delete files...
-    # called on every process in DDP
-    # pass
-
-
-class CustomWeightedRandomSampler(WeightedRandomSampler):
-    """WeightedRandomSampler except allows for more than 2^24 samples to be sampled"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __iter__(self):
-        rand_tensor = np.random.choice(range(0, len(self.weights)),
-                                        size=self.num_samples,
-                                        p=self.weights.numpy() / torch.sum(self.weights).numpy(),
-                                        replace=self.replacement)
-        rand_tensor = torch.from_numpy(rand_tensor)
-        return iter(rand_tensor.tolist())
-    
 class LabelWeightedSampler(Sampler[int]):
 
     label_weights: Sequence[float]
@@ -352,19 +338,22 @@ class LabelWeightedSampler(Sampler[int]):
         self.num_samples   = num_samples
         self.n_klass       = len(label_weights)
         # list of tensor.
-        self.klass_indices = [(self.labels == i_klass).nonzero().squeeze()
+        self.klass_indices = [(self.labels == i_klass).nonzero().squeeze(1)
                                 for i_klass in range(self.n_klass)]
+        self.label_weights[[(self.labels == i_klass).sum()==0 for i_klass in range(self.n_klass)]] = 0
+        
 
     def __iter__(self):
         sample_labels = torch.multinomial(self.label_weights,
                                             num_samples=self.num_samples,
                                             replacement=True)
         sample_indices = torch.empty_like(sample_labels)
-        for i_klass in range(self.n_klass):
-            left_inds  = (sample_labels == i_klass).nonzero().squeeze()
-            right_inds = torch.randint(len(self.klass_indices[i_klass]), size=(len(left_inds), ))
-            sample_indices[left_inds] = self.klass_indices[i_klass][right_inds]
-
+        for i_klass, klass_index in enumerate(self.klass_indices):
+            if klass_index.numel() == 0:
+                continue
+            left_inds  = (sample_labels == i_klass).nonzero().squeeze(1)
+            right_inds = torch.randint(len(klass_index), size=(len(left_inds), ))
+            sample_indices[left_inds] = klass_index[right_inds]
         return iter(sample_indices.tolist())
 
     def __len__(self):
