@@ -10,7 +10,12 @@ description="preprocessed for scprint"
 
 a = !ls zhang2024_adata_*.h5ad
 for f in a:
-    ln.Artifact(ad.read_h5ad(f), description=description).save()
+    adata = f.load(stream=True) #ad.read_h5ad(f)
+    adata.obs['cell_type_ontology_term_id'] = adata.obs['cell_type_ontology_term_id'].replace(rn)
+    adata.obs['cell_culture'] = False
+    ! rm $f.path
+    adata.write(f.path)
+    ln.Artifact(adata, description=description).save()
     print(f)
 # this dataset alone is 13M cells
 ln.Storage.filter(uid="GZgLW1TI").update(root=settings.storage)
