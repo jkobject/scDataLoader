@@ -152,9 +152,6 @@ def validate(adata: AnnData, organism: str):
             raise ValueError(
                 f"Column '{val}' is missing in the provided anndata object."
             )
-    bionty_source = bt.PublicSource.filter(
-        entity="DevelopmentalStage", organism=organism
-    ).one()
 
     if not bt.Ethnicity.validate(
         adata.obs["self_reported_ethnicity_ontology_term_id"],
@@ -177,14 +174,10 @@ def validate(adata: AnnData, organism: str):
         adata.obs["cell_type_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid cell type ontology term id found")
-    if (
-        not bt.DevelopmentalStage.filter(public_source=bionty_source)
-        .validate(
-            adata.obs["development_stage_ontology_term_id"],
-            field="ontology_id",
-        )
-        .all()
-    ):
+    if not bt.DevelopmentalStage.validate(
+        adata.obs["development_stage_ontology_term_id"],
+        field="ontology_id",
+    ).all():
         raise ValueError("Invalid dev stage ontology term id found")
     if not bt.Tissue.validate(
         adata.obs["tissue_ontology_term_id"], field="ontology_id"

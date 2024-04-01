@@ -19,6 +19,8 @@ FULL_LENGTH_ASSAYS = [
     "EFO:0008931",
 ]
 
+MAXFILESIZE = 10_000_000_000
+
 
 class Preprocessor:
     """
@@ -163,6 +165,17 @@ class Preprocessor:
                 )
             # please check layers
             # if not available count drop
+        prevsize = adata.shape[0]
+        # dropping non primary
+        if "is_primary_data" in adata.obs.columns:
+            adata = adata[adata.obs.is_primary_data]
+        if adata.shape[0] < self.min_dataset_size:
+            raise Exception("Dataset dropped due to too many secondary cells")
+        print(
+            "removed {} non primary cells, {} renamining".format(
+                prevsize - adata.shape[0], adata.shape[0]
+            )
+        )
         # # cleanup and dropping low expressed genes and unexpressed cells
         prevsize = adata.shape[0]
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
@@ -185,16 +198,12 @@ class Preprocessor:
                 "Dataset dropped due to low expressed genes and unexpressed cells: current size: "
                 + str(adata.shape[0])
             )
-        # dropping non primary
-        if "is_primary_data" in adata.obs.columns:
-            adata = adata[adata.obs.is_primary_data]
-        if adata.shape[0] < self.min_dataset_size:
-            raise Exception("Dataset dropped due to too many secondary cells")
         print(
-            "removed {} cells, {} renamining".format(
+            "filtered out {} cells, {} renamining".format(
                 prevsize - adata.shape[0], adata.shape[0]
             )
         )
+
         if self.is_symbol:
             genesdf["ensembl_gene_id"] = genesdf.index
             var = (
@@ -414,28 +423,35 @@ class LaminPreprocessor(Preprocessor):
                 # use the counts matrix
                 print(i)
                 if file.stem_uid in all_ready_processed_keys:
-                    print(f"{file.stem_uid} is already processed")
+                    print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
                 print(file)
-                if file.backed().obs.is_primary_data.sum() == 0:
-                    print(f"{file.key} only contains non primary cells")
+                backed = file.backed()
+                if backed.obs.is_primary_data.sum() == 0:
+                    print(f"{file.key} only contains non primary cells.. dropping")
                     continue
-                if file.size <= 20_000_000_000:
+                if backed.shape[1] < 1000:
+                    print(
+                        f"{file.key} only contains less than 1000 genes and is likely not scRNAseq... dropping"
+                    )
+                    continue
+                if file.size <= MAXFILESIZE:
                     adata = file.load(stream=self.stream)
                     print(adata)
                 else:
-                    badata = file.backed()
+                    badata = backed
                     print(badata)
 
                 try:
-                    if file.size > 20_000_000_000:
+                    if file.size > MAXFILESIZE:
                         print(
                             f"dividing the dataset as it is too large: {file.size//1_000_000_000}Gb"
                         )
-                        num_blocks = int(np.ceil(file.size / 8_000_000_000))
+                        num_blocks = int(np.ceil(file.size / (MAXFILESIZE / 2)))
                         block_size = int(
                             (np.ceil(badata.shape[0] / 30_000) * 30_000) // num_blocks
                         )
+                        print("num blocks ", num_blocks)
                         for i in range(num_blocks):
                             start_index = i * block_size
                             end_index = min((i + 1) * block_size, badata.shape[0])
@@ -451,6 +467,9 @@ class LaminPreprocessor(Preprocessor):
                             myfile.save()
                             if self.keep_files:
                                 files.append(myfile)
+                            else:
+                                del myfile
+                                del block
 
                     else:
                         adata = super().__call__(adata)
@@ -463,6 +482,9 @@ class LaminPreprocessor(Preprocessor):
                         myfile.save()
                         if self.keep_files:
                             files.append(myfile)
+                        else:
+                            del myfile
+                            del adata
 
                 except ValueError as v:
                     if v.args[0].startswith("we cannot work with this organism"):
