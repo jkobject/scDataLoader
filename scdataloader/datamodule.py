@@ -346,28 +346,19 @@ class LabelWeightedSampler(Sampler[int]):
         """
 
         super(LabelWeightedSampler, self).__init__(None)
-        counter = np.bincount(labels)
-        # reweight labels from counter
-        label_weights = np.array(label_weights) * counter
-        import pdb
+        # reweight labels from counter otherwsie same weight to labels that have many elements vs a few
+        label_weights = np.array(label_weights) * np.bincount(labels)
 
-        pdb.set_trace()
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
         self.num_samples = num_samples
-        self.n_klass = len(label_weights)
         # list of tensor.
         self.klass_indices = [
             (self.labels == i_klass).nonzero().squeeze(1)
-            for i_klass in range(self.n_klass)
+            for i_klass in range(len(label_weights))
         ]
-        self.label_weights[
-            [(self.labels == i_klass).sum() == 0 for i_klass in range(self.n_klass)]
-        ] = 0
 
     def __iter__(self):
-        # TODO: here we have an issue we sample without taking in account how many there is within each batch
-        # we are as likely to sample from each batch
         sample_labels = torch.multinomial(
             self.label_weights, num_samples=self.num_samples, replacement=True
         )
