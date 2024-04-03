@@ -11,9 +11,14 @@ from django.db import IntegrityError
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from functools import lru_cache
+from collections import Counter
+
+from typing import Union, List, Optional
+
+from anndata import AnnData
 
 
-def createFoldersFor(filepath):
+def createFoldersFor(filepath: str):
     """
     will recursively create folders if needed until having all the folders required to save the file in this filepath
     """
@@ -24,7 +29,9 @@ def createFoldersFor(filepath):
             os.mkdir(prevval)
 
 
-def _fetchFromServer(ensemble_server, attributes):
+def _fetchFromServer(
+    ensemble_server: str, attributes: list, database: str = "hsapiens_gene_ensembl"
+):
     """
     Fetches data from the specified ensemble server.
 
@@ -36,7 +43,7 @@ def _fetchFromServer(ensemble_server, attributes):
         pd.DataFrame: A pandas DataFrame containing the fetched data.
     """
     server = BiomartServer(ensemble_server)
-    ensmbl = server.datasets["hsapiens_gene_ensembl"]
+    ensmbl = server.datasets[database]
     print(attributes)
     res = pd.read_csv(
         io.StringIO(
@@ -48,11 +55,12 @@ def _fetchFromServer(ensemble_server, attributes):
 
 
 def getBiomartTable(
-    ensemble_server="http://jul2023.archive.ensembl.org/biomart",
-    useCache=False,
-    cache_folder="/tmp/biomart/",
-    attributes=[],
-    bypass_attributes=False,
+    ensemble_server: str = "http://jul2023.archive.ensembl.org/biomart",
+    useCache: bool = False,
+    cache_folder: str = "/tmp/biomart/",
+    attributes: List[str] = [],
+    bypass_attributes: bool = False,
+    database: str = "hsapiens_gene_ensembl",
 ):
     """generate a genelist dataframe from ensembl's biomart
 
@@ -88,7 +96,7 @@ def getBiomartTable(
     else:
         print("downloading gene names from biomart")
 
-        res = _fetchFromServer(ensemble_server, attr + attributes)
+        res = _fetchFromServer(ensemble_server, attr + attributes, database=database)
         res.to_csv(cachefile, index=False)
 
     res.columns = attr + attributes
@@ -102,7 +110,7 @@ def getBiomartTable(
     return res
 
 
-def validate(adata, organism):
+def validate(adata: AnnData, organism: str):
     """
     validate checks if the adata object is valid for lamindb
 
@@ -144,9 +152,6 @@ def validate(adata, organism):
             raise ValueError(
                 f"Column '{val}' is missing in the provided anndata object."
             )
-    bionty_source = bt.PublicSource.filter(
-        entity="DevelopmentalStage", organism=organism
-    ).one()
 
     if not bt.Ethnicity.validate(
         adata.obs["self_reported_ethnicity_ontology_term_id"],
@@ -169,14 +174,10 @@ def validate(adata, organism):
         adata.obs["cell_type_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid cell type ontology term id found")
-    if (
-        not bt.DevelopmentalStage.filter(bionty_source=bionty_source)
-        .validate(
-            adata.obs["development_stage_ontology_term_id"],
-            field="ontology_id",
-        )
-        .all()
-    ):
+    if not bt.DevelopmentalStage.validate(
+        adata.obs["development_stage_ontology_term_id"],
+        field="ontology_id",
+    ).all():
         raise ValueError("Invalid dev stage ontology term id found")
     if not bt.Tissue.validate(
         adata.obs["tissue_ontology_term_id"], field="ontology_id"
@@ -186,18 +187,16 @@ def validate(adata, organism):
         adata.obs["assay_ontology_term_id"], field="ontology_id"
     ).all():
         raise ValueError("Invalid assay ontology term id found")
-    if (
-        not bt.Gene.filter(organism=bt.settings.organism)
-        .validate(adata.var.index, field="ensembl_gene_id")
-        .all()
-    ):
+    if not bt.Gene.validate(
+        adata.var.index, field="ensembl_gene_id", organism=organism
+    ).all():
         raise ValueError("Invalid gene ensembl id found")
     return True
 
 
 # setting a cache of 200 elements
 # @lru_cache(maxsize=200)
-def get_all_ancestors(val, df):
+def get_all_ancestors(val: str, df: pd.DataFrame):
     if val not in df.index:
         return set()
     parents = df.loc[val].parents__ontology_id
@@ -207,7 +206,7 @@ def get_all_ancestors(val, df):
         return set.union(set(parents), *[get_all_ancestors(val, df) for val in parents])
 
 
-def get_ancestry_mapping(all_elem, onto_df):
+def get_ancestry_mapping(all_elem: list, onto_df: pd.DataFrame):
     """
     This function generates a mapping of all elements to their ancestors in the ontology dataframe.
 
@@ -242,12 +241,12 @@ def get_ancestry_mapping(all_elem, onto_df):
 
 
 def load_dataset_local(
-    remote_dataset,
-    download_folder,
-    name,
-    description,
-    use_cache=True,
-    only=None,
+    remote_dataset: ln.Collection,
+    download_folder: str,
+    name: str,
+    description: str,
+    use_cache: bool = True,
+    only: Optional[List[int]] = None,
 ):
     """
     This function loads a remote lamindb dataset to local.
@@ -303,7 +302,7 @@ def load_dataset_local(
     return dataset
 
 
-def load_genes(organisms):
+def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
     organismdf = []
     if type(organisms) == str:
         organisms = [organisms]
@@ -313,7 +312,7 @@ def load_genes(organisms):
         ).df()
         genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
-        genesdf = genesdf.set_index("ensembl_gene_id")
+        genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes
         genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
         # ribosomal genes
@@ -326,14 +325,14 @@ def load_genes(organisms):
 
 
 def populate_my_ontology(
-    organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
-    sex=["PATO:0000384", "PATO:0000383"],
-    celltypes=[],
-    ethnicities=[],
-    assays=[],
-    tissues=[],
-    diseases=[],
-    dev_stages=[],
+    organisms: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
+    sex: List[str] = ["PATO:0000384", "PATO:0000383"],
+    celltypes: List[str] = [],
+    ethnicities: List[str] = [],
+    assays: List[str] = [],
+    tissues: List[str] = [],
+    diseases: List[str] = [],
+    dev_stages: List[str] = [],
 ):
     """
     creates a local version of the lamin ontologies and add the required missing values in base ontologies
@@ -411,6 +410,17 @@ def populate_my_ontology(
     records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
     ln.save(records, parents=bool(dev_stages))
     bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
+
+    names = bt.DevelopmentalStage.public(organism="mouse").df().name
+    bionty_source = bt.PublicSource.filter(
+        entity="DevelopmentalStage", organism="mouse"
+    ).one()
+    records = [
+        bt.DevelopmentalStage.from_public(name=i, public_source=bionty_source)
+        for i in names.tolist()
+    ]
+    records[-4] = records[-4][0]
+    ln.save(records)
     # Disease
     names = bt.Disease.public().df().index if not diseases else diseases
     records = bt.Disease.from_values(names, field="ontology_id")
@@ -430,7 +440,7 @@ def populate_my_ontology(
         ln.save(records)
 
 
-def is_outlier(adata, metric: str, nmads: int):
+def is_outlier(adata: AnnData, metric: str, nmads: int):
     """
     is_outlier detects outliers in adata.obs[metric]
 
@@ -449,7 +459,7 @@ def is_outlier(adata, metric: str, nmads: int):
     return outlier
 
 
-def length_normalize(adata, gene_lengths):
+def length_normalize(adata: AnnData, gene_lengths: list):
     """
     length_normalize normalizes the counts by the gene length
 
@@ -464,7 +474,7 @@ def length_normalize(adata, gene_lengths):
     return adata
 
 
-def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
+def pd_load_cached(url: str, loc: str = "/tmp/", cache: bool = True, **kwargs):
     """
     pd_load_cached downloads a file from a url and loads it as a pandas dataframe
 
@@ -482,3 +492,36 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
         urllib.request.urlretrieve(url, loc)
     # Load the data from the file
     return pd.read_csv(loc, **kwargs)
+
+
+def translate(
+    val: Union[str, list, set, Counter, dict], t: str = "cell_type_ontology_term_id"
+):
+    """
+    translate translates the ontology term id to the name
+
+    Args:
+        val (str, dict, set, list, dict): the object to translate
+        t (flat, optional): the type of ontology terms.
+            one of cell_type_ontology_term_id, assay_ontology_term_id, tissue_ontology_term_id.
+            Defaults to "cell_type_ontology_term_id".
+
+    Returns:
+        dict: the mapping for the translation
+    """
+    if t == "cell_type_ontology_term_id":
+        obj = bt.CellType.public(organism="all")
+    elif t == "assay_ontology_term_id":
+        obj = bt.ExperimentalFactor.public()
+    elif t == "tissue_ontology_term_id":
+        obj = bt.Tissue.public()
+    else:
+        return None
+    if type(val) is str:
+        return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
+    elif type(val) is list or type(val) is set:
+        return {i: obj.search(i, field=obj.ontology_id).name.iloc[0] for i in set(val)}
+    elif type(val) is dict or type(val) is Counter:
+        return {
+            obj.search(k, field=obj.ontology_id).name.iloc[0]: v for k, v in val.items()
+        }

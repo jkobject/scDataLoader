@@ -55,6 +55,48 @@ then run the notebooks with the poetry installed environment
 
 ## Usage
 
+```python
+# initialize a local lamin database
+# !lamin init --storage ~/scdataloader --schema bionty
+
+from scdataloader import utils
+from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, additional_preprocess
+
+# preprocess datasets
+DESCRIPTION='preprocessed by scDataLoader'
+
+cx_dataset = ln.Collection.using(instance="laminlabs/cellxgene").filter(name="cellxgene-census", version='2023-12-15').one()
+cx_dataset, len(cx_dataset.artifacts.all())
+
+
+do_preprocess = LaminPreprocessor(additional_postprocess=additional_postprocess, additional_preprocess=additional_preprocess, skip_validate=True, subset_hvg=0)
+
+preprocessed_dataset = do_preprocess(cx_dataset, name=DESCRIPTION, description=DESCRIPTION, start_at=6, version="2")
+
+# create dataloaders
+from scdataloader import DataModule
+import tqdm
+
+datamodule = DataModule(
+    collection_name="preprocessed dataset",
+    organisms=["NCBITaxon:9606"], #organism that we will work on
+    how="most expr", # for the collator (most expr genes only will be selected)
+    max_len=1000, # only the 1000 most expressed
+    batch_size=64,
+    num_workers=1,
+    validation_split=0.1,
+    test_split=0)
+
+for i in tqdm.tqdm(datamodule.train_dataloader()):
+    # pass #or do pass
+    print(i)
+    break
+
+# with lightning:
+# Trainer(model, datamodule)
+
+```
+
 see the notebooks in [docs](https://jkobject.github.io/scDataLoader/):
 
 1. [load a dataset](https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html)

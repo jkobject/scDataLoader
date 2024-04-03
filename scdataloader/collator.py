@@ -1,6 +1,6 @@
 import numpy as np
 from .utils import load_genes
-from torch import Tensor
+from torch import Tensor, long
 
 # class SimpleCollator:
 
@@ -9,17 +9,18 @@ class Collator:
     def __init__(
         self,
         organisms: list,
+        how="all",
         org_to_id: dict = None,
         valid_genes: list = [],
         max_len=2000,
-        n_bins=0,
-        add_zero_genes=200,
+        add_zero_genes=0,
         logp1=False,
         norm_to=None,
-        how="all",
+        n_bins=0,
         tp_name=None,
         organism_name="organism_ontology_term_id",
         class_names=[],
+        genelist=[],
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -27,20 +28,29 @@ class Collator:
         allowing for various configurations such as maximum gene list length, normalization,
         and selection method for gene expression.
 
+        This Collator should work with scVI's dataloader as well!
+
         Args:
             organisms (list): List of organisms to be considered for gene expression data.
+                it will drop any other organism it sees (might lead to batches of different sizes!)
+            how (flag, optional): Method for selecting gene expression. Defaults to "most expr".
+                one of ["most expr", "random expr", "all", "some"]:
+                "most expr": selects the max_len most expressed genes,
+                if less genes are expressed, will sample random unexpressed genes,
+                "random expr": uses a random set of max_len expressed genes.
+                if less genes are expressed, will sample random unexpressed genes
+                "all": uses all genes
+                "some": uses only the genes provided through the genelist param
             org_to_id (dict): Dictionary mapping organisms to their respective IDs.
-            labels (list, optional): List of labels for the data. Defaults to [].
             valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].
-            max_len (int, optional): Maximum length of the gene list. Defaults to 2000.
-            n_bins (int, optional): Number of bins for binning the data. Defaults to 0.
-            add_zero_genes (int, optional): Number of zero genes to add. Defaults to 200.
+                it will drop any other genes from the input expression data (usefull when your model only works on some genes)
+            max_len (int, optional): Maximum number of genes to use (for random expr and most expr). Defaults to 2000.
+            n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.
+            add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.
             logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.
             norm_to (str, optional): Normalization method to be applied. Defaults to None.
-            how (str, optional): Method for selecting gene expression. Defaults to "most expr".
         """
         self.organisms = organisms
-        self.valid_genes = valid_genes
         self.max_len = max_len
         self.n_bins = n_bins
         self.add_zero_genes = add_zero_genes
@@ -53,6 +63,8 @@ class Collator:
             if org_to_id is not None
             else set(organisms)
         )
+        if self.how == "some":
+            assert len(genelist) > 0, "if how is some, genelist must be provided"
         self.organism_name = organism_name
         self.tp_name = tp_name
         self.class_names = class_names
@@ -60,18 +72,21 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.genedf = load_genes(organisms)
+        self.to_subset = {}
         for organism in set(self.genedf.organism):
             ogenedf = self.genedf[self.genedf.organism == organism]
+            tot = self.genedf[self.genedf.index.isin(valid_genes)]
             org = org_to_id[organism] if org_to_id is not None else organism
-            self.start_idx.update(
-                {org: np.where(self.genedf.organism == organism)[0][0]}
-            )
+            self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
             if len(valid_genes) > 0:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
+            if len(genelist) > 0:
+                df = ogenedf[ogenedf.index.isin(valid_genes)]
+                self.to_subset.update({org: df.index.isin(genelist)})
 
     def __call__(self, batch):
         """
-        __call__ is a special method in Python that is called when an instance of the class is called.
+        __call__ applies the collator to a minibatch of data
 
         Args:
             batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.
@@ -92,33 +107,62 @@ class Collator:
         other_classes = []
         gene_locs = []
         tp = []
+        dataset = []
+        nnz_loc = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
                 continue
+            if "dataset" in elem:
+                dataset.append(elem["dataset"])
             expr = np.array(elem["x"])
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
             if self.how == "most expr":
-                loc = np.argsort(expr)[-(self.max_len) :][::-1]
+                nnz_loc = np.where(expr > 0)[0]
+                ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                loc = np.argsort(expr)[-(ma):][::-1]
+                # nnz_loc = [1] * 30_000
+                # loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
                 nnz_loc = np.where(expr > 0)[0]
                 loc = nnz_loc[
-                    np.random.choice(len(nnz_loc), self.max_len, replace=False)
+                    np.random.choice(
+                        len(nnz_loc),
+                        self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc),
+                        replace=False,
+                        # p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected
+                    )
                 ]
-            elif self.how == "all":
+            elif self.how in ["all", "some"]:
                 loc = np.arange(len(expr))
             else:
                 raise ValueError("how must be either most expr or random expr")
-            if self.add_zero_genes > 0 and self.how != "all":
+            if (
+                (self.add_zero_genes > 0) or (self.max_len > len(nnz_loc))
+            ) and self.how not in ["all", "some"]:
                 zero_loc = np.where(expr == 0)[0]
-                zero_loc = [
-                    np.random.choice(len(zero_loc), self.add_zero_genes, replace=False)
+                zero_loc = zero_loc[
+                    np.random.choice(
+                        len(zero_loc),
+                        self.add_zero_genes
+                        + (
+                            0
+                            if self.max_len < len(nnz_loc)
+                            else self.max_len - len(nnz_loc)
+                        ),
+                        replace=False,
+                    )
                 ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
-            exprs.append(expr[loc])
-            gene_locs.append(loc + self.start_idx[organism_id])
+            expr = expr[loc]
+            loc = loc + self.start_idx[organism_id]
+            if self.how == "some":
+                expr = expr[self.to_subset[organism_id]]
+                loc = loc[self.to_subset[organism_id]]
+            exprs.append(expr)
+            gene_locs.append(loc)
 
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
@@ -132,6 +176,7 @@ class Collator:
         gene_locs = np.array(gene_locs)
         total_count = np.array(total_count)
         other_classes = np.array(other_classes)
+        dataset = np.array(dataset)
 
         # normalize counts
         if self.norm_to is not None:
@@ -152,17 +197,26 @@ class Collator:
         # do encoding of graph location
         # encode all the edges in some sparse way
         # normalizing total counts between 0,1
-        return {
+        ret = {
             "x": Tensor(expr),
             "genes": Tensor(gene_locs).int(),
             "class": Tensor(other_classes).int(),
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
         }
+        if len(dataset) > 0:
+            ret.update({"dataset": Tensor(dataset).to(long)})
+        return ret
 
 
 class AnnDataCollator(Collator):
     def __init__(self, *args, **kwargs):
+        """
+        AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)
+
+        Args:
+            @see Collator
+        """
         super().__init__(*args, **kwargs)
 
     def __call__(self, batch):
@@ -218,28 +272,14 @@ class AnnDataCollator(Collator):
         }
 
 
-class SCVICollator(Collator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, batch):
-        expr = batch["x"]
-        total_count = expr.sum(axis=1)
-        if self.how == "most expr":
-            loc = np.argsort(expr)[:, -(self.max_len) :][:, ::-1]
-        else:
-            raise ValueError("how must be either most expr or random expr")
-        if self.logp1:
-            expr = np.log2(1 + expr)
-        return {
-            "x": Tensor(expr[np.arange(expr.shape[0])[:, None], loc]),
-            "genes": Tensor(loc.copy()).int(),
-            "depth": Tensor(total_count),
-        }
-
-
 class GeneformerCollator(Collator):
     def __init__(self, *args, gene_norm_list: list, **kwargs):
+        """
+        GeneformerCollator to finish
+
+        Args:
+            gene_norm_list (list): the normalization of expression through all datasets, per gene.
+        """
         super().__init__(*args, **kwargs)
         self.gene_norm_list = gene_norm_list
 
@@ -251,6 +291,10 @@ class GeneformerCollator(Collator):
 
 
 class scGPTCollator(Collator):
+    """
+    scGPTCollator to finish
+    """
+
     def __call__(self, batch):
         super().__call__(batch)
         # binning

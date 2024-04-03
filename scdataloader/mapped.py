@@ -93,6 +93,22 @@ class MappedDataset:
         for storage in self.storages:
             with _Connect(storage) as store:
                 X = store["X"]
+                index = (
+                    store["var"]["ensembl_gene_id"]
+                    if "ensembl_gene_id" in store["var"]
+                    else store["var"]["_index"]
+                )
+                if join_vars == "None":
+                    if not all(
+                        [
+                            i <= j
+                            for i, j in zip(
+                                index[:99],
+                                index[1:100],
+                            )
+                        ]
+                    ):
+                        raise ValueError("The variables are not sorted.")
                 if isinstance(X, ArrayTypes):  # type: ignore
                     self.n_obs_list.append(X.shape[0])
                 else:
@@ -179,17 +195,14 @@ class MappedDataset:
         with _Connect(self.storages[storage_idx]) as store:
             out = {"x": self.get_data_idx(store, obs_idx, var_idxs)}
             if self.label_keys is not None:
-                for i, label in enumerate(self.label_keys):
+                for _, label in enumerate(self.label_keys):
                     label_idx = self.get_label_idx(store, obs_idx, label)
                     if label in self.encoders:
                         out.update({label: self.encoders[label][label_idx]})
                     else:
                         out.update({label: label_idx})
+                out.update({"dataset": storage_idx})
         return out
-
-    def uns(self, idx, key):
-        storage = self.storages[self.storage_idx[idx]]
-        return storage["uns"][key]
 
     def get_data_idx(
         self,
@@ -247,9 +260,11 @@ class MappedDataset:
             else:
                 labels += "_" + self.get_merged_labels(val).astype(str).astype("O")
         counter = Counter(labels)  # type: ignore
-        counter = np.array([counter[label] for label in labels])
+        rn = {n: i for i, n in enumerate(counter.keys())}
+        labels = np.array([rn[label] for label in labels])
+        counter = np.array(list(counter.values()))
         weights = scaler / (counter + scaler)
-        return weights
+        return weights, labels
 
     def get_merged_labels(self, label_key: str):
         """Get merged labels."""

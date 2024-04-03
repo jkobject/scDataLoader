@@ -1,20 +1,21 @@
 site_name: scdataloader
-theme: 
+theme:
   name: readthedocs
   # analytics:
-    # gtag: G-ABC123
+  # gtag: G-ABC123
 site_url: https://www.jkobject.com/scdataloader/
 nav:
   - Home: index.md
   - Example notebooks:
-    - download and preprocess: notebooks/1_download_and_preprocess.ipynb
-    - use the dataloader: notebooks/2_create_dataloader.ipynb
+      - download and preprocess: notebooks/1_download_and_preprocess.ipynb
+      - use the dataloader: notebooks/2_create_dataloader.ipynb
   - documentation:
-    - dataset: dataset.md
-    - preprocess: preprocess.md
-    - utils: utils.md
-    - dataloader: dataloader.md
-plugins: 
+      - dataset: dataset.md
+      - preprocess: preprocess.md
+      - utils: utils.md
+      - datamodule: datamodule.md
+      - collator: collator.md
+plugins:
   - search
   - mkdocstrings:
       handlers:
@@ -33,5 +34,3 @@ plugins:
   - mkdocs-jupyter:
       include_source: True
       include_requirejs: true
-  
-
