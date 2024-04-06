@@ -94,16 +94,13 @@ class Dataset(torchDataset):
                     self.class_topred[clss] = self.mapped_dataset.get_merged_categories(
                         clss
                     )
-                    update = {}
-                    c = 0
-                    for k, v in self.mapped_dataset.encoders[clss].items():
-                        if k == self.mapped_dataset.unknown_label:
-                            update.update({k: v})
-                            c += 1
-                            self.class_topred[clss] -= set([k])
-                        else:
-                            update.update({k: v - c})
-                    self.mapped_dataset.encoders[clss] = update
+                    if (
+                        self.mapped_dataset.unknown_label
+                        in self.mapped_dataset.encoders[clss].keys()
+                    ):
+                        self.class_topred[clss] -= set(
+                            [self.mapped_dataset.unknown_label]
+                        )
 
         if self.genedf is None:
             self.genedf = load_genes(self.organisms)
@@ -238,6 +235,7 @@ class Dataset(torchDataset):
             if label in self.clss_to_pred:
                 # if we have added new labels, we need to update the encoder with them too.
                 mlength = len(self.mapped_dataset.encoders[label])
+
                 mlength -= (
                     1
                     if self.mapped_dataset.unknown_label
@@ -253,7 +251,6 @@ class Dataset(torchDataset):
 
                 self.class_topred[label] = lclass
                 c = 0
-                d = 0
                 update = {}
                 mlength = len(lclass)
                 # import pdb
@@ -271,10 +268,9 @@ class Dataset(torchDataset):
                         c += 1
                     elif k == self.mapped_dataset.unknown_label:
                         update.update({k: v})
-                        d += 1
                         self.class_topred[label] -= set([k])
                     else:
-                        update.update({k: (v - c) - d})
+                        update.update({k: v - c})
                 self.mapped_dataset.encoders[label] = update
 
 
