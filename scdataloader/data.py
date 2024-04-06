@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 
 import lamindb as ln
+ln.connect("scprint")
+
 import bionty as bt
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
