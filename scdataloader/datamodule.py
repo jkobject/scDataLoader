@@ -263,8 +263,8 @@ class DataModule(L.LightningDataModule):
                 if cs + c > len_test:
                     break
                 else:
-                    print("    " + self.dataset.mapped_dataset.path_list[i].path)
-                    test_datasets.append(self.dataset.mapped_dataset.path_list[i].path)
+                    print("    " + self.dataset.mapped_dataset._path_list[i].path)
+                    test_datasets.append(self.dataset.mapped_dataset._path_list[i].path)
                     cs += c
 
             len_test = cs

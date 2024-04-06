@@ -1,20 +1,26 @@
+from __future__ import annotations
+
 from collections import Counter
 from functools import reduce
-from os import PathLike
-from typing import List, Literal, Optional, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
 from lamin_utils import logger
-from lamindb.dev._data import _track_run_input
-from lamindb.dev.storage._backed_access import (
+from lamindb_setup.core.upath import UPath
+from lamindb.core._data import _track_run_input
+
+from lamindb.core.storage._backed_access import (
     ArrayTypes,
     GroupTypes,
     StorageType,
     _safer_read_index,
     registry,
 )
-from lamindb_setup.dev.upath import UPath
+
+if TYPE_CHECKING:
+    from lamindb_setup.core.types import UPathStr
 
 
 class _Connect:
@@ -43,50 +49,118 @@ class _Connect:
 
 def mapped(
     dataset,
+    label_keys: str | list[str] | None = None,
+    join: Literal["inner", "outer"] | None = "inner",
+    encode_labels: bool | list[str] = True,
+    unknown_label: str | dict[str, str] | None = None,
+    cache_categories: bool = True,
+    parallel: bool = False,
+    dtype: str | None = None,
     stream: bool = False,
-    is_run_input: Optional[bool] = None,
-    **kwargs,
-) -> "MappedDataset":
-    _track_run_input(dataset, is_run_input)
+    is_run_input: bool | None = None,
+) -> MappedCollection:
     path_list = []
-    for file in dataset.artifacts.all():
-        if file.suffix not in {".h5ad", ".zrad", ".zarr"}:
-            logger.warning(f"Ignoring file with suffix {file.suffix}")
+    for artifact in dataset.artifacts.all():
+        if artifact.suffix not in {".h5ad", ".zrad", ".zarr"}:
+            logger.warning(f"Ignoring artifact with suffix {artifact.suffix}")
             continue
-        elif not stream and file.suffix == ".h5ad":
-            path_list.append(file.stage())
+        elif not stream:
+            path_list.append(artifact.stage())
         else:
-            path_list.append(file.path)
-    return MappedDataset(path_list, **kwargs)
+            path_list.append(artifact.path)
+    ds = MappedCollection(
+        path_list,
+        label_keys,
+        join,
+        encode_labels,
+        unknown_label,
+        cache_categories,
+        parallel,
+        dtype,
+    )
+    # track only if successful
+    _track_run_input(dataset, is_run_input)
+    return ds
 
 
-class MappedDataset:
-    """Map-style dataset for use in data loaders.
+class MappedCollection:
+    """Map-style collection for use in data loaders.
 
-    This currently only works for collections of `AnnData` objects.
+    This class virtually concatenates `AnnData` arrays as a `pytorch map-style dataset
+    <https://pytorch.org/docs/stable/data.html#map-style-datasets>`__.
 
-    For an example, see :meth:`~lamindb.Dataset.mapped`.
+    If your `AnnData` collection is in the cloud, move them into a local cache
+    first for faster access.
 
     .. note::
 
-        A similar data loader exists `here
-        <https://github.com/Genentech/scimilarity>`__.
+        For a guide, see :doc:`docs:scrna5`.
+
+        For more convenient use within :class:`~lamindb.core.MappedCollection`,
+        see :meth:`~lamindb.Collection.mapped`.
+
+        This currently only works for collections of `AnnData` objects.
+
+        The implementation was influenced by the `SCimilarity
+        <https://github.com/Genentech/scimilarity>`__ data loader.
+
+
+    Args:
+        path_list: A list of paths to `AnnData` objects stored in `.h5ad` or `.zarr` formats.
+        label_keys: Columns of the ``.obs`` slot that store labels.
+        join: `"inner"` or `"outer"` virtual joins. If ``None`` is passed,
+            does not join.
+        encode_labels: Encode labels into integers.
+            Can be a list with elements from ``label_keys```.
+        unknown_label: Encode this label to -1.
+            Can be a dictionary with keys from ``label_keys`` if ``encode_labels=True```
+            or from ``encode_labels`` if it is a list.
+        cache_categories: Enable caching categories of ``label_keys`` for faster access.
+        parallel: Enable sampling with multiple processes.
+        dtype: Convert numpy arrays from ``.X`` to this dtype on selection.
     """
 
     def __init__(
         self,
-        path_list: List[Union[str, PathLike]],
-        label_keys: Optional[Union[str, List[str]]] = None,
-        join_vars: Optional[Literal["auto", "inner", "None"]] = "auto",
-        encode_labels: Optional[Union[bool, List[str]]] = False,
+        path_list: list[UPathStr],
+        label_keys: str | list[str] | None = None,
+        join: Literal["inner", "outer", "auto"] | None = "inner",
+        encode_labels: bool | list[str] = True,
+        unknown_label: str | dict[str, str] | None = None,
+        cache_categories: bool = True,
         parallel: bool = False,
-        unknown_class: str = "unknown",
+        dtype: str | None = None,
     ):
-        self.storages = []
-        self.conns = []
+        assert join in {None, "inner", "outer", "auto"}
+
+        label_keys = [label_keys] if isinstance(label_keys, str) else label_keys
+        self.label_keys = label_keys
+
+        if isinstance(encode_labels, list):
+            if len(encode_labels) == 0:
+                encode_labels = False
+            elif label_keys is None or not all(
+                enc_label in label_keys for enc_label in encode_labels
+            ):
+                raise ValueError(
+                    "All elements of `encode_labels` should be in `label_keys`."
+                )
+        else:
+            if encode_labels:
+                encode_labels = label_keys if label_keys is not None else False
+        self.encode_labels = encode_labels
+
+        if encode_labels and isinstance(unknown_label, dict):
+            if not all(unkey in encode_labels for unkey in unknown_label):  # type: ignore
+                raise ValueError(
+                    "All keys of `unknown_label` should be in `encode_labels` and `label_keys`."
+                )
+        self.unknown_label = unknown_label
+
+        self.storages = []  # type: ignore
+        self.conns = []  # type: ignore
         self.parallel = parallel
-        self.unknown_class = unknown_class
-        self.path_list = path_list
+        self._path_list = path_list
         self._make_connections(path_list, parallel)
 
         self.n_obs_list = []
@@ -98,7 +172,7 @@ class MappedDataset:
                     if "ensembl_gene_id" in store["var"]
                     else store["var"]["_index"]
                 )
-                if join_vars == "None":
+                if join is None:
                     if not all(
                         [
                             i <= j
@@ -118,27 +192,21 @@ class MappedDataset:
         self.indices = np.hstack([np.arange(n_obs) for n_obs in self.n_obs_list])
         self.storage_idx = np.repeat(np.arange(len(self.storages)), self.n_obs_list)
 
-        self.join_vars = join_vars if len(path_list) > 1 else None
+        self.join_vars = join
         self.var_indices = None
-        if self.join_vars != "None":
+        if self.join_vars is not None:
             self._make_join_vars()
 
-        self.encode_labels = encode_labels
-        self.label_keys = [label_keys] if isinstance(label_keys, str) else label_keys
-        if isinstance(encode_labels, bool):
-            if encode_labels:
-                encode_labels = label_keys
+        if self.label_keys is not None:
+            if cache_categories:
+                self._cache_categories(self.label_keys)
             else:
-                encode_labels = []
-        if isinstance(encode_labels, list):
-            self.encoders = {}
-            for label in encode_labels:
-                cats = self.get_merged_categories(label)
-                self.encoders[label] = {cat: i for i, cat in enumerate(cats)}
-                if unknown_class in self.encoders[label]:
-                    self.encoders[label][unknown_class] = -1
-        else:
-            self.encoders = {}
+                self._cache_cats: dict = {}
+            self.encoders: dict = {}
+            if self.encode_labels:
+                self._make_encoders(self.encode_labels)  # type: ignore
+
+        self._dtype = dtype
         self._closed = False
 
     def _make_connections(self, path_list: list, parallel: bool):
@@ -154,31 +222,61 @@ class MappedDataset:
             self.conns.append(conn)
             self.storages.append(storage)
 
+    def _cache_categories(self, label_keys: list):
+        self._cache_cats = {}
+        decode = np.frompyfunc(lambda x: x.decode("utf-8"), 1, 1)
+        for label in label_keys:
+            self._cache_cats[label] = []
+            for storage in self.storages:
+                with _Connect(storage) as store:
+                    cats = self._get_categories(store, label)
+                    if cats is not None:
+                        cats = decode(cats) if isinstance(cats[0], bytes) else cats[...]
+                    self._cache_cats[label].append(cats)
+
+    def _make_encoders(self, encode_labels: list):
+        for label in encode_labels:
+            cats = self.get_merged_categories(label)
+            encoder = {}
+            if isinstance(self.unknown_label, dict):
+                unknown_label = self.unknown_label.get(label, None)
+            else:
+                unknown_label = self.unknown_label
+            if unknown_label is not None and unknown_label in cats:
+                cats.remove(unknown_label)
+                encoder[unknown_label] = -1
+            encoder.update({cat: i for i, cat in enumerate(cats)})
+            self.encoders[label] = encoder
+
     def _make_join_vars(self):
         var_list = []
         for storage in self.storages:
             with _Connect(storage) as store:
                 var_list.append(_safer_read_index(store["var"]))
-        if self.join_vars == "auto":
-            vars_eq = all([var_list[0].equals(vrs) for vrs in var_list[1:]])
-            if vars_eq:
-                self.join_vars = None
-                return
-            else:
-                self.join_vars = "inner"
+
+        self.var_joint = None
+        vars_eq = all(var_list[0].equals(vrs) for vrs in var_list[1:])
+        if vars_eq:
+            self.join_vars = None
+            self.var_joint = var_list[0]
+            return
         if self.join_vars == "inner":
             self.var_joint = reduce(pd.Index.intersection, var_list)
             if len(self.var_joint) == 0:
                 raise ValueError(
-                    "The provided AnnData objects don't have shared varibales."
+                    "The provided AnnData objects don't have shared varibales.\n"
+                    "Use join='outer'."
                 )
             self.var_indices = [vrs.get_indexer(self.var_joint) for vrs in var_list]
+        elif self.join_vars == "outer":
+            self.var_joint = reduce(pd.Index.union, var_list)
+            self.var_indices = [self.var_joint.get_indexer(vrs) for vrs in var_list]
 
     def _check_aligned_vars(self, vars: list):
         i = 0
         for storage in self.storages:
             with _Connect(storage) as store:
-                if vars == _safer_read_index(store["var"]).tolist():
+                if len(set(_safer_read_index(store["var"]).tolist()) - set(vars)) == 0:
                     i += 1
         print("{}% are aligned".format(i * 100 / len(self.storages)))
 
@@ -189,46 +287,75 @@ class MappedDataset:
         obs_idx = self.indices[idx]
         storage_idx = self.storage_idx[idx]
         if self.var_indices is not None:
-            var_idxs = self.var_indices[storage_idx]
+            var_idxs_join = self.var_indices[storage_idx]
         else:
-            var_idxs = None
+            var_idxs_join = None
+
         with _Connect(self.storages[storage_idx]) as store:
-            out = {"x": self.get_data_idx(store, obs_idx, var_idxs)}
+            out = {"x": self._get_data_idx(store, obs_idx, var_idxs_join)}
+            out["_storage_idx"] = storage_idx
             if self.label_keys is not None:
-                for _, label in enumerate(self.label_keys):
-                    label_idx = self.get_label_idx(store, obs_idx, label)
-                    if label in self.encoders:
-                        out.update({label: self.encoders[label][label_idx]})
+                for label in self.label_keys:
+                    if label in self._cache_cats:
+                        cats = self._cache_cats[label][storage_idx]
+                        if cats is None:
+                            cats = []
                     else:
-                        out.update({label: label_idx})
-                out.update({"dataset": storage_idx})
+                        cats = None
+                    label_idx = self._get_label_idx(store, obs_idx, label, cats)
+                    if label in self.encoders:
+                        label_idx = self.encoders[label][label_idx]
+                    out[label] = label_idx
         return out
 
-    def get_data_idx(
+    def _get_data_idx(
         self,
-        storage: StorageType,
+        storage: StorageType,  # type: ignore
         idx: int,
-        var_idxs: Optional[list] = None,
-        layer_key: Optional[str] = None,  # type: ignore # noqa
+        var_idxs_join: list | None = None,
+        layer_key: str | None = None,
     ):
         """Get the index for the data."""
-        layer = storage["X"] if layer_key is None else storage["layers"][layer_key]  # type: ignore # noqa
+        layer = storage["X"] if layer_key is None else storage["layers"][layer_key]  # type: ignore
         if isinstance(layer, ArrayTypes):  # type: ignore
-            # todo: better way to select variables
-
-            return layer[idx] if var_idxs is None else layer[idx][var_idxs]
+            layer_idx = layer[idx]
+            if self.join_vars is None:
+                result = layer_idx
+                if self._dtype is not None:
+                    result = result.astype(self._dtype, copy=False)
+            elif self.join_vars == "outer":
+                dtype = layer_idx.dtype if self._dtype is None else self._dtype
+                result = np.zeros(len(self.var_joint), dtype=dtype)
+                result[var_idxs_join] = layer_idx
+            else:  # inner join
+                result = layer_idx[var_idxs_join]
+                if self._dtype is not None:
+                    result = result.astype(self._dtype, copy=False)
+            return result
         else:  # assume csr_matrix here
             data = layer["data"]
             indices = layer["indices"]
             indptr = layer["indptr"]
             s = slice(*(indptr[idx : idx + 2]))
-            # this requires more memory than csr_matrix when var_idxs is not None
-            # but it is faster
-            layer_idx = np.zeros(layer.attrs["shape"][1])
-            layer_idx[indices[s]] = data[s]
-            return layer_idx if var_idxs is None else layer_idx[var_idxs]
+            data_s = data[s]
+            dtype = data_s.dtype if self._dtype is None else self._dtype
+            if self.join_vars == "outer":
+                layer_idx = np.zeros(len(self.var_joint), dtype=dtype)
+                layer_idx[var_idxs_join[indices[s]]] = data_s
+            else:
+                layer_idx = np.zeros(layer.attrs["shape"][1], dtype=dtype)
+                layer_idx[indices[s]] = data_s
+                if self.join_vars == "inner":
+                    layer_idx = layer_idx[var_idxs_join]
+            return layer_idx
 
-    def get_label_idx(self, storage: StorageType, idx: int, label_key: str):  # type: ignore # noqa
+    def _get_label_idx(
+        self,
+        storage: StorageType,
+        idx: int,
+        label_key: str,
+        categories: list | None = None,
+    ):
         """Get the index for the label by key."""
         obs = storage["obs"]  # type: ignore
         # how backwards compatible do we want to be here actually?
@@ -240,25 +367,29 @@ class MappedDataset:
                 label = labels[idx]
             else:
                 label = labels["codes"][idx]
-
-        cats = self.get_categories(storage, label_key)
-        if cats is not None:
+        if categories is not None:
+            cats = categories
+        else:
+            cats = self._get_categories(storage, label_key)
+        if cats is not None and len(cats) > 0:
             label = cats[label]
         if isinstance(label, bytes):
             label = label.decode("utf-8")
         return label
 
-    def get_label_weights(self, label_keys: Union[str, List[str]], scaler=10):
-        """Get all weights for a given label key."""
-        if type(label_keys) is not list:
+    def get_label_weights(self, label_keys: str | list[str], scaler: int = 10):
+        """Get all weights for the given label keys."""
+        if isinstance(label_keys, str):
             label_keys = [label_keys]
-        for i, val in enumerate(label_keys):
-            if val not in self.label_keys:
-                raise ValueError(f"{val} is not a valid label key.")
-            if i == 0:
-                labels = self.get_merged_labels(val)
-            else:
-                labels += "_" + self.get_merged_labels(val).astype(str).astype("O")
+        labels_list = []
+        for label_key in label_keys:
+            labels_to_str = self.get_merged_labels(label_key).astype(str).astype("O")
+            labels_list.append(labels_to_str)
+        if len(labels_list) > 1:
+            labels = reduce(lambda a, b: a + b, labels_list)
+        else:
+            labels = labels_list[0]
+
         counter = Counter(labels)  # type: ignore
         rn = {n: i for i, n in enumerate(counter.keys())}
         labels = np.array([rn[label] for label in labels])
@@ -267,14 +398,17 @@ class MappedDataset:
         return weights, labels
 
     def get_merged_labels(self, label_key: str):
-        """Get merged labels."""
+        """Get merged labels for `label_key` from all `.obs`."""
         labels_merge = []
         decode = np.frompyfunc(lambda x: x.decode("utf-8"), 1, 1)
-        for storage in self.storages:
+        for i, storage in enumerate(self.storages):
             with _Connect(storage) as store:
-                codes = self.get_codes(store, label_key)
+                codes = self._get_codes(store, label_key)
                 labels = decode(codes) if isinstance(codes[0], bytes) else codes
-                cats = self.get_categories(store, label_key)
+                if label_key in self._cache_cats:
+                    cats = self._cache_cats[label_key][i]
+                else:
+                    cats = self._get_categories(store, label_key)
                 if cats is not None:
                     cats = decode(cats) if isinstance(cats[0], bytes) else cats
                     labels = cats[labels]
@@ -282,22 +416,25 @@ class MappedDataset:
         return np.hstack(labels_merge)
 
     def get_merged_categories(self, label_key: str):
-        """Get merged categories."""
+        """Get merged categories for `label_key` from all `.obs`."""
         cats_merge = set()
         decode = np.frompyfunc(lambda x: x.decode("utf-8"), 1, 1)
-        for storage in self.storages:
+        for i, storage in enumerate(self.storages):
             with _Connect(storage) as store:
-                cats = self.get_categories(store, label_key)
+                if label_key in self._cache_cats:
+                    cats = self._cache_cats[label_key][i]
+                else:
+                    cats = self._get_categories(store, label_key)
                 if cats is not None:
                     cats = decode(cats) if isinstance(cats[0], bytes) else cats
                     cats_merge.update(cats)
                 else:
-                    codes = self.get_codes(store, label_key)
+                    codes = self._get_codes(store, label_key)
                     codes = decode(codes) if isinstance(codes[0], bytes) else codes
                     cats_merge.update(codes)
         return cats_merge
 
-    def get_categories(self, storage: StorageType, label_key: str):  # type: ignore
+    def _get_categories(self, storage: StorageType, label_key: str):  # type: ignore
         """Get categories."""
         obs = storage["obs"]  # type: ignore
         if isinstance(obs, ArrayTypes):  # type: ignore
@@ -324,8 +461,9 @@ class MappedDataset:
                     return labels.attrs["categories"]
                 else:
                     return None
+        return None
 
-    def get_codes(self, storage: StorageType, label_key: str):  # type: ignore
+    def _get_codes(self, storage: StorageType, label_key: str):  # type: ignore
         """Get codes."""
         obs = storage["obs"]  # type: ignore
         if isinstance(obs, ArrayTypes):  # type: ignore
@@ -338,7 +476,10 @@ class MappedDataset:
                 return label["codes"][...]
 
     def close(self):
-        """Close connection to array streaming backend."""
+        """Close connections to array streaming backend.
+
+        No effect if `parallel=True`.
+        """
         for storage in self.storages:
             if hasattr(storage, "close"):
                 storage.close()
@@ -349,6 +490,10 @@ class MappedDataset:
 
     @property
     def closed(self):
+        """Check if connections to array streaming backend are closed.
+
+        Does not matter if `parallel=True`.
+        """
         return self._closed
 
     def __enter__(self):
@@ -356,3 +501,17 @@ class MappedDataset:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    @staticmethod
+    def torch_worker_init_fn(worker_id):
+        """`worker_init_fn` for `torch.utils.data.DataLoader`.
+
+        Improves performance for `num_workers > 1`.
+        """
+        from torch.utils.data import get_worker_info
+
+        mapped = get_worker_info().dataset
+        mapped.parallel = False
+        mapped.storages = []
+        mapped.conns = []
+        mapped._make_connections(mapped._path_list, parallel=False)

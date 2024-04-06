@@ -58,25 +58,26 @@ class Dataset(torchDataset):
             "sex_ontology_term_id",
             #'dataset_id',
             #'cell_culture',
-            #"dpt_group",
-            #"heat_diff",
-            #"nnz",
+            # "dpt_group",
+            # "heat_diff",
+            # "nnz",
         ]
     )
     # set of obs to prepare for prediction (encode)
     clss_to_pred: Optional[list[str]] = field(default_factory=list)
     # set of obs that need to be hierarchically prepared
     hierarchical_clss: Optional[list[str]] = field(default_factory=list)
-    join_vars: Optional[Literal["auto", "inner", "None"]] = "None"
+    join_vars: Literal["inner", "outer"] | None = None
 
     def __post_init__(self):
         self.mapped_dataset = mapped.mapped(
             self.lamin_dataset,
             label_keys=self.obs,
+            join=self.join_vars,
             encode_labels=self.clss_to_pred,
+            unknown_label="unknown",
             stream=True,
             parallel=True,
-            join_vars=self.join_vars,
         )
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
@@ -96,7 +97,7 @@ class Dataset(torchDataset):
                     update = {}
                     c = 0
                     for k, v in self.mapped_dataset.encoders[clss].items():
-                        if k == self.mapped_dataset.unknown_class:
+                        if k == self.mapped_dataset.unknown_label:
                             update.update({k: v})
                             c += 1
                             self.class_topred[clss] -= set([k])
@@ -108,9 +109,7 @@ class Dataset(torchDataset):
             self.genedf = load_genes(self.organisms)
 
         self.genedf.columns = self.genedf.columns.astype(str)
-        for organism in self.organisms:
-            ogenedf = self.genedf[self.genedf.organism == organism]
-            self.mapped_dataset._check_aligned_vars(ogenedf.index.tolist())
+        self.mapped_dataset._check_aligned_vars(self.genedf.index.tolist())
 
     def __len__(self, **kwargs):
         return self.mapped_dataset.__len__(**kwargs)
@@ -148,7 +147,6 @@ class Dataset(torchDataset):
             + "     {} labels\n".format(len(self.obs))
             + "     {} clss_to_pred\n".format(len(self.clss_to_pred))
             + "     {} hierarchical_clss\n".format(len(self.hierarchical_clss))
-            + "     {} join_vars\n".format(len(self.join_vars))
             + "     {} organisms\n".format(len(self.organisms))
             + (
                 "dataset contains {} classes to predict\n".format(
@@ -242,7 +240,7 @@ class Dataset(torchDataset):
                 mlength = len(self.mapped_dataset.encoders[label])
                 mlength -= (
                     1
-                    if self.mapped_dataset.unknown_class
+                    if self.mapped_dataset.unknown_label
                     in self.mapped_dataset.encoders[label].keys()
                     else 0
                 )
@@ -263,7 +261,7 @@ class Dataset(torchDataset):
                 # pdb.set_trace()
                 mlength -= (
                     1
-                    if self.mapped_dataset.unknown_class
+                    if self.mapped_dataset.unknown_label
                     in self.mapped_dataset.encoders[label].keys()
                     else 0
                 )
@@ -271,7 +269,7 @@ class Dataset(torchDataset):
                     if k in self.class_groupings[label].keys():
                         update.update({k: mlength + c})
                         c += 1
-                    elif k == self.mapped_dataset.unknown_class:
+                    elif k == self.mapped_dataset.unknown_label:
                         update.update({k: v})
                         d += 1
                         self.class_topred[label] -= set([k])

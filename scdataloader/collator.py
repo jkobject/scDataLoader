@@ -114,7 +114,7 @@ class Collator:
             if organism_id not in self.organism_ids:
                 continue
             if "dataset" in elem:
-                dataset.append(elem["dataset"])
+                dataset.append(elem["_storage_idx"])
             expr = np.array(elem["x"])
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
