@@ -113,7 +113,7 @@ class Collator:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
                 continue
-            if "dataset" in elem:
+            if "_storage_idx" in elem:
                 dataset.append(elem["_storage_idx"])
             expr = np.array(elem["x"])
             total_count.append(expr.sum())

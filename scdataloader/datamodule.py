@@ -154,7 +154,9 @@ class DataModule(L.LightningDataModule):
             f"\ttest_split={self.test_split},\n"
             f"\tn_samples={self.n_samples},\n"
             f"\tweight_scaler={self.weight_scaler},\n"
-            f"\train_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
+            f"\ttrain_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
+            f"\tassays_to_drop={self.assays_to_drop},\n"
+            f"\tnum_datasets={len(self.dataset.mapped_dataset.storages)},\n"
             f"\tlabel_to_weight={self.label_to_weight}\n"
             + (
                 "\twith train_dataset size of=("
