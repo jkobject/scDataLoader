@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 import lamindb as ln
+
 ln.connect("scprint")
 
 import bionty as bt
@@ -84,7 +85,7 @@ class Dataset(torchDataset):
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
         )
-        self.class_groupings = {}
+        self.labels_groupings = {}
         self.class_topred = {}
         # generate tree from ontologies
         if len(self.hierarchical_clss) > 0:
@@ -162,12 +163,12 @@ class Dataset(torchDataset):
     def get_unseen_mapped_dataset_elements(self, idx: int):
         return [str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")]
 
-    def define_hierarchies(self, labels: list[str]):
+    def define_hierarchies(self, clsses: list[str]):
         # TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with
-        self.class_groupings = {}
+        self.labels_groupings = {}
         self.class_topred = {}
-        for label in labels:
-            if label not in [
+        for clss in clsses:
+            if clss not in [
                 "cell_type_ontology_term_id",
                 "tissue_ontology_term_id",
                 "disease_ontology_term_id",
@@ -176,41 +177,41 @@ class Dataset(torchDataset):
                 "self_reported_ethnicity_ontology_term_id",
             ]:
                 raise ValueError(
-                    "label {} not in accepted labels, for now only supported from bionty sources".format(
-                        label
+                    "class {} not in accepted classes, for now only supported from bionty sources".format(
+                        clss
                     )
                 )
-            elif label == "cell_type_ontology_term_id":
+            elif clss == "cell_type_ontology_term_id":
                 parentdf = (
                     bt.CellType.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif label == "tissue_ontology_term_id":
+            elif clss == "tissue_ontology_term_id":
                 parentdf = (
                     bt.Tissue.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif label == "disease_ontology_term_id":
+            elif clss == "disease_ontology_term_id":
                 parentdf = (
                     bt.Disease.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif label == "development_stage_ontology_term_id":
+            elif clss == "development_stage_ontology_term_id":
                 parentdf = (
                     bt.DevelopmentalStage.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif label == "assay_ontology_term_id":
+            elif clss == "assay_ontology_term_id":
                 parentdf = (
                     bt.ExperimentalFactor.filter()
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif label == "self_reported_ethnicity_ontology_term_id":
+            elif clss == "self_reported_ethnicity_ontology_term_id":
                 parentdf = (
                     bt.Ethnicity.filter()
                     .df(include=["parents__ontology_id"])
@@ -219,61 +220,61 @@ class Dataset(torchDataset):
 
             else:
                 raise ValueError(
-                    "label {} not in accepted labels, for now only supported from bionty sources".format(
-                        label
+                    "class {} not in accepted classes, for now only supported from bionty sources".format(
+                        clss
                     )
                 )
-            cats = self.mapped_dataset.get_merged_categories(label)
-            addition = set(LABELS_TOADD.get(label, {}).values())
+            cats = self.mapped_dataset.get_merged_categories(clss)
+            addition = set(LABELS_TOADD.get(clss, {}).values())
             cats |= addition
             # import pdb
 
             # pdb.set_trace()
-            groupings, _, lclass = get_ancestry_mapping(cats, parentdf)
+            groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
             for i, j in groupings.items():
                 if len(j) == 0:
                     groupings.pop(i)
-            self.class_groupings[label] = groupings
-            if label in self.clss_to_pred:
-                # if we have added new labels, we need to update the encoder with them too.
-                mlength = len(self.mapped_dataset.encoders[label])
+            self.labels_groupings[clss] = groupings
+            if clss in self.clss_to_pred:
+                # if we have added new clss, we need to update the encoder with them too.
+                mlength = len(self.mapped_dataset.encoders[clss])
 
                 mlength -= (
                     1
                     if self.mapped_dataset.unknown_label
-                    in self.mapped_dataset.encoders[label].keys()
+                    in self.mapped_dataset.encoders[clss].keys()
                     else 0
                 )
 
                 for i, v in enumerate(
-                    addition - set(self.mapped_dataset.encoders[label].keys())
+                    addition - set(self.mapped_dataset.encoders[clss].keys())
                 ):
-                    self.mapped_dataset.encoders[label].update({v: mlength + i})
+                    self.mapped_dataset.encoders[clss].update({v: mlength + i})
                 # we need to change the ordering so that the things that can't be predicted appear afterward
 
-                self.class_topred[label] = lclass
+                self.class_topred[clss] = leaf_labels
                 c = 0
                 update = {}
-                mlength = len(lclass)
+                mlength = len(leaf_labels)
                 # import pdb
 
                 # pdb.set_trace()
                 mlength -= (
                     1
                     if self.mapped_dataset.unknown_label
-                    in self.mapped_dataset.encoders[label].keys()
+                    in self.mapped_dataset.encoders[clss].keys()
                     else 0
                 )
-                for k, v in self.mapped_dataset.encoders[label].items():
-                    if k in self.class_groupings[label].keys():
+                for k, v in self.mapped_dataset.encoders[clss].items():
+                    if k in self.labels_groupings[clss].keys():
                         update.update({k: mlength + c})
                         c += 1
                     elif k == self.mapped_dataset.unknown_label:
                         update.update({k: v})
-                        self.class_topred[label] -= set([k])
+                        self.class_topred[clss] -= set([k])
                     else:
                         update.update({k: v - c})
-                self.mapped_dataset.encoders[label] = update
+                self.mapped_dataset.encoders[clss] = update
 
 
 class SimpleAnnDataset:
