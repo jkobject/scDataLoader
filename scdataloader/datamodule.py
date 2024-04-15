@@ -81,7 +81,7 @@ class DataModule(L.LightningDataModule):
                 clss_to_pred=clss_to_pred,
                 hierarchical_clss=hierarchical_clss,
             )
-            print(mdataset)
+            # print(mdataset)
         # and location
         if do_gene_pos:
             if type(do_gene_pos) is str:
@@ -144,6 +144,8 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.test_datasets = []
+        self.test_idx = []
         super().__init__()
 
     def __repr__(self):
@@ -157,6 +159,8 @@ class DataModule(L.LightningDataModule):
             f"\ttrain_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
             f"\tassays_to_drop={self.assays_to_drop},\n"
             f"\tnum_datasets={len(self.dataset.mapped_dataset.storages)},\n"
+            f"\ttest datasets={str(self.test_datasets)},\n"
+            f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
             + (
                 "\twith train_dataset size of=("
@@ -250,7 +254,6 @@ class DataModule(L.LightningDataModule):
             idx_full = np.array(idx_full)
         else:
             idx_full = np.arange(self.n_samples)
-        test_datasets = []
         if len_test > 0:
             # this way we work on some never seen datasets
             # keeping at least one
@@ -260,17 +263,15 @@ class DataModule(L.LightningDataModule):
                 else self.dataset.mapped_dataset.n_obs_list[0]
             )
             cs = 0
-            print("these files will be considered test datasets:")
             for i, c in enumerate(self.dataset.mapped_dataset.n_obs_list):
                 if cs + c > len_test:
                     break
                 else:
-                    print("    " + self.dataset.mapped_dataset._path_list[i].path)
-                    test_datasets.append(self.dataset.mapped_dataset._path_list[i].path)
+                    self.test_datasets.append(
+                        self.dataset.mapped_dataset._path_list[i].path
+                    )
                     cs += c
-
             len_test = cs
-            print("perc test: ", len_test / self.n_samples)
             self.test_idx = idx_full[:len_test]
             idx_full = idx_full[len_test:]
         else:
@@ -288,8 +289,7 @@ class DataModule(L.LightningDataModule):
         self.train_weights = weights
         self.train_labels = labels
         self.idx_full = idx_full
-
-        return test_datasets
+        return self.test_datasets
 
     def train_dataloader(self, **kwargs):
         # train_sampler = WeightedRandomSampler(
