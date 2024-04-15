@@ -22,7 +22,7 @@ class DataModule(L.LightningDataModule):
     def __init__(
         self,
         collection_name: str,
-        label_to_weight: list = ["organism_ontology_term_id"],
+        clss_to_weight: list = ["organism_ontology_term_id"],
         organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 10,
         train_oversampling_per_epoch: float = 0.1,
@@ -32,9 +32,9 @@ class DataModule(L.LightningDataModule):
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
-        label_to_pred: list = ["organism_ontology_term_id"],
-        all_labels: list = ["organism_ontology_term_id"],
-        hierarchical_labels: list = [],
+        clss_to_pred: list = ["organism_ontology_term_id"],
+        all_clss: list = ["organism_ontology_term_id"],
+        hierarchical_clss: list = [],
         # this is for the collator
         how: str = "random expr",
         organism_name: str = "organism_ontology_term_id",
@@ -66,7 +66,7 @@ class DataModule(L.LightningDataModule):
                 the file must have ensembl_gene_id as index.
                 This is used to subset the available genes further to the ones that have embeddings in your model.
             organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
-            label_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
+            clss_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
                 it will use a full dataset and will round to the nearest dataset's cell count.
@@ -77,9 +77,9 @@ class DataModule(L.LightningDataModule):
             mdataset = Dataset(
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
-                obs=all_labels,
-                clss_to_pred=label_to_pred,
-                hierarchical_clss=hierarchical_labels,
+                obs=all_clss,
+                clss_to_pred=clss_to_pred,
+                hierarchical_clss=hierarchical_clss,
             )
             print(mdataset)
         # and location
@@ -118,7 +118,7 @@ class DataModule(L.LightningDataModule):
             )
             if do_gene_pos:
                 self.gene_pos = mdataset.genedf["pos"].tolist()
-        self.labels = {k: len(v) for k, v in mdataset.class_topred.items()}
+        self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
         if use_default_col:
@@ -131,7 +131,7 @@ class DataModule(L.LightningDataModule):
                 org_to_id=mdataset.encoder[organism_name],
                 tp_name=tp_name,
                 organism_name=organism_name,
-                class_names=label_to_weight,
+                class_names=clss_to_weight,
             )
         self.validation_split = validation_split
         self.test_split = test_split
@@ -141,7 +141,7 @@ class DataModule(L.LightningDataModule):
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
         self.train_oversampling_per_epoch = train_oversampling_per_epoch
-        self.label_to_weight = label_to_weight
+        self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
         super().__init__()
@@ -157,7 +157,7 @@ class DataModule(L.LightningDataModule):
             f"\ttrain_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
             f"\tassays_to_drop={self.assays_to_drop},\n"
             f"\tnum_datasets={len(self.dataset.mapped_dataset.storages)},\n"
-            f"\tlabel_to_weight={self.label_to_weight}\n"
+            f"\tclss_to_weight={self.clss_to_weight}\n"
             + (
                 "\twith train_dataset size of=("
                 + str((self.train_weights != 0).sum())
@@ -181,22 +181,22 @@ class DataModule(L.LightningDataModule):
         return decoders
 
     @property
-    def cls_hierarchy(self):
+    def labels_hierarchy(self):
         """
-        cls_hierarchy the hierarchy of labels for any cls that would have a hierarchy
+        labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy
 
         Returns:
             dict[str, dict[str, str]]
         """
-        cls_hierarchy = {}
-        for k, dic in self.dataset.class_groupings.items():
+        labels_hierarchy = {}
+        for k, dic in self.dataset.labels_groupings.items():
             rdic = {}
             for sk, v in dic.items():
                 rdic[self.dataset.encoder[k][sk]] = [
                     self.dataset.encoder[k][i] for i in list(v)
                 ]
-            cls_hierarchy[k] = rdic
-        return cls_hierarchy
+            labels_hierarchy[k] = rdic
+        return labels_hierarchy
 
     @property
     def genes(self):
@@ -221,9 +221,9 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
-        if len(self.label_to_weight) > 0:
+        if len(self.clss_to_weight) > 0:
             weights, labels = self.dataset.get_label_weights(
-                self.label_to_weight, scaler=self.weight_scaler
+                self.clss_to_weight, scaler=self.weight_scaler
             )
         else:
             weights = np.ones(1)
