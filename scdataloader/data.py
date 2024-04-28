@@ -120,19 +120,6 @@ class Dataset(torchDataset):
 
     def __getitem__(self, *args, **kwargs):
         item = self.mapped_dataset.__getitem__(*args, **kwargs)
-        # import pdb
-
-        # pdb.set_trace()
-        # item.update(
-        #    {"unseen_genes": self.get_unseen_mapped_dataset_elements(*args, **kwargs)}
-        # )
-        # ret = {}
-        # ret["count"] = item[0]
-        # for i, val in enumerate(self.obs):
-        #    ret[val] = item[1][i]
-        ## mark unseen genes with a flag
-        ## send the associated
-        # print(item[0].shape)
         return item
 
     def __repr__(self):
@@ -227,9 +214,6 @@ class Dataset(torchDataset):
             cats = self.mapped_dataset.get_merged_categories(clss)
             addition = set(LABELS_TOADD.get(clss, {}).values())
             cats |= addition
-            # import pdb
-
-            # pdb.set_trace()
             groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
             for i, j in groupings.items():
                 if len(j) == 0:
@@ -256,9 +240,6 @@ class Dataset(torchDataset):
                 c = 0
                 update = {}
                 mlength = len(leaf_labels)
-                # import pdb
-
-                # pdb.set_trace()
                 mlength -= (
                     1
                     if self.mapped_dataset.unknown_label

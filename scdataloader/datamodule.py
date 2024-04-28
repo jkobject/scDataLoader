@@ -83,6 +83,7 @@ class DataModule(L.LightningDataModule):
             )
             # print(mdataset)
         # and location
+        self.gene_pos = None
         if do_gene_pos:
             if type(do_gene_pos) is str:
                 print("seeing a string: loading gene positions as biomart parquet file")
@@ -137,6 +138,7 @@ class DataModule(L.LightningDataModule):
         self.test_split = test_split
         self.dataset = mdataset
         self.kwargs = kwargs
+        self.kwargs.pop("sampler")
         self.assays_to_drop = assays_to_drop
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
@@ -322,6 +324,9 @@ class DataModule(L.LightningDataModule):
             if self.test_idx is not None
             else None
         )
+
+    def predict_dataloader(self):
+        return DataLoader(self.dataset, **self.kwargs)
 
     # def teardown(self):
     # clean up state after the trainer stops, delete files...
