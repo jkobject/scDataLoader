@@ -12,10 +12,46 @@ from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from functools import lru_cache
 from collections import Counter
+from torch import Tensor
+import torch
 
 from typing import Union, List, Optional
 
 from anndata import AnnData
+
+
+def downsample_profile(mat: Tensor, dropout: float):
+    """
+    This function downsamples the expression profile of a given single cell RNA matrix.
+
+    The noise is applied based on the renoise parameter,
+    the total counts of the matrix, and the number of genes. The function first calculates the noise
+    threshold (scaler) based on the renoise parameter. It then generates an initial matrix count by
+    applying a Poisson distribution to a random tensor scaled by the total counts and the number of genes.
+    The function then models the sampling zeros by applying a Poisson distribution to a random tensor
+    scaled by the noise threshold, the total counts, and the number of genes. The function also models
+    the technical zeros by generating a random tensor and comparing it to the noise threshold. The final
+    matrix count is calculated by subtracting the sampling zeros from the initial matrix count and
+    multiplying by the technical zeros. The function ensures that the final matrix count is not less
+    than zero by taking the maximum of the final matrix count and a tensor of zeros. The function
+    returns the final matrix count.
+
+    Args:
+        mat (torch.Tensor): The input matrix.
+        dropout (float): The renoise parameter.
+
+    Returns:
+        torch.Tensor: The matrix count after applying noise.
+    """
+    batch = mat.shape[0]
+    ngenes = mat.shape[1]
+    dropout = dropout * 1.1
+    # we model the sampling zeros (dropping 30% of the reads)
+    res = torch.poisson((mat * (dropout / 2))).int()
+    # we model the technical zeros (dropping 50% of the genes)
+    notdrop = (torch.rand((batch, ngenes), device=mat.device) >= (dropout / 2)).int()
+    mat = (mat - res) * notdrop
+    return torch.maximum(mat, torch.zeros((1, 1), device=mat.device, dtype=torch.int))
 
 
 def createFoldersFor(filepath: str):
@@ -404,9 +440,7 @@ def populate_my_ontology(
     ln.save(records, parents=bool(tissues))
     bt.Tissue(name="unknown", ontology_id="unknown").save()
     # DevelopmentalStage
-    names = (
-        bt.DevelopmentalStage.public().df().index if not dev_stages else dev_stages
-    )
+    names = bt.DevelopmentalStage.public().df().index if not dev_stages else dev_stages
     records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
     ln.save(records, parents=bool(dev_stages))
     bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()

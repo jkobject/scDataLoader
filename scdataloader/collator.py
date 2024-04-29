@@ -1,5 +1,5 @@
 import numpy as np
-from .utils import load_genes
+from .utils import load_genes, downsample_profile
 from torch import Tensor, long
 
 # class SimpleCollator:
@@ -21,6 +21,8 @@ class Collator:
         organism_name="organism_ontology_term_id",
         class_names=[],
         genelist=[],
+        downsample=None,  # don't use it for training!
+        save_output=False,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -68,9 +70,10 @@ class Collator:
         self.organism_name = organism_name
         self.tp_name = tp_name
         self.class_names = class_names
-
+        self.save_output = save_output
         self.start_idx = {}
         self.accepted_genes = {}
+        self.downsample = downsample
         self.genedf = load_genes(organisms)
         self.to_subset = {}
         for organism in set(self.genedf.organism):
@@ -206,6 +209,11 @@ class Collator:
         }
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
+        if self.downsample is not None:
+            ret["x"] = downsample_profile(ret["x"], self.downsample)
+        if self.save_output:
+            with open("collator_output.txt", "a") as f:
+                np.savetxt(f, ret["x"].numpy())
         return ret
 
 
