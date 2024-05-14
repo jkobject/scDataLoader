@@ -258,7 +258,7 @@ class Dataset(torchDataset):
                 self.mapped_dataset.encoders[clss] = update
 
 
-class SimpleAnnDataset:
+class SimpleAnnDataset(torchDataset):
     def __init__(
         self,
         adata: AnnData,
@@ -275,20 +275,32 @@ class SimpleAnnDataset:
             obs_to_output (list[str]): list of observations to output from anndata.obs
             layer (str): layer of the anndata to use
         """
-        self.adata = adata
-        self.obs_to_output = obs_to_output
-        self.layer = layer
+        self.adataX = (
+            adata.layers[layer].toarray() if layer is not None else adata.X.toarray()
+        )
+        self.obs_to_output = adata.obs[obs_to_output]
 
     def __len__(self):
-        return self.adata.shape[0]
+        return self.adataX.shape[0]
+
+    def __iter__(self):
+        for idx, obs in enumerate(self.adata.obs.itertuples(index=False)):
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=DeprecationWarning)
+                out = {"x": self.adataX[idx].reshape(-1)}
+                out.update(
+                    {
+                        name: val
+                        for name, val in self.obs_to_output.iloc[idx].items()
+                    }
+                )
+                yield out
 
     def __getitem__(self, idx):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            if self.layer is not None:
-                out = {"x": self.adata.layers[self.layer][idx].toarray().reshape(-1)}
-            else:
-                out = {"x": self.adata.X[idx].toarray().reshape(-1)}
-            for i in self.obs_to_output:
-                out.update({i: self.adata.obs.iloc[idx][i]})
+            out = {"x": self.adataX[idx].reshape(-1)}
+            out.update(
+                {name: val for name, val in self.obs_to_output.iloc[idx].items()}
+            )
         return out
