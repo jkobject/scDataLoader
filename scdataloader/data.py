@@ -12,6 +12,7 @@ from scdataloader import mapped
 import warnings
 
 from anndata import AnnData
+from scipy.sparse import issparse
 
 from scdataloader.utils import get_ancestry_mapping, load_genes
 
@@ -276,8 +277,8 @@ class SimpleAnnDataset(torchDataset):
             layer (str): layer of the anndata to use
         """
         self.adataX = (
-            adata.layers[layer].toarray() if layer is not None else adata.X.toarray()
-        )
+            adata.layers[layer] if layer is not None else adata.X)
+        self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
         self.obs_to_output = adata.obs[obs_to_output]
 
     def __len__(self):

@@ -304,7 +304,6 @@ class DataModule(L.LightningDataModule):
             self.train_weights,
             self.train_labels,
             num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
-            # replacement=True,
         )
         return DataLoader(self.dataset, sampler=train_sampler, **self.kwargs, **kwargs)
 

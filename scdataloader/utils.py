@@ -242,6 +242,16 @@ def get_all_ancestors(val: str, df: pd.DataFrame):
         return set.union(set(parents), *[get_all_ancestors(val, df) for val in parents])
 
 
+# setting a cache of 200 elements
+# @lru_cache(maxsize=200)
+def get_descendants(val, df):
+    ontos = set(df[df.parents__ontology_id.str.contains(val)].index.tolist())
+    r_onto = set()
+    for onto in ontos:
+        r_onto |= get_descendants(onto, df)
+    return r_onto | ontos
+
+
 def get_ancestry_mapping(all_elem: list, onto_df: pd.DataFrame):
     """
     This function generates a mapping of all elements to their ancestors in the ontology dataframe.
