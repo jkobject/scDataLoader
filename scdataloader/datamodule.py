@@ -138,7 +138,8 @@ class DataModule(L.LightningDataModule):
         self.test_split = test_split
         self.dataset = mdataset
         self.kwargs = kwargs
-        self.kwargs.pop("sampler")
+        if "sampler" in self.kwargs:
+            self.kwargs.pop("sampler")
         self.assays_to_drop = assays_to_drop
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
