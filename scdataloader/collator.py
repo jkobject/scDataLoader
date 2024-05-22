@@ -53,18 +53,13 @@ class Collator:
             norm_to (str, optional): Normalization method to be applied. Defaults to None.
         """
         self.organisms = organisms
+        self.genedf = load_genes(organisms)
         self.max_len = max_len
         self.n_bins = n_bins
         self.add_zero_genes = add_zero_genes
         self.logp1 = logp1
         self.norm_to = norm_to
-        self.org_to_id = org_to_id
         self.how = how
-        self.organism_ids = (
-            set([org_to_id[k] for k in organisms])
-            if org_to_id is not None
-            else set(organisms)
-        )
         if self.how == "some":
             assert len(genelist) > 0, "if how is some, genelist must be provided"
         self.organism_name = organism_name
@@ -74,8 +69,19 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.downsample = downsample
-        self.genedf = load_genes(organisms)
         self.to_subset = {}
+        self.setup(org_to_id, valid_genes, genelist)
+
+    def setup(self, org_to_id=None, valid_genes=[], genelist=[]):
+        self.org_to_id = org_to_id
+        self.to_subset = {}
+        self.accepted_genes = {}
+        self.start_idx = {}
+        self.organism_ids = (
+            set([org_to_id[k] for k in self.organisms])
+            if org_to_id is not None
+            else set(self.organisms)
+        )
         for organism in set(self.genedf.organism):
             ogenedf = self.genedf[self.genedf.organism == organism]
             tot = self.genedf[self.genedf.index.isin(valid_genes)]
