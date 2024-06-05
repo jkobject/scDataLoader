@@ -6,6 +6,7 @@ from torch.utils.data.sampler import (
     WeightedRandomSampler,
     SubsetRandomSampler,
     SequentialSampler,
+    RandomSampler,
 )
 import torch
 from torch.utils.data import DataLoader, Sampler
@@ -326,7 +327,9 @@ class DataModule(L.LightningDataModule):
         )
 
     def predict_dataloader(self):
-        return DataLoader(self.dataset, **self.kwargs)
+        return DataLoader(
+            self.dataset, sampler=SubsetRandomSampler(self.idx_full), **self.kwargs
+        )
 
     # def teardown(self):
     # clean up state after the trainer stops, delete files...
