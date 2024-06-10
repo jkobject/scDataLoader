@@ -245,6 +245,8 @@ class MappedCollection:
             if unknown_label is not None and unknown_label in cats:
                 cats.remove(unknown_label)
                 encoder[unknown_label] = -1
+            cats = list(cats)
+            cats.sort()
             encoder.update({cat: i for i, cat in enumerate(cats)})
             self.encoders[label] = encoder
 

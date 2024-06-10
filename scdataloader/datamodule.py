@@ -7,7 +7,7 @@ from torch.utils.data.sampler import (
     SubsetRandomSampler,
     SequentialSampler,
     RandomSampler,
-)
+) 
 import torch
 from torch.utils.data import DataLoader, Sampler
 import lightning as L
@@ -29,7 +29,7 @@ class DataModule(L.LightningDataModule):
         train_oversampling_per_epoch: float = 0.1,
         validation_split: float = 0.2,
         test_split: float = 0,
-        gene_embeddings: str = "",
+        gene_embeddings: str = "", 
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
