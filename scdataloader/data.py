@@ -276,8 +276,7 @@ class SimpleAnnDataset(torchDataset):
             obs_to_output (list[str]): list of observations to output from anndata.obs
             layer (str): layer of the anndata to use
         """
-        self.adataX = (
-            adata.layers[layer] if layer is not None else adata.X)
+        self.adataX = adata.layers[layer] if layer is not None else adata.X
         self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
         self.obs_to_output = adata.obs[obs_to_output]
 
@@ -290,10 +289,7 @@ class SimpleAnnDataset(torchDataset):
                 warnings.filterwarnings("ignore", category=DeprecationWarning)
                 out = {"x": self.adataX[idx].reshape(-1)}
                 out.update(
-                    {
-                        name: val
-                        for name, val in self.obs_to_output.iloc[idx].items()
-                    }
+                    {name: val for name, val in self.obs_to_output.iloc[idx].items()}
                 )
                 yield out
 

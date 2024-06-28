@@ -82,7 +82,7 @@ class Collator:
             if org_to_id is not None
             else set(self.organisms)
         )
-        for organism in set(self.genedf.organism):
+        for organism in self.organisms:
             ogenedf = self.genedf[self.genedf.organism == organism]
             tot = self.genedf[self.genedf.index.isin(valid_genes)]
             org = org_to_id[organism] if org_to_id is not None else organism
