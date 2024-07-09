@@ -233,7 +233,7 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
-        if len(self.clss_to_weight) > 0:
+        if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
             weights, labels = self.dataset.get_label_weights(
                 self.clss_to_weight, scaler=self.weight_scaler
             )
