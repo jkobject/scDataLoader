@@ -138,11 +138,12 @@ def getBiomartTable(
     res.columns = attr + attributes
     if type(res) is not type(pd.DataFrame()):
         raise ValueError("should be a dataframe")
-    res = res[~(res["ensembl_gene_id"].isna() & res["hgnc_symbol"].isna())]
-    res.loc[res[res.hgnc_symbol.isna()].index, "hgnc_symbol"] = res[
-        res.hgnc_symbol.isna()
-    ]["ensembl_gene_id"]
-
+    res = res[~(res["ensembl_gene_id"].isna())]
+    if "hgnc_symbol" in res.columns:
+        res = res[res["hgnc_symbol"].isna()]
+        res.loc[res[res.hgnc_symbol.isna()].index, "hgnc_symbol"] = res[
+            res.hgnc_symbol.isna()
+        ]["ensembl_gene_id"]
     return res
 
 
