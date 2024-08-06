@@ -4,6 +4,7 @@ Changelog
 
 (unreleased)
 ------------
+- Release: version  🚀 [jkobject]
 - Cleanup. [jkobject]
 - Debug lamin connection. [jkobject]
 - Bypass attr. [jkobject]
