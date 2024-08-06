@@ -61,11 +61,11 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datamodule/">datamodule</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">collator</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">collator</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.collator.Collator">Collator</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.collator.Collator.__call__">__call__()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.collator.Collator.__call__">__call__</a>
     </li>
         </ul>
     </li>
@@ -105,22 +105,20 @@
 
 
 
-
 <h2 id="scdataloader.collator.Collator" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">Collator</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">Collator</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
       <p>This class is responsible for collating data for the scPRINT model. It handles the
 organization and preparation of gene expression data from different organisms,
 allowing for various configurations such as maximum gene list length, normalization,
 and selection method for gene expression.</p>
 <p>This Collator should work with scVI's dataloader as well!</p>
-
 
 
 <table class="field-list">
@@ -298,9 +296,9 @@ This is mainly for debugging purposes</p>
     </tr>
   </tbody>
 </table>
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/collator.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/collator.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
@@ -448,12 +446,11 @@ This is mainly for debugging purposes</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">(</span><span class="n">org_to_id</span><span class="p">,</span> <span class="n">valid_genes</span><span class="p">,</span> <span class="n">genelist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -466,18 +463,15 @@ This is mainly for debugging purposes</p>
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.collator.Collator.__call__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="fm">__call__</span></code>
+            <code class="highlight language-python"><span class="fm">__call__</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p><strong>call</strong> applies the collator to a minibatch of data</p>
+    <div class="doc doc-contents ">
 
+      <p><strong>call</strong> applies the collator to a minibatch of data</p>
 
 
 <table class="field-list">
@@ -509,7 +503,6 @@ elem["class_names.."]: other classes</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -517,24 +510,24 @@ elem["class_names.."]: other classes</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-                <code>dict[str, <span title="torch.Tensor">Tensor</span>]</code>
-            –
-            <div class="doc-md-description">
-              <p>list[Tensor]: List of tensors containing the collated data.</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>dict[str, <span title="torch.Tensor">Tensor</span>]</code>
+              –
+              <div class="doc-md-description">
+                <p>list[Tensor]: List of tensors containing the collated data.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/collator.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/collator.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
 <span class="normal">107</span>
@@ -790,8 +783,8 @@ elem["class_names.."]: other classes</p>
             <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -799,7 +792,7 @@ elem["class_names.."]: other classes</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -807,23 +800,22 @@ elem["class_names.."]: other classes</p>
 
 
 
-
 <h2 id="scdataloader.collator.AnnDataCollator" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">AnnDataCollator</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">AnnDataCollator</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.collator.Collator" href="#scdataloader.collator.Collator">Collator</a></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.collator.Collator" href="#scdataloader.collator.Collator">Collator</a></code></p>
 
-  
+
       <p>AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)</p>
 
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/collator.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/collator.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
@@ -839,9 +831,9 @@ elem["class_names.."]: other classes</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -857,7 +849,7 @@ elem["class_names.."]: other classes</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
               

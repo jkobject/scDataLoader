@@ -55,19 +55,19 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../dataset/">dataset</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">preprocess</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">preprocess</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.LaminPreprocessor">LaminPreprocessor</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_preprocess">additional_preprocess()</a>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_preprocess">additional_preprocess</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_postprocess">additional_postprocess()</a>
+    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.preprocess.additional_postprocess">additional_postprocess</a>
     </li>
     </ul>
                   </li>
@@ -109,21 +109,19 @@
 
 
 
-
 <h2 id="scdataloader.preprocess.Preprocessor" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">Preprocessor</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">Preprocessor</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
       <p>Prepare data into training, valid and test split. Normalize raw expression
 values, binning or using other transform into the preset model input format.</p>
-  
-      <p>Initializes the preprocessor and configures the workflow steps.</p>
 
+      <p>Initializes the preprocessor and configures the workflow steps.</p>
 
 
 <table class="field-list">
@@ -336,9 +334,9 @@ Defaults to False.</p>
     </tr>
   </tbody>
 </table>
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 31</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 31</span>
 <span class="normal"> 32</span>
 <span class="normal"> 33</span>
 <span class="normal"> 34</span>
@@ -520,9 +518,9 @@ Defaults to False.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">do_postp</span> <span class="o">=</span> <span class="n">do_postp</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">use_raw</span> <span class="o">=</span> <span class="n">use_raw</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -538,7 +536,7 @@ Defaults to False.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -546,21 +544,20 @@ Defaults to False.</p>
 
 
 
-
 <h2 id="scdataloader.preprocess.LaminPreprocessor" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">LaminPreprocessor</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">LaminPreprocessor</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.Preprocessor" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.Preprocessor" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a></code></p>
 
 
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
@@ -588,12 +585,11 @@ Defaults to False.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">stream</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">keep_files</span> <span class="o">=</span> <span class="n">keep_files</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -606,19 +602,16 @@ Defaults to False.</p>
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.preprocess.LaminPreprocessor.__call__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="fm">__call__</span></code>
+            <code class="highlight language-python"><span class="fm">__call__</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>format controls the different input value wrapping, including categorical
 binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.</p>
-
 
 
 <table class="field-list">
@@ -653,9 +646,9 @@ is used in the highly variable gene selection step.</p>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
 <span class="normal">402</span>
@@ -883,8 +876,8 @@ is used in the highly variable gene selection step.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide either anndata or ln.Collection&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -892,27 +885,24 @@ is used in the highly variable gene selection step.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h2 id="scdataloader.preprocess.additional_preprocess" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_preprocess</span></code>
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_preprocess</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">597</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">597</span>
 <span class="normal">598</span>
 <span class="normal">599</span>
 <span class="normal">600</span>
@@ -1020,28 +1010,25 @@ is used in the highly variable gene selection step.</p>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
     <span class="k">return</span> <span class="n">adata</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h2 id="scdataloader.preprocess.additional_postprocess" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_postprocess</span></code>
+            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">additional_postprocess</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">653</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">653</span>
 <span class="normal">654</span>
 <span class="normal">655</span>
 <span class="normal">656</span>
@@ -1129,8 +1116,8 @@ is used in the highly variable gene selection step.</p>
     <span class="c1"># to query the N nearest neighbors we just get the N elements above and N below and check they are in the group</span>
     <span class="k">return</span> <span class="n">adata</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
               

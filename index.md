@@ -29,6 +29,8 @@ It allows you to:
 
 built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
 
+The package has been designed together with the [scPRINT paper](https://doi.org/10.1101/2024.07.29.605556) and [model](https://github.com/cantinilab/scPRINT).
+
 ## More
 
 I needed to create this Data Loader for my PhD project. I am using it to load & preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.
@@ -96,10 +98,10 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 
 ```
 
-see the notebooks in [docs](https://jkobject.github.io/scDataLoader/):
+see the notebooks in [docs](https://www.jkobject.com/scDataLoader/):
 
-1. [load a dataset](https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html)
-2. [create a dataset](https://jkobject.github.io/scDataLoader/notebooks/02_create_dataset.html)
+1. [load a dataset](https://www.jkobject.com/scDataLoader/notebooks/1_download_and_preprocess/)
+2. [create a dataset](https://www.jkobject.com/scDataLoader/notebooks/2_create_dataloader/)
 
 ### command line preprocessing
 

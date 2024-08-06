@@ -57,31 +57,31 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">utils</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">utils</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.utils">utils</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.createFoldersFor">createFoldersFor()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.createFoldersFor">createFoldersFor</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.downsample_profile">downsample_profile()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.downsample_profile">downsample_profile</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.getBiomartTable">getBiomartTable</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.is_outlier">is_outlier()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.is_outlier">is_outlier</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.length_normalize">length_normalize()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.length_normalize">length_normalize</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.pd_load_cached">pd_load_cached()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.pd_load_cached">pd_load_cached</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.translate">translate()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.translate">translate</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.validate">validate()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.validate">validate</a>
     </li>
         </ul>
     </li>
@@ -123,19 +123,17 @@
 
 
 
-
 <h2 id="scdataloader.utils" class="doc doc-heading">
-          <code>scdataloader.utils</code>
+            <code>scdataloader.utils</code>
 
 
 </h2>
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -148,21 +146,19 @@
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.createFoldersFor" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">createFoldersFor</span></code>
+            <code class="highlight language-python"><span class="n">createFoldersFor</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>will recursively create folders if needed until having all the folders required to save the file in this filepath</p>
 
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
@@ -180,25 +176,22 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prevval</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">prevval</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.downsample_profile" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">downsample_profile</span></code>
+            <code class="highlight language-python"><span class="n">downsample_profile</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>This function downsamples the expression profile of a given single cell RNA matrix.</p>
 <p>The noise is applied based on the renoise parameter,
 the total counts of the matrix, and the number of genes. The function first calculates the noise
@@ -211,7 +204,6 @@ matrix count is calculated by subtracting the sampling zeros from the initial ma
 multiplying by the technical zeros. The function ensures that the final matrix count is not less
 than zero by taking the maximum of the final matrix count and a tensor of zeros. The function
 returns the final matrix count.</p>
-
 
 
 <table class="field-list">
@@ -246,7 +238,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -254,23 +245,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>torch.Tensor: The matrix count after applying noise.</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>torch.Tensor: The matrix count after applying noise.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
@@ -334,27 +325,23 @@ returns the final matrix count.</p>
     <span class="n">mat</span> <span class="o">=</span> <span class="p">(</span><span class="n">mat</span> <span class="o">-</span> <span class="n">res</span><span class="p">)</span> <span class="o">*</span> <span class="n">notdrop</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">mat</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.getBiomartTable" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">getBiomartTable</span></code>
+            <code class="highlight language-python"><span class="n">getBiomartTable</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>generate a genelist dataframe from ensembl's biomart</p>
+    <div class="doc doc-contents ">
 
+      <p>generate a genelist dataframe from ensembl's biomart</p>
 
 
 <table class="field-list">
@@ -433,7 +420,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -457,7 +443,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -465,23 +450,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>pd.DataFrame: the dataframe</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>pd.DataFrame: the dataframe</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 94</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 94</span>
 <span class="normal"> 95</span>
 <span class="normal"> 96</span>
 <span class="normal"> 97</span>
@@ -597,27 +582,23 @@ returns the final matrix count.</p>
         <span class="p">][</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">res</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.get_ancestry_mapping" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_ancestry_mapping</span></code>
+            <code class="highlight language-python"><span class="n">get_ancestry_mapping</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>This function generates a mapping of all elements to their ancestors in the ontology dataframe.</p>
+    <div class="doc doc-contents ">
 
+      <p>This function generates a mapping of all elements to their ancestors in the ontology dataframe.</p>
 
 
 <table class="field-list">
@@ -652,7 +633,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -660,23 +640,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-<b><code>dict</code></b>            –
-            <div class="doc-md-description">
-              <p>A dictionary mapping each element to its ancestors.</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>dict</code></b>              –
+              <div class="doc-md-description">
+                <p>A dictionary mapping each element to its ancestors.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">260</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
 <span class="normal">263</span>
@@ -740,27 +720,23 @@ returns the final matrix count.</p>
 
     <span class="k">return</span> <span class="n">groupings</span><span class="p">,</span> <span class="n">full_ancestors</span><span class="p">,</span> <span class="n">leafs</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.is_outlier" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">is_outlier</span></code>
+            <code class="highlight language-python"><span class="n">is_outlier</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>is_outlier detects outliers in adata.obs[metric]</p>
+    <div class="doc doc-contents ">
 
+      <p>is_outlier detects outliers in adata.obs[metric]</p>
 
 
 <table class="field-list">
@@ -803,7 +779,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -811,23 +786,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>pd.Series: a boolean series indicating whether a cell is an outlier or not</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>pd.Series: a boolean series indicating whether a cell is an outlier or not</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">492</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">492</span>
 <span class="normal">493</span>
 <span class="normal">494</span>
 <span class="normal">495</span>
@@ -861,27 +836,23 @@ returns the final matrix count.</p>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">outlier</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.length_normalize" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">length_normalize</span></code>
+            <code class="highlight language-python"><span class="n">length_normalize</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>length_normalize normalizes the counts by the gene length</p>
+    <div class="doc doc-contents ">
 
+      <p>length_normalize normalizes the counts by the gene length</p>
 
 
 <table class="field-list">
@@ -916,7 +887,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -924,23 +894,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-<b><code>anndata</code></b>            –
-            <div class="doc-md-description">
-              <p>the anndata object</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>anndata</code></b>              –
+              <div class="doc-md-description">
+                <p>the anndata object</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">511</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">511</span>
 <span class="normal">512</span>
 <span class="normal">513</span>
 <span class="normal">514</span>
@@ -966,27 +936,23 @@ returns the final matrix count.</p>
     <span class="n">adata</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">((</span><span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">gene_lengths</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">adata</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.load_dataset_local" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">load_dataset_local</span></code>
+            <code class="highlight language-python"><span class="n">load_dataset_local</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>This function loads a remote lamindb dataset to local.</p>
+    <div class="doc doc-contents ">
 
+      <p>This function loads a remote lamindb dataset to local.</p>
 
 
 <table class="field-list">
@@ -1065,7 +1031,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -1073,23 +1038,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>lamindb.Dataset: The local dataset.</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>lamindb.Dataset: The local dataset.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -1209,27 +1174,23 @@ returns the final matrix count.</p>
     <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">dataset</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.pd_load_cached" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">pd_load_cached</span></code>
+            <code class="highlight language-python"><span class="n">pd_load_cached</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>pd_load_cached downloads a file from a url and loads it as a pandas dataframe</p>
+    <div class="doc doc-contents ">
 
+      <p>pd_load_cached downloads a file from a url and loads it as a pandas dataframe</p>
 
 
 <table class="field-list">
@@ -1276,7 +1237,6 @@ returns the final matrix count.</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -1284,23 +1244,23 @@ returns the final matrix count.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>pd.DataFrame: the dataframe</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>pd.DataFrame: the dataframe</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">526</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">526</span>
 <span class="normal">527</span>
 <span class="normal">528</span>
 <span class="normal">529</span>
@@ -1336,32 +1296,28 @@ returns the final matrix count.</p>
     <span class="c1"># Load the data from the file</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.populate_my_ontology" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">populate_my_ontology</span></code>
+            <code class="highlight language-python"><span class="n">populate_my_ontology</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>creates a local version of the lamin ontologies and add the required missing values in base ontologies</p>
 <p>run this function just one for each new lamin storage</p>
 <p>erase everything with bt.$ontology.filter().delete()</p>
 <p>add whatever value you need afterward like it is done here with:</p>
 <p><code>bt.$ontology(name="ddd", ontology_id="ddddd").save()</code></p>
 <p><code>df["assay_ontology_term_id"].unique()</code></p>
-
 
 
 <table class="field-list">
@@ -1467,9 +1423,9 @@ returns the final matrix count.</p>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
@@ -1693,27 +1649,23 @@ returns the final matrix count.</p>
         <span class="p">)</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.translate" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">translate</span></code>
+            <code class="highlight language-python"><span class="n">translate</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>translate translates the ontology term id to the name</p>
+    <div class="doc doc-contents ">
 
+      <p>translate translates the ontology term id to the name</p>
 
 
 <table class="field-list">
@@ -1752,7 +1704,6 @@ Defaults to "cell_type_ontology_term_id".</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -1760,23 +1711,23 @@ Defaults to "cell_type_ontology_term_id".</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-<b><code>dict</code></b>            –
-            <div class="doc-md-description">
-              <p>the mapping for the translation</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>dict</code></b>              –
+              <div class="doc-md-description">
+                <p>the mapping for the translation</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
 <span class="normal">547</span>
 <span class="normal">548</span>
 <span class="normal">549</span>
@@ -1838,27 +1789,23 @@ Defaults to "cell_type_ontology_term_id".</p>
             <span class="n">obj</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.utils.validate" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">validate</span></code>
+            <code class="highlight language-python"><span class="n">validate</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>validate checks if the adata object is valid for lamindb</p>
+    <div class="doc doc-contents ">
 
+      <p>validate checks if the adata object is valid for lamindb</p>
 
 
 <table class="field-list">
@@ -1900,7 +1847,6 @@ Defaults to "cell_type_ontology_term_id".</p>
     </tr>
   </tbody>
 </table>
-
 
 <table class="field-list">
   <colgroup>
@@ -1981,7 +1927,6 @@ Defaults to "cell_type_ontology_term_id".</p>
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -1989,23 +1934,23 @@ Defaults to "cell_type_ontology_term_id".</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-<b><code>bool</code></b>            –
-            <div class="doc-md-description">
-              <p>True if the adata object is valid</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>bool</code></b>              –
+              <div class="doc-md-description">
+                <p>True if the adata object is valid</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/utils.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
@@ -2169,8 +2114,8 @@ Defaults to "cell_type_ontology_term_id".</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid gene ensembl id found&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -2178,7 +2123,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
               

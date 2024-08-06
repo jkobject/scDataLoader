@@ -41,7 +41,7 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#more">More</a>
     </li>
@@ -141,6 +141,7 @@
 <li>extend it to your need</li>
 </ol>
 <p>built on top of <code>lamindb</code> and the <code>.mapped()</code> function by Sergey: https://github.com/Koncopd </p>
+<p>The package has been designed together with the <a href="https://doi.org/10.1101/2024.07.29.605556">scPRINT paper</a> and <a href="https://github.com/cantinilab/scPRINT">model</a>.</p>
 <h2 id="more">More</h2>
 <p>I needed to create this Data Loader for my PhD project. I am using it to load &amp; preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.</p>
 <p><img alt="scdataloader.drawio.png" src="scdataloader.drawio.png" /></p>
@@ -195,10 +196,10 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 # Trainer(model, datamodule)
 
 </code></pre>
-<p>see the notebooks in <a href="https://jkobject.github.io/scDataLoader/">docs</a>:</p>
+<p>see the notebooks in <a href="https://www.jkobject.com/scDataLoader/">docs</a>:</p>
 <ol>
-<li><a href="https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html">load a dataset</a></li>
-<li><a href="https://jkobject.github.io/scDataLoader/notebooks/02_create_dataset.html">create a dataset</a></li>
+<li><a href="https://www.jkobject.com/scDataLoader/notebooks/1_download_and_preprocess/">load a dataset</a></li>
+<li><a href="https://www.jkobject.com/scDataLoader/notebooks/2_create_dataloader/">create a dataset</a></li>
 </ol>
 <h3 id="command-line-preprocessing">command line preprocessing</h3>
 <p>You can use the command line to preprocess a large database of datasets like here for cellxgene. this allows parallelizing and easier usage.</p>
@@ -268,6 +269,6 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 </html>
 
 <!--
-MkDocs version : 1.5.3
-Build Date UTC : 2024-08-06 09:41:15.887452+00:00
+MkDocs version : 1.6.0
+Build Date UTC : 2024-08-06 13:46:34.593361+00:00
 -->

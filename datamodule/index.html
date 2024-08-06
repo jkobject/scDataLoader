@@ -59,7 +59,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../utils/">utils</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">datamodule</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">datamodule</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.datamodule.DataModule">DataModule</a>
         <ul>
@@ -69,7 +69,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.datamodule.DataModule.labels_hierarchy">labels_hierarchy</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.datamodule.DataModule.setup">setup()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.datamodule.DataModule.setup">setup</a>
     </li>
         </ul>
     </li>
@@ -109,23 +109,21 @@
 
 
 
-
 <h2 id="scdataloader.datamodule.DataModule" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">DataModule</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">DataModule</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="lightning.LightningDataModule">LightningDataModule</span></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="lightning.LightningDataModule">LightningDataModule</span></code></p>
 
-  
+
       <p>DataModule a pytorch lighting datamodule directly from a lamin Collection.
 it can work with bare pytorch too</p>
 <p>It implements train / val / test dataloaders. the train is weighted random, val is random, test is one to many separated datasets.
 This is where the mappedCollection, dataset, and collator are combined to create the dataloaders.</p>
-
 
 
 <table class="field-list">
@@ -362,9 +360,9 @@ any genes within this distance of each other will be considered at the same posi
     </tr>
   </tbody>
 </table>
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
 <span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
@@ -662,9 +660,9 @@ any genes within this distance of each other will be considered at the same posi
     <span class="bp">self</span><span class="o">.</span><span class="n">test_idx</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -678,10 +676,9 @@ any genes within this distance of each other will be considered at the same posi
 
 
 
-
 <h3 id="scdataloader.datamodule.DataModule.decoders" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">decoders</span></code>
-  
+            <code class="highlight language-python"><span class="n">decoders</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
@@ -689,10 +686,9 @@ any genes within this distance of each other will be considered at the same posi
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>decoders the decoders for any labels that would have been encoded</p>
+    <div class="doc doc-contents ">
 
+      <p>decoders the decoders for any labels that would have been encoded</p>
 
 
 <table class="field-list">
@@ -702,31 +698,30 @@ any genes within this distance of each other will be considered at the same posi
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>dict[str, dict[int, str]]</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>dict[str, dict[int, str]]</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
-</table>  </div>
+</table>    </div>
 
 </div>
 
 <div class="doc doc-object doc-attribute">
-
 
 
 
 <h3 id="scdataloader.datamodule.DataModule.genes" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">genes</span></code>
-  
+            <code class="highlight language-python"><span class="n">genes</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
@@ -734,10 +729,9 @@ any genes within this distance of each other will be considered at the same posi
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>genes the genes used in this datamodule</p>
+    <div class="doc doc-contents ">
 
+      <p>genes the genes used in this datamodule</p>
 
 
 <table class="field-list">
@@ -747,20 +741,20 @@ any genes within this distance of each other will be considered at the same posi
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>list</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>list</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
-</table>  </div>
+</table>    </div>
 
 </div>
 
@@ -768,10 +762,9 @@ any genes within this distance of each other will be considered at the same posi
 
 
 
-
 <h3 id="scdataloader.datamodule.DataModule.labels_hierarchy" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">labels_hierarchy</span></code>
-  
+            <code class="highlight language-python"><span class="n">labels_hierarchy</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
@@ -779,10 +772,9 @@ any genes within this distance of each other will be considered at the same posi
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
+    <div class="doc doc-contents ">
 
+      <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
 
 
 <table class="field-list">
@@ -792,42 +784,38 @@ any genes within this distance of each other will be considered at the same posi
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>dict[str, dict[str, str]]</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>dict[str, dict[str, str]]</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
-</table>  </div>
+</table>    </div>
 
 </div>
-
 
 
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.datamodule.DataModule.setup" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">setup</span></code>
+            <code class="highlight language-python"><span class="n">setup</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>setup method is used to prepare the data for the training, validation, and test sets.
 It shuffles the data, calculates weights for each set, and creates samplers for each set.</p>
-
 
 
 <table class="field-list">
@@ -855,9 +843,9 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
@@ -1005,8 +993,8 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
     <span class="bp">self</span><span class="o">.</span><span class="n">idx_full</span> <span class="o">=</span> <span class="n">idx_full</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_datasets</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -1014,7 +1002,7 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 
   </div>
 
-  </div>
+    </div>
 
 </div>
               

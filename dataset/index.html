@@ -53,15 +53,15 @@
               </ul>
               <p class="caption"><span class="caption-text">documentation</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">dataset</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">dataset</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#scdataloader.data.Dataset">Dataset</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_label_weights">get_label_weights()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_label_weights">get_label_weights</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a>
     </li>
         </ul>
     </li>
@@ -109,11 +109,9 @@
 
 
 
-
 <h2 id="scdataloader.data.Dataset" class="doc doc-heading">
-          <code>scdataloader.data.Dataset</code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span></code>
 
-  
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
   </span>
@@ -121,11 +119,11 @@
 </h2>
 
 
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
-  
+
       <p>Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.</p>
 <p>This serves as a wrapper around lamin's mappedCollection to provide more features,
 mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species</p>
@@ -146,10 +144,9 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 </code></pre>
 
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -162,18 +159,15 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.data.Dataset.define_hierarchies" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">define_hierarchies</span></code>
+            <code class="highlight language-python"><span class="n">define_hierarchies</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>define_hierarchies is a method to define the hierarchies for the classes to predict</p>
+    <div class="doc doc-contents ">
 
+      <p>define_hierarchies is a method to define the hierarchies for the classes to predict</p>
 
 
 <table class="field-list">
@@ -200,7 +194,6 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -223,9 +216,9 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/data.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/data.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
@@ -455,27 +448,23 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
                     <span class="n">update</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="o">-</span> <span class="n">c</span><span class="p">})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span> <span class="o">=</span> <span class="n">update</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.data.Dataset.get_label_weights" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_label_weights</span></code>
+            <code class="highlight language-python"><span class="n">get_label_weights</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>get_label_weights is a wrapper around mappedDataset.get_label_weights</p>
+    <div class="doc doc-contents ">
 
+      <p>get_label_weights is a wrapper around mappedDataset.get_label_weights</p>
 
 
 <table class="field-list">
@@ -485,23 +474,23 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-<b><code>dict</code></b>            –
-            <div class="doc-md-description">
-              <p>dictionary of weights for each label</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>dict</code></b>              –
+              <div class="doc-md-description">
+                <p>dictionary of weights for each label</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/data.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/data.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
@@ -517,27 +506,23 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_label_weights</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
-
 <h3 id="scdataloader.data.Dataset.get_unseen_mapped_dataset_elements" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_unseen_mapped_dataset_elements</span></code>
+            <code class="highlight language-python"><span class="n">get_unseen_mapped_dataset_elements</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</p>
+    <div class="doc doc-contents ">
 
+      <p>get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</p>
 
 
 <table class="field-list">
@@ -564,7 +549,6 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
   </tbody>
 </table>
 
-
 <table class="field-list">
   <colgroup>
     <col class="field-name" />
@@ -572,23 +556,23 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
   </colgroup>
   <tbody valign="top">
     <tr class="field">
-    <th class="field-name">Returns:</th>
-    <td class="field-body">
-      <ul class="first simple">
-          <li>
-            –
-            <div class="doc-md-description">
-              <p>list[str]: list of unseen genes</p>
-            </div>
-          </li>
-      </ul>
-    </td>
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>list[str]: list of unseen genes</p>
+              </div>
+            </li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
-          <details class="quote">
-            <summary>Source code in <code>scdataloader/data.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/data.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
@@ -610,8 +594,8 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">uns</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;unseen_genes&quot;</span><span class="p">)]</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -619,7 +603,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -627,18 +611,17 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 
 
 
-
 <h2 id="scdataloader.data.SimpleAnnDataset" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">SimpleAnnDataset</span></code>
+              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">SimpleAnnDataset</span></code>
 
 </h2>
 
 
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
-  
+
       <p>SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
 scDataloader and with your model during inference.</p>
       <hr />
@@ -647,9 +630,9 @@ obs_to_output (list[str]): list of observations to output from anndata.obs
 layer (str): layer of the anndata to use
 </code></pre>
 
-                <details class="quote">
-                  <summary>Source code in <code>scdataloader/data.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
+                  <details class="quote">
+                    <summary>Source code in <code>scdataloader/data.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
@@ -687,9 +670,9 @@ layer (str): layer of the anndata to use
     <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span> <span class="k">if</span> <span class="n">issparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">obs_to_output</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">obs_to_output</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -705,7 +688,7 @@ layer (str): layer of the anndata to use
 
   </div>
 
-  </div>
+    </div>
 
 </div>
               
