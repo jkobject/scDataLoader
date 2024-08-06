@@ -29,6 +29,8 @@ It allows you to:
 
 built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
 
+The package has been designed together with the [scPRINT paper](https://doi.org/10.1101/2024.07.29.605556) and [model](https://github.com/cantinilab/scPRINT).
+
 ## More
 
 I needed to create this Data Loader for my PhD project. I am using it to load & preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.
