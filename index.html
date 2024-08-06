@@ -46,10 +46,26 @@
     <li class="toctree-l2"><a class="reference internal" href="#more">More</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#install-it-from-pypi">Install it from PyPI</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#direct-usage">Direct Usage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#command-line-preprocessing">command line preprocessing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#command-line-usage">command line usage</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#development">Development</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#license">License</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#acknowledgments">Acknowledgments</a>
     </li>
     </ul>
                 </li>
@@ -99,9 +115,16 @@
               
                 <h1 id="scdataloader">scdataloader</h1>
 <p><a href="https://codecov.io/gh/jkobject/scDataLoader"><img alt="codecov" src="https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here" /></a>
-<a href="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml"><img alt="CI" src="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg" /></a></p>
-<p>Awesome single cell dataloader created by @jkobject</p>
-<p>This data loader is designed to be used with:</p>
+<a href="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml"><img alt="CI" src="https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg" /></a>
+<a href="https://badge.fury.io/py/scDataLoader"><img alt="PyPI version" src="https://badge.fury.io/py/scDataLoader.svg" /></a>
+<a href="https://scDataLoader.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/scDataLoader/badge/?version=latest" /></a>
+<a href="https://pepy.tech/project/scDataLoader"><img alt="Downloads" src="https://pepy.tech/badge/scDataLoader" /></a>
+<a href="https://pepy.tech/project/scDataLoader"><img alt="Downloads" src="https://pepy.tech/badge/scDataLoader/month" /></a>
+<a href="https://pepy.tech/project/scDataLoader"><img alt="Downloads" src="https://pepy.tech/badge/scDataLoader/week" /></a>
+<a href="https://img.shields.io/github/issues/jkobject/scDataLoader"><img alt="GitHub issues" src="https://img.shields.io/github/issues/jkobject/scDataLoader" /></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<a href="https://doi.org/10.1101/2024.07.29.605556"><img alt="DOI" src="https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue" /></a></p>
+<p>This single cell pytorch dataloader / lighting datamodule is designed to be used with:</p>
 <ul>
 <li><a href="https://lamin.ai/">lamindb</a></li>
 </ul>
@@ -117,20 +140,87 @@
 <li>create a more complex single cell dataset</li>
 <li>extend it to your need</li>
 </ol>
+<p>built on top of <code>lamindb</code> and the <code>.mapped()</code> function by Sergey: https://github.com/Koncopd </p>
 <h2 id="more">More</h2>
 <p>I needed to create this Data Loader for my PhD project. I am using it to load &amp; preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.</p>
-<p><img alt="scdataloader.drawio.png" src="" /></p>
+<p><img alt="scdataloader.drawio.png" src="scdataloader.drawio.png" /></p>
 <h2 id="install-it-from-pypi">Install it from PyPI</h2>
 <pre><code class="language-bash">pip install scdataloader
 </code></pre>
+<h3 id="install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</h3>
+<pre><code class="language-bash">git clone https://github.com/jkobject/scDataLoader.git
+cd scDataLoader
+poetry install
+</code></pre>
+<p>then run the notebooks with the poetry installed environment</p>
 <h2 id="usage">Usage</h2>
+<h3 id="direct-usage">Direct Usage</h3>
+<pre><code class="language-python"># initialize a local lamin database
+# !lamin init --storage ~/scdataloader --schema bionty
+
+from scdataloader import utils
+from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, additional_preprocess
+
+# preprocess datasets
+DESCRIPTION='preprocessed by scDataLoader'
+
+cx_dataset = ln.Collection.using(instance=&quot;laminlabs/cellxgene&quot;).filter(name=&quot;cellxgene-census&quot;, version='2023-12-15').one()
+cx_dataset, len(cx_dataset.artifacts.all())
+
+
+do_preprocess = LaminPreprocessor(additional_postprocess=additional_postprocess, additional_preprocess=additional_preprocess, skip_validate=True, subset_hvg=0)
+
+preprocessed_dataset = do_preprocess(cx_dataset, name=DESCRIPTION, description=DESCRIPTION, start_at=6, version=&quot;2&quot;)
+
+# create dataloaders
+from scdataloader import DataModule
+import tqdm
+
+datamodule = DataModule(
+    collection_name=&quot;preprocessed dataset&quot;,
+    organisms=[&quot;NCBITaxon:9606&quot;], #organism that we will work on
+    how=&quot;most expr&quot;, # for the collator (most expr genes only will be selected)
+    max_len=1000, # only the 1000 most expressed
+    batch_size=64,
+    num_workers=1,
+    validation_split=0.1,
+    test_split=0)
+
+for i in tqdm.tqdm(datamodule.train_dataloader()):
+    # pass #or do pass
+    print(i)
+    break
+
+# with lightning:
+# Trainer(model, datamodule)
+
+</code></pre>
 <p>see the notebooks in <a href="https://jkobject.github.io/scDataLoader/">docs</a>:</p>
 <ol>
 <li><a href="https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html">load a dataset</a></li>
 <li><a href="https://jkobject.github.io/scDataLoader/notebooks/02_create_dataset.html">create a dataset</a></li>
 </ol>
+<h3 id="command-line-preprocessing">command line preprocessing</h3>
+<p>You can use the command line to preprocess a large database of datasets like here for cellxgene. this allows parallelizing and easier usage.</p>
+<pre><code class="language-bash">scdataloader --instance &quot;laminlabs/cellxgene&quot; --name &quot;cellxgene-census&quot; --version &quot;2023-12-15&quot; --description &quot;preprocessed for scprint&quot; --new_name &quot;scprint main&quot; --start_at 10 &gt;&gt; scdataloader.out
+</code></pre>
+<h3 id="command-line-usage">command line usage</h3>
+<p>The main way to use</p>
+<blockquote>
+<p>please refer to the <a href="https://www.jkobject.com/scPRINT/">scPRINT documentation</a> and <a href="https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_intermediate.html">lightning documentation</a> for more information on command line usage</p>
+</blockquote>
 <h2 id="development">Development</h2>
-<p>Read the <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
+<p>Read the <a href="../CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
+<h2 id="license">License</h2>
+<p>This project is licensed under the MIT License - see the <a href="../LICENSE">LICENSE</a> file for details.</p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<ul>
+<li><a href="https://lamin.ai/">lamin.ai</a></li>
+<li><a href="https://scanpy.readthedocs.io/en/stable/">scanpy</a></li>
+<li><a href="https://anndata.readthedocs.io/en/latest/">anndata</a></li>
+<li><a href="https://www.jkobject.com/scPRINT/">scprint</a></li>
+</ul>
+<p>Awesome single cell dataloader created by @jkobject</p>
               
             </div>
           </div><footer>
@@ -179,5 +269,5 @@
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-03-07 09:01:45.267942+00:00
+Build Date UTC : 2024-08-06 09:40:56.402298+00:00
 -->

@@ -187,7 +187,7 @@ it will drop any other genes from the input expression data (usefull when your m
 )
               –
               <div class="doc-md-description">
-                <p>Maximum number of genes to use (for random expr and most expr). Defaults to 2000.</p>
+                <p>Total number of genes to use (for random expr and most expr). Defaults to 2000.</p>
               </div>
             </li>
             <li>
@@ -222,12 +222,75 @@ it will drop any other genes from the input expression data (usefull when your m
             </li>
             <li>
               <b><code>norm_to</code></b>
+                  (<code>float</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Rescaling value of the normalization to be applied. Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organism_name</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;organism_ontology_term_id&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the organism ontology term id. Defaults to "organism_ontology_term_id".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>tp_name</code></b>
                   (<code>str</code>, default:
                       <code>None</code>
 )
               –
               <div class="doc-md-description">
-                <p>Normalization method to be applied. Defaults to None.</p>
+                <p>Name of the heat diff. Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>class_names</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of other classes to be considered. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>genelist</code></b>
+                  (<code>list</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of genes to be considered. Defaults to [].
+If [] all genes will be considered</p>
+              </div>
+            </li>
+            <li>
+              <b><code>downsample</code></b>
+                  (<code>float</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Downsample the profile to a certain number of cells. Defaults to None.
+This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator</p>
+              </div>
+            </li>
+            <li>
+              <b><code>save_output</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, saves the output to a file. Defaults to False.
+This is mainly for debugging purposes</p>
               </div>
             </li>
         </ul>
@@ -237,7 +300,8 @@ it will drop any other genes from the input expression data (usefull when your m
 </table>
                 <details class="quote">
                   <summary>Source code in <code>scdataloader/collator.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+<span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
 <span class="normal">12</span>
@@ -309,26 +373,23 @@ it will drop any other genes from the input expression data (usefull when your m
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">organisms</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-    <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
-    <span class="n">org_to_id</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">valid_genes</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">max_len</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-    <span class="n">add_zero_genes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">logp1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">norm_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_bins</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">tp_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">organism_name</span><span class="o">=</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
-    <span class="n">class_names</span><span class="o">=</span><span class="p">[],</span>
-    <span class="n">genelist</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">organisms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">how</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">org_to_id</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">valid_genes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">max_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="n">add_zero_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">logp1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">norm_to</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">tp_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">organism_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
+    <span class="n">class_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">genelist</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">downsample</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># don&#39;t use it for training!</span>
+    <span class="n">save_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class is responsible for collating data for the scPRINT model. It handles the</span>
@@ -352,46 +413,40 @@ it will drop any other genes from the input expression data (usefull when your m
 <span class="sd">        org_to_id (dict): Dictionary mapping organisms to their respective IDs.</span>
 <span class="sd">        valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].</span>
 <span class="sd">            it will drop any other genes from the input expression data (usefull when your model only works on some genes)</span>
-<span class="sd">        max_len (int, optional): Maximum number of genes to use (for random expr and most expr). Defaults to 2000.</span>
+<span class="sd">        max_len (int, optional): Total number of genes to use (for random expr and most expr). Defaults to 2000.</span>
 <span class="sd">        n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.</span>
 <span class="sd">        add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.</span>
 <span class="sd">        logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.</span>
-<span class="sd">        norm_to (str, optional): Normalization method to be applied. Defaults to None.</span>
+<span class="sd">        norm_to (float, optional): Rescaling value of the normalization to be applied. Defaults to None.</span>
+<span class="sd">        organism_name (str, optional): Name of the organism ontology term id. Defaults to &quot;organism_ontology_term_id&quot;.</span>
+<span class="sd">        tp_name (str, optional): Name of the heat diff. Defaults to None.</span>
+<span class="sd">        class_names (list, optional): List of other classes to be considered. Defaults to [].</span>
+<span class="sd">        genelist (list, optional): List of genes to be considered. Defaults to [].</span>
+<span class="sd">            If [] all genes will be considered</span>
+<span class="sd">        downsample (float, optional): Downsample the profile to a certain number of cells. Defaults to None.</span>
+<span class="sd">            This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator</span>
+<span class="sd">        save_output (bool, optional): If True, saves the output to a file. Defaults to False.</span>
+<span class="sd">            This is mainly for debugging purposes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">organisms</span> <span class="o">=</span> <span class="n">organisms</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">=</span> <span class="n">max_len</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span> <span class="o">=</span> <span class="n">n_bins</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">add_zero_genes</span> <span class="o">=</span> <span class="n">add_zero_genes</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logp1</span> <span class="o">=</span> <span class="n">logp1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="o">=</span> <span class="n">norm_to</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">org_to_id</span> <span class="o">=</span> <span class="n">org_to_id</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">=</span> <span class="n">how</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="nb">set</span><span class="p">([</span><span class="n">org_to_id</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">org_to_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
-    <span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;some&quot;</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">genelist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;if how is some, genelist must be provided&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span> <span class="o">=</span> <span class="n">organism_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span> <span class="o">=</span> <span class="n">tp_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="n">class_names</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">save_output</span> <span class="o">=</span> <span class="n">save_output</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span> <span class="o">=</span> <span class="n">downsample</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span><span class="p">):</span>
-        <span class="n">ogenedf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span> <span class="o">==</span> <span class="n">organism</span><span class="p">]</span>
-        <span class="n">org</span> <span class="o">=</span> <span class="n">org_to_id</span><span class="p">[</span><span class="n">organism</span><span class="p">]</span> <span class="k">if</span> <span class="n">org_to_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">organism</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span><span class="n">org</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">organism</span> <span class="o">==</span> <span class="n">organism</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]}</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">org</span><span class="p">:</span> <span class="n">ogenedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)})</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">genelist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">ogenedf</span><span class="p">[</span><span class="n">ogenedf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_genes</span><span class="p">)]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">org</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">genelist</span><span class="p">)})</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">(</span><span class="n">org_to_id</span><span class="p">,</span> <span class="n">valid_genes</span><span class="p">,</span> <span class="n">genelist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                 </details>
 
@@ -421,7 +476,7 @@ it will drop any other genes from the input expression data (usefull when your m
 
   <div class="doc doc-contents ">
   
-      <p><strong>call</strong> is a special method in Python that is called when an instance of the class is called.</p>
+      <p><strong>call</strong> applies the collator to a minibatch of data</p>
 
 
 
@@ -466,6 +521,7 @@ elem["class_names.."]: other classes</p>
     <td class="field-body">
       <ul class="first simple">
           <li>
+                <code>dict[str, <span title="torch.Tensor">Tensor</span>]</code>
             –
             <div class="doc-md-description">
               <p>list[Tensor]: List of tensors containing the collated data.</p>
@@ -478,23 +534,7 @@ elem["class_names.."]: other classes</p>
 </table>
           <details class="quote">
             <summary>Source code in <code>scdataloader/collator.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
 <span class="normal">107</span>
@@ -593,9 +633,37 @@ elem["class_names.."]: other classes</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    __call__ is a special method in Python that is called when an instance of the class is called.</span>
+<span class="sd">    __call__ applies the collator to a minibatch of data</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.</span>
@@ -616,11 +684,14 @@ elem["class_names.."]: other classes</p>
     <span class="n">other_classes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">gene_locs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">tp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">nnz_loc</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
         <span class="n">organism_id</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">organism_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span><span class="p">:</span>
             <span class="k">continue</span>
+        <span class="k">if</span> <span class="s2">&quot;_storage_idx&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;_storage_idx&quot;</span><span class="p">])</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
         <span class="n">total_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -682,6 +753,7 @@ elem["class_names.."]: other classes</p>
     <span class="n">gene_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gene_locs</span><span class="p">)</span>
     <span class="n">total_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
     <span class="n">other_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
     <span class="c1"># normalize counts</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -702,13 +774,21 @@ elem["class_names.."]: other classes</p>
     <span class="c1"># do encoding of graph location</span>
     <span class="c1"># encode all the edges in some sparse way</span>
     <span class="c1"># normalizing total counts between 0,1</span>
-    <span class="k">return</span> <span class="p">{</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span>
         <span class="s2">&quot;genes&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">gene_locs</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
         <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
         <span class="s2">&quot;tp&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span>
         <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">total_count</span><span class="p">),</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;dataset&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">long</span><span class="p">)})</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsample_profile</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_output</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;collator_output.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -743,13 +823,19 @@ elem["class_names.."]: other classes</p>
 
                 <details class="quote">
                   <summary>Source code in <code>scdataloader/collator.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    AnnDataCollator Collator to use if working with AnnData&#39;s experimental dataloader (it is very slow!!!)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        @see Collator</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
