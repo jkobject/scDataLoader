@@ -4,6 +4,61 @@ Changelog
 
 (unreleased)
 ------------
+- Cleanup. [jkobject]
+- Debug lamin connection. [jkobject]
+- Bypass attr. [jkobject]
+- No weight scaler. [maestro-jk]
+- Improvement in collator and some refact. [maestro-jk]
+- Multi thread debug. [maestro-jk]
+- Making a predict dataloader. [maestro-jk]
+- Tiny side cases. [jkobject]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader.
+  [maestro-jk]
+- Making it faster and a tiny debug. [jkobject]
+- Better collator with a setup. [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader.
+  [maestro-jk]
+- Add some capabilities. [jkobject]
+- Removing pdbs. [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader.
+  [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader into
+  main. [jkobject]
+- Cleanup. [jkobject]
+- Decrease prints. [maestro-jk]
+- Works. [maestro-jk]
+- Tiny debug. [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader.
+  [maestro-jk]
+- Tiny debug with the update. [jkobject]
+- Quick to remove. [maestro-jk]
+- Update mapped with new lamindb version. [jkobject]
+- Update mapped with new lamindb version. [jkobject]
+
+
+0.4.0 (2024-04-03)
+------------------
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader into
+  main. [jkobject]
+- Merge pull request #5 from
+  jkobject/dependabot/github_actions/softprops/action-gh-release-2.
+  [Jérémie Kalfon]
+
+  Bump softprops/action-gh-release from 1 to 2
+- Bump softprops/action-gh-release from 1 to 2. [dependabot[bot]]
+
+  Bumps [softprops/action-gh-release](https://github.com/softprops/action-gh-release) from 1 to 2.
+  - [Release notes](https://github.com/softprops/action-gh-release/releases)
+  - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/softprops/action-gh-release/compare/v1...v2)
+
+  ---
+  updated-dependencies:
+  - dependency-name: softprops/action-gh-release
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Release: version 0.7.0 🚀 [jkobject]
 - Merge branch 'dev' into main. [jkobject]
 - Debug to test. [jkobject]
 - Merge branch 'dev' of https://github.com/jkobject/scDataLoader into
