@@ -1,28 +1,27 @@
 import numpy as np
 from .utils import load_genes, downsample_profile
 from torch import Tensor, long
-
-# class SimpleCollator:
+from typing import Optional
 
 
 class Collator:
     def __init__(
         self,
-        organisms: list,
-        how="all",
-        org_to_id: dict = None,
-        valid_genes: list = [],
-        max_len=2000,
-        add_zero_genes=0,
-        logp1=False,
-        norm_to=None,
-        n_bins=0,
-        tp_name=None,
-        organism_name="organism_ontology_term_id",
-        class_names=[],
-        genelist=[],
-        downsample=None,  # don't use it for training!
-        save_output=False,
+        organisms: list[str],
+        how: str = "all",
+        org_to_id: dict[str, int] = None,
+        valid_genes: list[str] = [],
+        max_len: int = 2000,
+        add_zero_genes: int = 0,
+        logp1: bool = False,
+        norm_to: Optional[float] = None,
+        n_bins: int = 0,
+        tp_name: Optional[str] = None,
+        organism_name: str = "organism_ontology_term_id",
+        class_names: list[str] = [],
+        genelist: list[str] = [],
+        downsample: Optional[float] = None,  # don't use it for training!
+        save_output: bool = False,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -46,11 +45,20 @@ class Collator:
             org_to_id (dict): Dictionary mapping organisms to their respective IDs.
             valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].
                 it will drop any other genes from the input expression data (usefull when your model only works on some genes)
-            max_len (int, optional): Maximum number of genes to use (for random expr and most expr). Defaults to 2000.
+            max_len (int, optional): Total number of genes to use (for random expr and most expr). Defaults to 2000.
             n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.
             add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.
             logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.
-            norm_to (str, optional): Normalization method to be applied. Defaults to None.
+            norm_to (float, optional): Rescaling value of the normalization to be applied. Defaults to None.
+            organism_name (str, optional): Name of the organism ontology term id. Defaults to "organism_ontology_term_id".
+            tp_name (str, optional): Name of the heat diff. Defaults to None.
+            class_names (list, optional): List of other classes to be considered. Defaults to [].
+            genelist (list, optional): List of genes to be considered. Defaults to [].
+                If [] all genes will be considered
+            downsample (float, optional): Downsample the profile to a certain number of cells. Defaults to None.
+                This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator
+            save_output (bool, optional): If True, saves the output to a file. Defaults to False.
+                This is mainly for debugging purposes
         """
         self.organisms = organisms
         self.genedf = load_genes(organisms)
@@ -70,9 +78,9 @@ class Collator:
         self.accepted_genes = {}
         self.downsample = downsample
         self.to_subset = {}
-        self.setup(org_to_id, valid_genes, genelist)
+        self._setup(org_to_id, valid_genes, genelist)
 
-    def setup(self, org_to_id=None, valid_genes=[], genelist=[]):
+    def _setup(self, org_to_id=None, valid_genes=[], genelist=[]):
         self.org_to_id = org_to_id
         self.to_subset = {}
         self.accepted_genes = {}
@@ -93,7 +101,7 @@ class Collator:
                 df = ogenedf[ogenedf.index.isin(valid_genes)]
                 self.to_subset.update({org: df.index.isin(genelist)})
 
-    def __call__(self, batch):
+    def __call__(self, batch) -> dict[str, Tensor]:
         """
         __call__ applies the collator to a minibatch of data
 
@@ -233,7 +241,7 @@ class AnnDataCollator(Collator):
         """
         super().__init__(*args, **kwargs)
 
-    def __call__(self, batch):
+    def __call__(self, batch) -> dict[str, Tensor]:
         exprs = []
         total_count = []
         other_classes = []
@@ -286,6 +294,9 @@ class AnnDataCollator(Collator):
         }
 
 
+#############
+#### WIP ####
+#############
 class GeneformerCollator(Collator):
     def __init__(self, *args, gene_norm_list: list, **kwargs):
         """

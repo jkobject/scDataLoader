@@ -74,6 +74,7 @@ def _fetchFromServer(
     Args:
         ensemble_server (str): The URL of the ensemble server to fetch data from.
         attributes (list): The list of attributes to fetch from the server.
+        database (str): The database to fetch data from.
 
     Returns:
         pd.DataFrame: A pandas DataFrame containing the fetched data.
@@ -104,6 +105,9 @@ def getBiomartTable(
         ensemble_server (str, optional): the biomart server. Defaults to "http://jul2023.archive.ensembl.org/biomart".
         useCache (bool, optional): whether to use the cache or not. Defaults to False.
         cache_folder (str, optional): the cache folder. Defaults to "/tmp/biomart/".
+        attributes (List[str], optional): the attributes to fetch. Defaults to [].
+        bypass_attributes (bool, optional): whether to bypass the attributes or not. Defaults to False.
+        database (str, optional): the database to fetch from. Defaults to "hsapiens_gene_ensembl".
 
     Raises:
         ValueError: should be a dataframe (when the result from the server is something else)

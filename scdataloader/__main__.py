@@ -10,6 +10,9 @@ from typing import Optional, Union
 
 # scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" --description="preprocessed for scprint" --new_name="scprint main" --start_at=39
 def main():
+    """
+    main function to preprocess datasets in a given lamindb collection.
+    """
     parser = argparse.ArgumentParser(
         description="Preprocess datasets in a given lamindb collection."
     )

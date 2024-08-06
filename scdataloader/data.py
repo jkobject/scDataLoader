@@ -146,12 +146,36 @@ class Dataset(torchDataset):
         )
 
     def get_label_weights(self, *args, **kwargs):
+        """
+        get_label_weights is a wrapper around mappedDataset.get_label_weights
+
+        Returns:
+            dict: dictionary of weights for each label
+        """
         return self.mapped_dataset.get_label_weights(*args, **kwargs)
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
+        """
+        get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements
+
+        Args:
+            idx (int): index of the element to get
+
+        Returns:
+            list[str]: list of unseen genes
+        """
         return [str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")]
 
     def define_hierarchies(self, clsses: list[str]):
+        """
+        define_hierarchies is a method to define the hierarchies for the classes to predict
+
+        Args:
+            clsses (list[str]): list of classes to predict
+
+        Raises:
+            ValueError: if the class is not in the accepted classes
+        """
         # TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with
         self.labels_groupings = {}
         self.class_topred = {}

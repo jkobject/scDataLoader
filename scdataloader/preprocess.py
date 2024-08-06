@@ -204,7 +204,9 @@ class Preprocessor:
             )
         )
 
-        if self.is_symbol:
+        if self.is_symbol or not adata.var.index.str.contains("ENSG").any():
+            if not adata.var.index.str.contains("ENSG").any():
+                print("No ENSG genes found, assuming gene symbols...")
             genesdf["ensembl_gene_id"] = genesdf.index
             var = (
                 adata.var.merge(

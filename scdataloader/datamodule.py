@@ -60,19 +60,33 @@ class DataModule(L.LightningDataModule):
 
         Args:
             collection_name (str): The lamindb collection to be used.
-            weight_scaler (int, optional): how much more you will see the most present vs less present category.
-            gene_position_tolerance (int, optional): The tolerance for gene position. Defaults to 10_000.
-                any genes within this distance of each other will be considered at the same position.
-            gene_embeddings (str, optional): The path to the gene embeddings file. Defaults to "".
-                the file must have ensembl_gene_id as index.
-                This is used to subset the available genes further to the ones that have embeddings in your model.
+            clss_to_weight (list, optional): The classes to weight in the trainer's weighted random sampler. Defaults to ["organism_ontology_term_id"].
             organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
-            clss_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
+            weight_scaler (int, optional): how much more you will see the most present vs less present category.
+            train_oversampling_per_epoch (float, optional): The proportion of the dataset to include in the training set for each epoch. Defaults to 0.1.
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
                 it will use a full dataset and will round to the nearest dataset's cell count.
-            **other args: see @file data.py and @file collator.py for more details
+            gene_embeddings (str, optional): The path to the gene embeddings file. Defaults to "".
+                the file must have ensembl_gene_id as index.
+                This is used to subset the available genes further to the ones that have embeddings in your model.
+            use_default_col (bool, optional): Whether to use the default collator. Defaults to True.
+            gene_position_tolerance (int, optional): The tolerance for gene position. Defaults to 10_000.
+                any genes within this distance of each other will be considered at the same position.
+            clss_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
+            assays_to_drop (list, optional): List of assays to drop from the dataset. Defaults to [].
+            do_gene_pos (Union[bool, str], optional): Whether to use gene positions. Defaults to True.
+            max_len (int, optional): The maximum length of the input tensor. Defaults to 1000.
+            add_zero_genes (int, optional): The number of zero genes to add to the input tensor. Defaults to 100.
+            how (str, optional): The method to use for the collator. Defaults to "random expr".
+            organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
+            tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
+            hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
+            all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
+            clss_to_pred (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
+
+            see @file data.py and @file collator.py for more details about some of the parameters
         """
         if collection_name is not None:
             mdataset = Dataset(

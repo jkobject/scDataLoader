@@ -1,3 +1,9 @@
+"""
+Configuration file for scDataLoader
+
+Missing labels are added to the dataset to complete a better hierarchical tree
+"""
+
 LABELS_TOADD = {
     "assay_ontology_term_id": {
         "10x transcription profiling": "EFO:0030003",

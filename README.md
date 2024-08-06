@@ -2,14 +2,16 @@
 
 [![codecov](https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here)](https://codecov.io/gh/jkobject/scDataLoader)
 [![CI](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml)
-[![DOI](https://zenodo.org/badge/731248665.svg)](https://zenodo.org/doi/10.5281/zenodo.10573143)
+[![PyPI version](https://badge.fury.io/py/scDataLoader.svg)](https://badge.fury.io/py/scDataLoader)
+[![Documentation Status](https://readthedocs.org/projects/scDataLoader/badge/?version=latest)](https://scDataLoader.readthedocs.io/en/latest/?badge=latest)
+[![Downloads](https://pepy.tech/badge/scDataLoader)](https://pepy.tech/project/scDataLoader)
+[![Downloads](https://pepy.tech/badge/scDataLoader/month)](https://pepy.tech/project/scDataLoader)
+[![Downloads](https://pepy.tech/badge/scDataLoader/week)](https://pepy.tech/project/scDataLoader)
+[![GitHub issues](https://img.shields.io/github/issues/jkobject/scDataLoader)](https://img.shields.io/github/issues/jkobject/scDataLoader)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![DOI](https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue)](https://doi.org/10.1101/2024.07.29.605556)
 
-
-Awesome single cell dataloader created by @jkobject 
-
-built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
-
-This data loader is designed to be used with:
+This single cell pytorch dataloader / lighting datamodule is designed to be used with:
 
 - [lamindb](https://lamin.ai/)
 
@@ -25,18 +27,13 @@ It allows you to:
 3. create a more complex single cell dataset
 4. extend it to your need
 
-## About
+built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
 
-the idea is to use it to train models like scGPT / GeneFormer (and soon, scPrint ;)). It is: 
+## More
 
-1. loading from lamin 
-2. doing some dataset specific preprocessing if needed 
-3. creating a dataset object on top of .mapped() (that is needed for mapping genes, cell labels etc..)
-4. passing it to a dataloader object that can work with it correctly
+I needed to create this Data Loader for my PhD project. I am using it to load & preprocess thousands of datasets containing millions of cells in a few seconds. I believed that individuals employing AI for single-cell RNA sequencing and other sequencing datasets would eagerly utilize and desire such a tool, which presently does not exist.
 
-Currently one would have to use the preprocess function to make the dataset fit for different tools like scGPT / Geneformer. But I would want to enable it through different Collators. This is still missing and a WIP... (please do contribute!)
-
-![docs/scdataloader.drawio.png](docs/scdataloader.drawio.png)
+![scdataloader.drawio.png](docs/scdataloader.drawio.png)
 
 ## Install it from PyPI
 
@@ -54,6 +51,8 @@ poetry install
 then run the notebooks with the poetry installed environment
 
 ## Usage
+
+### Direct Usage
 
 ```python
 # initialize a local lamin database
@@ -102,6 +101,33 @@ see the notebooks in [docs](https://jkobject.github.io/scDataLoader/):
 1. [load a dataset](https://jkobject.github.io/scDataLoader/notebooks/01_load_dataset.html)
 2. [create a dataset](https://jkobject.github.io/scDataLoader/notebooks/02_create_dataset.html)
 
+### command line preprocessing
+
+You can use the command line to preprocess a large database of datasets like here for cellxgene. this allows parallelizing and easier usage.
+
+```bash
+scdataloader --instance "laminlabs/cellxgene" --name "cellxgene-census" --version "2023-12-15" --description "preprocessed for scprint" --new_name "scprint main" --start_at 10 >> scdataloader.out
+```
+
+### command line usage
+
+The main way to use
+
+> please refer to the [scPRINT documentation](https://www.jkobject.com/scPRINT/) and [lightning documentation](https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_intermediate.html) for more information on command line usage
+
 ## Development
 
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [lamin.ai](https://lamin.ai/)
+- [scanpy](https://scanpy.readthedocs.io/en/stable/)
+- [anndata](https://anndata.readthedocs.io/en/latest/)
+- [scprint](https://www.jkobject.com/scPRINT/)
+
+Awesome single cell dataloader created by @jkobject
