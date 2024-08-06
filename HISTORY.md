@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Cleanup and making a release. [jkobject]
+
+
+1.0.0 (2024-08-06)
+------------------
+- Release: version 1.0.0 🚀 [jkobject]
 - Release: version  🚀 [jkobject]
 - Cleanup. [jkobject]
 - Debug lamin connection. [jkobject]
