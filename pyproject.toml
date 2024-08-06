@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scdataloader"
-version = "0.0.4"
+version = "1.0.1"
 description = "a dataloader for single cell data in lamindb"
 authors = ["jkobject"]
 license = "GPL3"
