@@ -10,7 +10,8 @@ keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPrint"]
 
 [tool.poetry.dependencies]
 python = "3.10.*"
-lamindb = "*"
+lamindb = "<=0.69.9"
+bionty = "<=0.42.6"
 cellxgene-census = "*"
 torch = "*"
 lightning = "*"
@@ -25,7 +26,6 @@ leidenalg = "*"
 decoupler = "*"
 django = "*"
 lnschema-bionty = "*"
-bionty = "*"
 scikit-misc = "*"
 
 [tool.poetry.group.dev.dependencies]
