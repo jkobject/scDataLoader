@@ -355,7 +355,7 @@ def load_dataset_local(
 
 def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
     organismdf = []
-    if type(organisms) == str:
+    if type(organisms) is str:
         organisms = [organisms]
     for organism in organisms:
         genesdf = bt.Gene.filter(

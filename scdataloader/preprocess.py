@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Union
+from typing import Callable, Optional, Union
 from uuid import uuid4
 
 import anndata as ad
@@ -7,9 +7,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 from anndata import AnnData
-from django.db import IntegrityError
 from scipy.sparse import csr_matrix
-import os
 
 from scdataloader import utils as data_utils
 

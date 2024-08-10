@@ -92,7 +92,10 @@ class Collator:
         )
         for organism in self.organisms:
             ogenedf = self.genedf[self.genedf.organism == organism]
-            tot = self.genedf[self.genedf.index.isin(valid_genes)]
+            if len(valid_genes) > 0:
+                tot = self.genedf[self.genedf.index.isin(valid_genes)]
+            else:
+                tot = self.genedf
             org = org_to_id[organism] if org_to_id is not None else organism
             self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
             if len(valid_genes) > 0:

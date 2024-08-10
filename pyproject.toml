@@ -6,7 +6,7 @@ authors = ["jkobject"]
 license = "GPL3"
 readme = ["README.md", "LICENSE"]
 repository = "https://github.com/jkobject/scDataLoader"
-keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPrint"]
+keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 
 [tool.poetry.dependencies]
 python = "3.10.*"

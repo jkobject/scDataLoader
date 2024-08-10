@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from functools import reduce
-from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import pandas as pd
@@ -49,7 +48,7 @@ class _Connect:
 
 def mapped(
     dataset,
-    label_keys: str | list[str] | None = None,
+    label_keys: str[str] | None = None,
     join: Literal["inner", "outer"] | None = "inner",
     encode_labels: bool | list[str] = True,
     unknown_label: str | dict[str, str] | None = None,
