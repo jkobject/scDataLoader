@@ -16,6 +16,16 @@ from torch.utils.data import DataLoader
 
 def test_base():
     assert NAME == "scdataloader"
+    utils.populate_my_ontology(
+        organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
+        sex=["PATO:0000384", "PATO:0000383"],
+        celltypes=None,
+        ethnicities=None,
+        assays=None,
+        tissues=None,
+        diseases=None,
+        dev_stages=None,
+    )
     # cx_dataset = (
     #     ln.Collection.using(instance="laminlabs/cellxgene")
     #     .filter(name="cellxgene-census", version="2023-12-15")
