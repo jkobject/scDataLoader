@@ -412,7 +412,7 @@ def populate_my_ontology(
 
     names = bt.CellType.public().df().index if not celltypes else celltypes
     records = bt.CellType.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(celltypes))
+    ln.save(records)
     bt.CellType(name="unknown", ontology_id="unknown").save()
     # Organism
     names = bt.Organism.public().df().index if not organisms else organisms
@@ -420,7 +420,7 @@ def populate_my_ontology(
         i[0] if type(i) is list else i
         for i in [bt.Organism.from_public(ontology_id=i) for i in names]
     ]
-    ln.save(records, parents=bool(organisms))
+    ln.save(records)
     bt.Organism(name="unknown", ontology_id="unknown").save()
     # Phenotype
     names = bt.Phenotype.public().df().index if not sex else sex
@@ -433,31 +433,31 @@ def populate_my_ontology(
         )
         for i in names
     ]
-    ln.save(records, parents=bool(sex))
+    ln.save(records)
     bt.Phenotype(name="unknown", ontology_id="unknown").save()
     # ethnicity
     names = bt.Ethnicity.public().df().index if not ethnicities else ethnicities
     records = bt.Ethnicity.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(ethnicities))
+    ln.save(records)
     bt.Ethnicity(
         name="unknown", ontology_id="unknown"
     ).save()  # multi ethnic will have to get renamed
     # ExperimentalFactor
     names = bt.ExperimentalFactor.public().df().index if not assays else assays
     records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(assays))
+    ln.save(records)
     bt.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
     # lookup = bt.ExperimentalFactor.lookup()
     # lookup.smart_seq_v4.parents.add(lookup.smart_like)
     # Tissue
     names = bt.Tissue.public().df().index if not tissues else tissues
     records = bt.Tissue.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(tissues))
+    ln.save(records)
     bt.Tissue(name="unknown", ontology_id="unknown").save()
     # DevelopmentalStage
     names = bt.DevelopmentalStage.public().df().index if not dev_stages else dev_stages
     records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(dev_stages))
+    ln.save(records)
     bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
 
     names = bt.DevelopmentalStage.public(organism="mouse").df().name
@@ -468,12 +468,11 @@ def populate_my_ontology(
         bt.DevelopmentalStage.from_public(name=i, public_source=bionty_source)
         for i in names.tolist()
     ]
-    records[-4] = records[-4][0]
     ln.save(records)
     # Disease
     names = bt.Disease.public().df().index if not diseases else diseases
     records = bt.Disease.from_values(names, field="ontology_id")
-    ln.save(records, parents=bool(diseases))
+    ln.save(records)
     bt.Disease(name="normal", ontology_id="PATO:0000461").save()
     bt.Disease(name="unknown", ontology_id="unknown").save()
     # genes
