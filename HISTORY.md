@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.0.4 (2024-08-14)
+------------------
+- Release: version 1.0.4 🚀 [jkobject]
 - Debug gene_df. [jkobject]
 
 
