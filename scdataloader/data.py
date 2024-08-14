@@ -8,7 +8,7 @@ import bionty as bt
 import pandas as pd
 from torch.utils.data import Dataset as torchDataset
 from typing import Union, Optional, Literal
-from scdataloader import mapped
+from scdataloader.mapped import MappedCollection
 import warnings
 
 from anndata import AnnData
@@ -74,9 +74,9 @@ class Dataset(torchDataset):
     join_vars: Literal["inner", "outer"] | None = None
 
     def __post_init__(self):
-        self.mapped_dataset = mapped.mapped(
+        self.mapped_dataset = mapped(
             self.lamin_dataset,
-            label_keys=self.obs,
+            obs_keys=self.obs,
             join=self.join_vars,
             encode_labels=self.clss_to_pred,
             unknown_label="unknown",
@@ -311,7 +311,7 @@ class SimpleAnnDataset(torchDataset):
         for idx, obs in enumerate(self.adata.obs.itertuples(index=False)):
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=DeprecationWarning)
-                out = {"x": self.adataX[idx].reshape(-1)}
+                out = {"X": self.adataX[idx].reshape(-1)}
                 out.update(
                     {name: val for name, val in self.obs_to_output.iloc[idx].items()}
                 )
@@ -320,8 +320,45 @@ class SimpleAnnDataset(torchDataset):
     def __getitem__(self, idx):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            out = {"x": self.adataX[idx].reshape(-1)}
+            out = {"X": self.adataX[idx].reshape(-1)}
             out.update(
                 {name: val for name, val in self.obs_to_output.iloc[idx].items()}
             )
         return out
+
+
+def mapped(
+    dataset,
+    obs_keys: list[str] | None = None,
+    join: Literal["inner", "outer"] | None = "inner",
+    encode_labels: bool | list[str] = True,
+    unknown_label: str | dict[str, str] | None = None,
+    cache_categories: bool = True,
+    parallel: bool = False,
+    dtype: str | None = None,
+    stream: bool = False,
+    is_run_input: bool | None = None,
+) -> MappedCollection:
+    path_list = []
+    for artifact in dataset.artifacts.all():
+        if artifact.suffix not in {".h5ad", ".zrad", ".zarr"}:
+            print(f"Ignoring artifact with suffix {artifact.suffix}")
+            continue
+        elif not artifact.path.exists():
+            print(f"Path does not exist for artifact with suffix {artifact.suffix}")
+            continue
+        elif not stream:
+            path_list.append(artifact.stage())
+        else:
+            path_list.append(artifact.path)
+    ds = MappedCollection(
+        path_list=path_list,
+        obs_keys=obs_keys,
+        join=join,
+        encode_labels=encode_labels,
+        unknown_label=unknown_label,
+        cache_categories=cache_categories,
+        parallel=parallel,
+        dtype=dtype,
+    )
+    return ds

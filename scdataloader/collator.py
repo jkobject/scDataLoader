@@ -111,7 +111,7 @@ class Collator:
         Args:
             batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.
                 the first list is for the different samples, the second list is for the different elements with
-                elem["x"]: gene expression
+                elem["X"]: gene expression
                 elem["organism_name"]: organism ontology term id
                 elem["tp_name"]: heat diff
                 elem["class_names.."]: other classes
@@ -135,7 +135,7 @@ class Collator:
                 continue
             if "_storage_idx" in elem:
                 dataset.append(elem["_storage_idx"])
-            expr = np.array(elem["x"])
+            expr = np.array(elem["X"])
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
@@ -232,69 +232,6 @@ class Collator:
             with open("collator_output.txt", "a") as f:
                 np.savetxt(f, ret["x"].numpy())
         return ret
-
-
-class AnnDataCollator(Collator):
-    def __init__(self, *args, **kwargs):
-        """
-        AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)
-
-        Args:
-            @see Collator
-        """
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, batch) -> dict[str, Tensor]:
-        exprs = []
-        total_count = []
-        other_classes = []
-        gene_locs = []
-        tp = []
-        for elem in batch:
-            organism_id = elem.obs[self.organism_name]
-            if organism_id.item() not in self.organism_ids:
-                print(organism_id)
-            expr = np.array(elem.X[0])
-
-            total_count.append(expr.sum())
-            if len(self.accepted_genes) > 0:
-                expr = expr[self.accepted_genes[organism_id]]
-            if self.how == "most expr":
-                loc = np.argsort(expr)[-(self.max_len) :][::-1]
-            elif self.how == "random expr":
-                nnz_loc = np.where(expr > 0)[0]
-                loc = nnz_loc[
-                    np.random.choice(len(nnz_loc), self.max_len, replace=False)
-                ]
-            else:
-                raise ValueError("how must be either most expr or random expr")
-            if self.add_zero_genes > 0:
-                zero_loc = np.where(expr == 0)[0]
-                zero_loc = [
-                    np.random.choice(len(zero_loc), self.add_zero_genes, replace=False)
-                ]
-                loc = np.concatenate((loc, zero_loc), axis=None)
-            exprs.append(expr[loc])
-            gene_locs.append(loc + self.start_idx[organism_id.item()])
-
-            if self.tp_name is not None:
-                tp.append(elem.obs[self.tp_name])
-            else:
-                tp.append(0)
-
-            other_classes.append([elem.obs[i].values[0] for i in self.class_names])
-
-        expr = np.array(exprs)
-        tp = np.array(tp)
-        gene_locs = np.array(gene_locs)
-        total_count = np.array(total_count)
-        other_classes = np.array(other_classes)
-        return {
-            "x": Tensor(expr),
-            "genes": Tensor(gene_locs).int(),
-            "depth": Tensor(total_count),
-            "class": Tensor(other_classes),
-        }
 
 
 #############

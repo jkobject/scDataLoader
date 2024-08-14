@@ -10,8 +10,8 @@ keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 
 [tool.poetry.dependencies]
 python = "3.10.*"
-lamindb = "<=0.69.9"
-bionty = "<=0.42.6"
+lamindb = "0.75.1"
+bionty = "0.48.0"
 cellxgene-census = "*"
 torch = "*"
 lightning = "*"
@@ -25,7 +25,6 @@ pandas = ">=2.0.0"
 leidenalg = "*"
 decoupler = "*"
 django = "*"
-lnschema-bionty = "*"
 scikit-misc = "*"
 pytest = { version = "^7.4.3", optional = true }
 coverage = { version = "^7.3.2", optional = true }
@@ -54,7 +53,6 @@ dev = [
     "mkdocs-jupyter",
     "mkdocstrings-python"
 ]
-
 
 [build-system]
 requires = ["poetry-core"]

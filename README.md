@@ -115,6 +115,27 @@ The main way to use
 
 > please refer to the [scPRINT documentation](https://www.jkobject.com/scPRINT/) and [lightning documentation](https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_intermediate.html) for more information on command line usage
 
+## FAQ
+
+### how to update my ontologies?
+
+```bash
+import bionty as bt
+bt.reset_sources()
+
+# Run via CLI: lamin load <your instance>
+
+import lnschema_bionty as lb
+lb.dev.sync_bionty_source_to_latest()
+```
+
+### how to load all ontologies?
+
+```python
+from scdataloader import utils
+utils.populate_ontologies() # this might take from 5-20mins
+```
+
 ## Development
 
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.

@@ -138,7 +138,6 @@ def getBiomartTable(
 
         res = _fetchFromServer(ensemble_server, attr + attributes, database=database)
         res.to_csv(cachefile, index=False)
-
     res.columns = attr + attributes
     if type(res) is not type(pd.DataFrame()):
         raise ValueError("should be a dataframe")
@@ -361,7 +360,6 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf = bt.Gene.filter(
             organism_id=bt.Organism.filter(ontology_id=organism).first().id
         ).df()
-        genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
         genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes
@@ -420,7 +418,7 @@ def populate_my_ontology(
         names = bt.Organism.public().df().index if not organisms else organisms
         records = [
             i[0] if type(i) is list else i
-            for i in [bt.Organism.from_public(ontology_id=i) for i in names]
+            for i in [bt.Organism.from_source(ontology_id=i) for i in names]
         ]
         ln.save(records)
         bt.Organism(name="unknown", ontology_id="unknown").save()
@@ -429,11 +427,8 @@ def populate_my_ontology(
     if sex is not None:
         names = bt.Phenotype.public().df().index if not sex else sex
         records = [
-            bt.Phenotype.from_public(
+            bt.Phenotype.from_source(
                 ontology_id=i,
-                public_source=bt.PublicSource.filter(
-                    entity="Phenotype", source="pato"
-                ).one(),
             )
             for i in names
         ]
@@ -470,12 +465,9 @@ def populate_my_ontology(
         ln.save(records)
         bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
 
-        names = bt.DevelopmentalStage.public(organism="mouse").df().name
-        bionty_source = bt.PublicSource.filter(
-            entity="DevelopmentalStage", organism="mouse"
-        ).one()
+        names = bt.DevelopmentalStage.public(organism="mouse").df().index
         records = [
-            bt.DevelopmentalStage.from_public(name=i, public_source=bionty_source)
+            bt.DevelopmentalStage.from_source(ontology_id=i)
             for i in names.tolist()
         ]
         records[-4] = records[-4][0]

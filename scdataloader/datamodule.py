@@ -130,7 +130,7 @@ class DataModule(L.LightningDataModule):
                 print(f"reduced the size to {len(set(c))/len(biomart)}")
                 biomart["pos"] = c
             mdataset.genedf = biomart.loc[mdataset.genedf.index]
-            self.gene_pos = mdataset.genedf["pos"].tolist()
+            self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
 
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
