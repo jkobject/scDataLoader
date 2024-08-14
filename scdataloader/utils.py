@@ -370,7 +370,11 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
         genesdf["organism"] = organism
         organismdf.append(genesdf)
-    return pd.concat(organismdf)
+    organismdf = pd.concat(organismdf)
+    organismdf.drop(
+        columns=["source_id", "run_id", "created_by_id", "updated_at"], inplace=True
+    )
+    return organismdf
 
 
 def populate_my_ontology(
@@ -467,8 +471,7 @@ def populate_my_ontology(
 
         names = bt.DevelopmentalStage.public(organism="mouse").df().index
         records = [
-            bt.DevelopmentalStage.from_source(ontology_id=i)
-            for i in names.tolist()
+            bt.DevelopmentalStage.from_source(ontology_id=i) for i in names.tolist()
         ]
         records[-4] = records[-4][0]
         ln.save(records)
@@ -524,27 +527,6 @@ def length_normalize(adata: AnnData, gene_lengths: list):
     """
     adata.X = csr_matrix((adata.X.T / gene_lengths).T)
     return adata
-
-
-def pd_load_cached(url: str, loc: str = "/tmp/", cache: bool = True, **kwargs):
-    """
-    pd_load_cached downloads a file from a url and loads it as a pandas dataframe
-
-    Args:
-        url (str): the url to download the file from
-        loc (str, optional): the location to save the file to. Defaults to "/tmp/".
-        cache (bool, optional): whether to use the cached file or not. Defaults to True.
-
-    Returns:
-        pd.DataFrame: the dataframe
-    """
-    # Check if the file exists, if not, download it
-    loc += url.split("/")[-1]
-    if not os.path.isfile(loc) or not cache:
-        urllib.request.urlretrieve(url, loc)
-    # Load the data from the file
-    return pd.read_csv(loc, **kwargs)
-
 
 def translate(
     val: Union[str, list, set, Counter, dict], t: str = "cell_type_ontology_term_id"

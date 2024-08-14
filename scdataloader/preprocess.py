@@ -266,9 +266,6 @@ class Preprocessor:
         # QC
 
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
-        for name in ["stable_id", "created_at", "updated_at"]:
-            if name in adata.var.columns:
-                adata.var = adata.var.drop(columns=name)
         print("startin QC")
         sc.pp.calculate_qc_metrics(
             adata, qc_vars=["mt", "ribo", "hb"], inplace=True, percent_top=[20]
