@@ -433,7 +433,7 @@ def populate_my_ontology(
         names = bt.Phenotype.public().df().index if not sex else sex
         records = [
             bt.Phenotype.from_source(
-                ontology_id=i,
+                ontology_id=i, source=bt.PublicSource.filter(name="pato").first()
             )
             for i in names
         ]
@@ -472,9 +472,12 @@ def populate_my_ontology(
 
         names = bt.DevelopmentalStage.public(organism="mouse").df().index
         records = [
-            bt.DevelopmentalStage.from_source(ontology_id=i) for i in names.tolist()
+            bt.DevelopmentalStage.from_source(
+                ontology_id=i,
+                source=bt.PublicSource.filter(organism="mouse", name="mmusdv").first(),
+            )
+            for i in names.tolist()
         ]
-        records[-4] = records[-4][0]
         ln.save(records)
     # Disease
     if diseases is not None:
