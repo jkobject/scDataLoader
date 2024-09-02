@@ -1,5 +1,13 @@
 import sys
 import pytest
+import lamindb_setup as ln_setup
+
+
+@pytest.fixture(scope="session")
+def setup_instance():
+    ln_setup.init(storage="./testdb")
+    yield
+    ln_setup.delete("testdb", force=True)
 
 
 # each test runs on cwd to its temp dir

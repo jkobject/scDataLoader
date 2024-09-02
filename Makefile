@@ -27,14 +27,14 @@ install:          ## Install the project in dev mode.
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
 	$(ENV_PREFIX)isort scdataloader/
-	$(ENV_PREFIX)black -l 79 scdataloader/
-	$(ENV_PREFIX)black -l 79 tests/
+	$(ENV_PREFIX)black -l 88 scdataloader/
+	$(ENV_PREFIX)black -l 88 tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)flake8 --ignore=E501,E203,E266,E265,W503 scdataloader/
-	$(ENV_PREFIX)black -l 120 --check scdataloader/
-	$(ENV_PREFIX)black -l 120 --check tests/
+	$(ENV_PREFIX)flake8 --ignore=E501,E203,E266,E265,W503,F401 scdataloader/
+	$(ENV_PREFIX)black -l 88 --check scdataloader/
+	$(ENV_PREFIX)black -l 88 --check tests/
 ##	$(ENV_PREFIX)mypy --ignore-missing-imports scdataloader/
 
 .PHONY: test

@@ -161,7 +161,10 @@ class Collator:
                 raise ValueError("how must be either most expr or random expr")
             if (
                 (self.add_zero_genes > 0) or (self.max_len > len(nnz_loc))
-            ) and self.how not in ["all", "some"]:
+            ) and self.how not in [
+                "all",
+                "some",
+            ]:
                 zero_loc = np.where(expr == 0)[0]
                 zero_loc = zero_loc[
                     np.random.choice(

@@ -14,8 +14,11 @@ from scdataloader import Preprocessor
 from torch.utils.data import DataLoader
 
 
-def test_base():
+def test_base(
+    setup_instance,
+):
     assert NAME == "scdataloader"
+    print("populating ontology...")
     utils.populate_my_ontology(
         organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
         sex=["PATO:0000384", "PATO:0000383"],
@@ -26,6 +29,7 @@ def test_base():
         diseases=None,
         dev_stages=None,
     )
+    print("ontology populated")
     # cx_dataset = (
     #     ln.Collection.using(instance="laminlabs/cellxgene")
     #     .filter(name="cellxgene-census", version="2023-12-15")
@@ -64,6 +68,7 @@ def test_base():
         num_workers=1,
         shuffle=False,
     )
+    print("dataloader created")
     for batch in dataloader:
         print(batch)
         break
