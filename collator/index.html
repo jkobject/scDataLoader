@@ -69,8 +69,6 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#scdataloader.collator.AnnDataCollator">AnnDataCollator</a>
-    </li>
     </ul>
                   </li>
               </ul>
@@ -491,7 +489,7 @@ This is mainly for debugging purposes</p>
               <div class="doc-md-description">
                 <p>array]]): List of dicts of arrays containing gene expression data.
 the first list is for the different samples, the second list is for the different elements with
-elem["x"]: gene expression
+elem["X"]: gene expression
 elem["organism_name"]: organism ontology term id
 elem["tp_name"]: heat diff
 elem["class_names.."]: other classes</p>
@@ -527,10 +525,7 @@ elem["class_names.."]: other classes</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/collator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
@@ -654,14 +649,20 @@ elem["class_names.."]: other classes</p>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    __call__ applies the collator to a minibatch of data</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.</span>
 <span class="sd">            the first list is for the different samples, the second list is for the different elements with</span>
-<span class="sd">            elem[&quot;x&quot;]: gene expression</span>
+<span class="sd">            elem[&quot;X&quot;]: gene expression</span>
 <span class="sd">            elem[&quot;organism_name&quot;]: organism ontology term id</span>
 <span class="sd">            elem[&quot;tp_name&quot;]: heat diff</span>
 <span class="sd">            elem[&quot;class_names..&quot;]: other classes</span>
@@ -685,7 +686,7 @@ elem["class_names.."]: other classes</p>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="s2">&quot;_storage_idx&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;_storage_idx&quot;</span><span class="p">])</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">])</span>
         <span class="n">total_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
@@ -711,7 +712,10 @@ elem["class_names.."]: other classes</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;how must be either most expr or random expr&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_zero_genes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">))</span>
-        <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;some&quot;</span><span class="p">]:</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;some&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
             <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">zero_loc</span><span class="p">[</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
@@ -787,63 +791,6 @@ elem["class_names.."]: other classes</p>
     </div>
 
 </div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="scdataloader.collator.AnnDataCollator" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">scdataloader</span><span class="o">.</span><span class="n">collator</span><span class="o">.</span><span class="n">AnnDataCollator</span></code>
-
-</h2>
-
-
-    <div class="doc doc-contents first">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.collator.Collator" href="#scdataloader.collator.Collator">Collator</a></code></p>
-
-
-      <p>AnnDataCollator Collator to use if working with AnnData's experimental dataloader (it is very slow!!!)</p>
-
-                  <details class="quote">
-                    <summary>Source code in <code>scdataloader/collator.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    AnnDataCollator Collator to use if working with AnnData&#39;s experimental dataloader (it is very slow!!!)</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        @see Collator</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-                  </details>
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
 
 
 
