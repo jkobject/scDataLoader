@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Nothing really. [jkobject]
+
+
+1.1.0 (2024-09-04)
+------------------
+- Release: version 1.1.0 🚀 [jkobject]
 - Latest lamindb. [jkobject]
 - Debugged. [jkobject]
 - Better linting. [jkobject]
