@@ -2,6 +2,7 @@ import lamindb as ln
 import scanpy as sc
 import numpy as np
 import os
+import time
 
 from scdataloader.base import NAME
 from scdataloader import utils
@@ -14,22 +15,23 @@ from scdataloader import Preprocessor
 from torch.utils.data import DataLoader
 
 
-def test_base(
-    setup_instance,
-):
+def test_base():
     assert NAME == "scdataloader"
+
     print("populating ontology...")
+    start_time = time.time()
     utils.populate_my_ontology(
         organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
         sex=["PATO:0000384", "PATO:0000383"],
-        celltypes=None,
-        ethnicities=None,
-        assays=None,
-        tissues=None,
-        diseases=None,
-        dev_stages=None,
+        # celltypes=None,
+        # ethnicities=None,
+        # assays=None,
+        # tissues=None,
+        # diseases=None,
+        # dev_stages=None,
     )
-    print("ontology populated")
+    end_time = time.time()
+    print(f"ontology populated in {end_time - start_time:.2f} seconds")
     # cx_dataset = (
     #     ln.Collection.using(instance="laminlabs/cellxgene")
     #     .filter(name="cellxgene-census", version="2023-12-15")
