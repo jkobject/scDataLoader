@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Release should be good to go. [jkobject]
+
+
+1.1.2 (2024-09-04)
+------------------
+- Release: version 1.1.2 🚀 [jkobject]
 - Release. [jkobject]
 
 
