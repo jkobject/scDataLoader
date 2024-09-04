@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Latest lamindb. [jkobject]
+- Debugged. [jkobject]
+- Better linting. [jkobject]
+- Debug ontology loading. [jkobject]
+- Nothing really. [jkobject]
+- Release: version 1.0.5 🚀 [jkobject]
 - Release: version 1.0.4 🚀 [jkobject]
 
 
