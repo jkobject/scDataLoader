@@ -81,7 +81,7 @@ release:          ## Create a new tag for release.
 	@echo "$${TAG}" > scdataloader/VERSION
 	@sed -i 's/^version = .*/version = "'$${TAG}'"/' pyproject.toml
 	@$(ENV_PREFIX)gitchangelog > HISTORY.md
-	@git add scdataloader/VERSION HISTORY.md
+	@git add scdataloader/VERSION HISTORY.md pyproject.toml
 	@git commit -m "release: version $${TAG} 🚀"
 	@echo "creating git tag : $${TAG}"
 	@git tag $${TAG}
