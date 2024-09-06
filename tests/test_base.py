@@ -1,13 +1,14 @@
-import lamindb as ln
+# import lamindb as ln
 import scanpy as sc
-import numpy as np
+
+# import numpy as np
 import os
 import time
 
 from scdataloader.base import NAME
 from scdataloader import utils
 
-from scdataloader import DataModule
+# from scdataloader import DataModule
 from scdataloader import SimpleAnnDataset
 from scdataloader import Collator
 from scdataloader import Preprocessor
@@ -18,7 +19,8 @@ import pytest
 
 def test_base():
     assert NAME == "scdataloader"
-adata = sc.read_h5ad(os.path.join(os.path.dirname(__file__), "test.h5ad"))
+    adata = sc.read_h5ad(os.path.join(os.path.dirname(__file__), "test.h5ad"))
+
     try:
         print("populating ontology...")
         start_time = time.time()
@@ -34,26 +36,26 @@ adata = sc.read_h5ad(os.path.join(os.path.dirname(__file__), "test.h5ad"))
         )
         end_time = time.time()
         print(f"ontology populated in {end_time - start_time:.2f} seconds")
-    # cx_dataset = (
-    #     ln.Collection.using(instance="laminlabs/cellxgene")
-    #     .filter(name="cellxgene-census", version="2023-12-15")
-    #     .one()
-    # )
-    # datamodule = DataModule(
-    #     collection_name="preprocessed dataset",
-    #     organisms=["NCBITaxon:9606"],  # organism that we will work on
-    #     how="most expr",  # for the collator (most expr genes only will be selected)
-    #     max_len=1000,  # only the 1000 most expressed
-    #     batch_size=64,
-    #     num_workers=1,
-    #     validation_split=0.1,
-    #     test_split=0,
-    # )
-    # for i in datamodule.train_dataloader():
-    #     # pass #or do pass
-    #     print(i)
-    #     break
-    # assert True, "Datamodule test passed"
+        # cx_dataset = (
+        #     ln.Collection.using(instance="laminlabs/cellxgene")
+        #     .filter(name="cellxgene-census", version="2023-12-15")
+        #     .one()
+        # )
+        # datamodule = DataModule(
+        #     collection_name="preprocessed dataset",
+        #     organisms=["NCBITaxon:9606"],  # organism that we will work on
+        #     how="most expr",  # for the collator (most expr genes only will be selected)
+        #     max_len=1000,  # only the 1000 most expressed
+        #     batch_size=64,
+        #     num_workers=1,
+        #     validation_split=0.1,
+        #     test_split=0,
+        # )
+        # for i in datamodule.train_dataloader():
+        #     # pass #or do pass
+        #     print(i)
+        #     break
+        # assert True, "Datamodule test passed"
         preprocessor = Preprocessor(do_postp=False)
         adata = preprocessor(adata)
         adataset = SimpleAnnDataset(adata, obs_to_output=["organism_ontology_term_id"])
