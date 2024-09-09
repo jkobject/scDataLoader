@@ -387,6 +387,7 @@ def populate_my_ontology(
     tissues: List[str] = [],
     diseases: List[str] = [],
     dev_stages: List[str] = [],
+    organism_clade: str = "vertebrates",
 ):
     """
     creates a local version of the lamin ontologies and add the required missing values in base ontologies
@@ -420,22 +421,26 @@ def populate_my_ontology(
         bt.CellType(name="unknown", ontology_id="unknown").save()
     # Organism
     if organisms is not None:
-        names = bt.Organism.public().df().index if not organisms else organisms
+        names = (
+            bt.Organism.public(organism=organism_clade).df().index
+            if not organisms
+            else organisms
+        )
+        source = bt.PublicSource.filter(name="ensembl", organism=organism_clade).last()
         records = [
             i[0] if type(i) is list else i
-            for i in [bt.Organism.from_source(ontology_id=i) for i in names]
+            for i in [
+                bt.Organism.from_source(ontology_id=i, source=source) for i in names
+            ]
         ]
         ln.save(records)
         bt.Organism(name="unknown", ontology_id="unknown").save()
-        organism_names = names
     # Phenotype
     if sex is not None:
         names = bt.Phenotype.public().df().index if not sex else sex
+        source = bt.PublicSource.filter(name="pato").first()
         records = [
-            bt.Phenotype.from_source(
-                ontology_id=i, source=bt.PublicSource.filter(name="pato").first()
-            )
-            for i in names
+            bt.Phenotype.from_source(ontology_id=i, source=source) for i in names
         ]
         ln.save(records)
         bt.Phenotype(name="unknown", ontology_id="unknown").save()
@@ -468,15 +473,17 @@ def populate_my_ontology(
         )
         records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
         ln.save(records)
-        bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
+        # bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
 
         names = bt.DevelopmentalStage.public(organism="mouse").df().index
+        names = [i for i in names if i != "unknown"]
+        source = bt.PublicSource.filter(organism="mouse", name="mmusdv").last()
         records = [
-            bt.DevelopmentalStage.from_source(
-                ontology_id=i,
-                source=bt.PublicSource.filter(organism="mouse", name="mmusdv").first(),
-            )
-            for i in names.tolist()
+            i[0] if type(i) is list else i
+            for i in [
+                bt.DevelopmentalStage.from_source(ontology_id=i, source=source)
+                for i in names
+            ]
         ]
         ln.save(records)
     # Disease
@@ -487,7 +494,7 @@ def populate_my_ontology(
         bt.Disease(name="normal", ontology_id="PATO:0000461").save()
         bt.Disease(name="unknown", ontology_id="unknown").save()
     # genes
-    for organism in organism_names:
+    for organism in ["NCBITaxon:10090", "NCBITaxon:9606"]:
         # convert onto to name
         organism = bt.Organism.filter(ontology_id=organism).one().name
         names = bt.Gene.public(organism=organism).df()["ensembl_gene_id"]
