@@ -798,14 +798,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
@@ -814,7 +807,14 @@ returns the final matrix count.</p>
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span>
-<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -906,19 +906,19 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">528</span>
 <span class="normal">529</span>
 <span class="normal">530</span>
 <span class="normal">531</span>
 <span class="normal">532</span>
-<span class="normal">533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -1417,7 +1417,14 @@ returns the final matrix count.</p>
 <span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
-<span class="normal">499</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">sex</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
     <span class="n">celltypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -1426,6 +1433,7 @@ returns the final matrix count.</p>
     <span class="n">tissues</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">diseases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">dev_stages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">organism_clade</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vertebrates&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    creates a local version of the lamin ontologies and add the required missing values in base ontologies</span>
@@ -1459,22 +1467,26 @@ returns the final matrix count.</p>
         <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># Organism</span>
     <span class="k">if</span> <span class="n">organisms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">organisms</span> <span class="k">else</span> <span class="n">organisms</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">organisms</span>
+            <span class="k">else</span> <span class="n">organisms</span>
+        <span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ensembl&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">i</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
+            <span class="p">]</span>
         <span class="p">]</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">organism_names</span> <span class="o">=</span> <span class="n">names</span>
     <span class="c1"># Phenotype</span>
     <span class="k">if</span> <span class="n">sex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span>
-                <span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
         <span class="p">]</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1507,15 +1519,17 @@ returns the final matrix count.</p>
         <span class="p">)</span>
         <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
-        <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># bt.DevelopmentalStage(name=&quot;unknown&quot;, ontology_id=&quot;unknown&quot;).save()</span>
 
         <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="s2">&quot;mouse&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="s2">&quot;mouse&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mmusdv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span>
-                <span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
-                <span class="n">source</span><span class="o">=</span><span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="s2">&quot;mouse&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mmusdv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">(),</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">i</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
+            <span class="p">]</span>
         <span class="p">]</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
     <span class="c1"># Disease</span>
@@ -1526,7 +1540,7 @@ returns the final matrix count.</p>
         <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;PATO:0000461&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="c1"># genes</span>
-    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organism_names</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">]:</span>
         <span class="c1"># convert onto to name</span>
         <span class="n">organism</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
         <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()[</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span>
@@ -1615,14 +1629,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">543</span>
 <span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
@@ -1645,7 +1652,14 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">563</span>
 <span class="normal">564</span>
 <span class="normal">565</span>
-<span class="normal">566</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
     <span class="n">val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">t</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

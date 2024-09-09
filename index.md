@@ -41,16 +41,42 @@ I needed to create this Data Loader for my PhD project. I am using it to load & 
 
 ```bash
 pip install scdataloader
+# or
+pip install scDataLoader[dev] # for dev dependencies
+
+lamin login <email> --key <API-key>
+lamin init --storage [folder-name-where-lamin-data-will-be-stored] --schema bionty
 ```
 
-### Install it locally and run the notebooks:
+if you start with lamin and had to do a `lamin init`, you will also need to populate your ontologies. This is because scPRINT is using ontologies to define its cell types, diseases, sexes, ethnicities, etc.
+
+you can do it manually or with our function:
+
+```python
+from scdataloader.utils import populate_my_ontology
+
+populate_my_ontology() #to populate everything (recommended) (can take 2-10mns)
+
+populate_my_ontology( #the minimum for scprint to run some inferences (denoising, grn inference)
+organisms: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
+    sex: List[str] = ["PATO:0000384", "PATO:0000383"],
+    celltypes = None,
+    ethnicities = None,
+    assays = None,
+    tissues = None,
+    diseases = None,
+    dev_stages = None,
+)
+```
+
+### Dev install
+
+If you want to use the latest version of scDataLoader and work on the code yourself use `git clone` and `pip -e` instead of `pip install`.
 
 ```bash
 git clone https://github.com/jkobject/scDataLoader.git
-cd scDataLoader
-poetry install
+pip install -e scDataLoader[dev]
 ```
-then run the notebooks with the poetry installed environment
 
 ## Usage
 
@@ -98,7 +124,7 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 
 ```
 
-see the notebooks in [docs](https://www.jkobject.com/scDataLoader/):
+see the notebooks:
 
 1. [load a dataset](https://www.jkobject.com/scDataLoader/notebooks/1_download_and_preprocess/)
 2. [create a dataset](https://www.jkobject.com/scDataLoader/notebooks/2_create_dataloader/)
@@ -117,13 +143,34 @@ The main way to use
 
 > please refer to the [scPRINT documentation](https://www.jkobject.com/scPRINT/) and [lightning documentation](https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_intermediate.html) for more information on command line usage
 
+## FAQ
+
+### how to update my ontologies?
+
+```bash
+import bionty as bt
+bt.reset_sources()
+
+# Run via CLI: lamin load <your instance>
+
+import lnschema_bionty as lb
+lb.dev.sync_bionty_source_to_latest()
+```
+
+### how to load all ontologies?
+
+```python
+from scdataloader import utils
+utils.populate_ontologies() # this might take from 5-20mins
+```
+
 ## Development
 
-Read the [CONTRIBUTING.md](../CONTRIBUTING.md) file.
+Read the [CONTRIBUTING.md](https://github.com/jkobject/scDataLoader/blob/main/CONTRIBUTING.md) file.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/jkobject/scDataLoader/blob/main/LICENSE) file for details.
 
 ## Acknowledgments
 

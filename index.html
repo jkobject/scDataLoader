@@ -47,7 +47,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#install-it-from-pypi">Install it from PyPI</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</a>
+    <li class="toctree-l3"><a class="reference internal" href="#dev-install">Dev install</a>
     </li>
         </ul>
     </li>
@@ -58,6 +58,14 @@
     <li class="toctree-l3"><a class="reference internal" href="#command-line-preprocessing">command line preprocessing</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#command-line-usage">command line usage</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#faq">FAQ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#how-to-update-my-ontologies">how to update my ontologies?</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#how-to-load-all-ontologies">how to load all ontologies?</a>
     </li>
         </ul>
     </li>
@@ -147,13 +155,34 @@
 <p><img alt="scdataloader.drawio.png" src="scdataloader.drawio.png" /></p>
 <h2 id="install-it-from-pypi">Install it from PyPI</h2>
 <pre><code class="language-bash">pip install scdataloader
+# or
+pip install scDataLoader[dev] # for dev dependencies
+
+lamin login &lt;email&gt; --key &lt;API-key&gt;
+lamin init --storage [folder-name-where-lamin-data-will-be-stored] --schema bionty
 </code></pre>
-<h3 id="install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</h3>
+<p>if you start with lamin and had to do a <code>lamin init</code>, you will also need to populate your ontologies. This is because scPRINT is using ontologies to define its cell types, diseases, sexes, ethnicities, etc.</p>
+<p>you can do it manually or with our function:</p>
+<pre><code class="language-python">from scdataloader.utils import populate_my_ontology
+
+populate_my_ontology() #to populate everything (recommended) (can take 2-10mns)
+
+populate_my_ontology( #the minimum for scprint to run some inferences (denoising, grn inference)
+organisms: List[str] = [&quot;NCBITaxon:10090&quot;, &quot;NCBITaxon:9606&quot;],
+    sex: List[str] = [&quot;PATO:0000384&quot;, &quot;PATO:0000383&quot;],
+    celltypes = None,
+    ethnicities = None,
+    assays = None,
+    tissues = None,
+    diseases = None,
+    dev_stages = None,
+)
+</code></pre>
+<h3 id="dev-install">Dev install</h3>
+<p>If you want to use the latest version of scDataLoader and work on the code yourself use <code>git clone</code> and <code>pip -e</code> instead of <code>pip install</code>.</p>
 <pre><code class="language-bash">git clone https://github.com/jkobject/scDataLoader.git
-cd scDataLoader
-poetry install
+pip install -e scDataLoader[dev]
 </code></pre>
-<p>then run the notebooks with the poetry installed environment</p>
 <h2 id="usage">Usage</h2>
 <h3 id="direct-usage">Direct Usage</h3>
 <pre><code class="language-python"># initialize a local lamin database
@@ -196,7 +225,7 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 # Trainer(model, datamodule)
 
 </code></pre>
-<p>see the notebooks in <a href="https://www.jkobject.com/scDataLoader/">docs</a>:</p>
+<p>see the notebooks:</p>
 <ol>
 <li><a href="https://www.jkobject.com/scDataLoader/notebooks/1_download_and_preprocess/">load a dataset</a></li>
 <li><a href="https://www.jkobject.com/scDataLoader/notebooks/2_create_dataloader/">create a dataset</a></li>
@@ -210,10 +239,24 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 <blockquote>
 <p>please refer to the <a href="https://www.jkobject.com/scPRINT/">scPRINT documentation</a> and <a href="https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_intermediate.html">lightning documentation</a> for more information on command line usage</p>
 </blockquote>
+<h2 id="faq">FAQ</h2>
+<h3 id="how-to-update-my-ontologies">how to update my ontologies?</h3>
+<pre><code class="language-bash">import bionty as bt
+bt.reset_sources()
+
+# Run via CLI: lamin load &lt;your instance&gt;
+
+import lnschema_bionty as lb
+lb.dev.sync_bionty_source_to_latest()
+</code></pre>
+<h3 id="how-to-load-all-ontologies">how to load all ontologies?</h3>
+<pre><code class="language-python">from scdataloader import utils
+utils.populate_ontologies() # this might take from 5-20mins
+</code></pre>
 <h2 id="development">Development</h2>
-<p>Read the <a href="../CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
+<p>Read the <a href="https://github.com/jkobject/scDataLoader/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
 <h2 id="license">License</h2>
-<p>This project is licensed under the MIT License - see the <a href="../LICENSE">LICENSE</a> file for details.</p>
+<p>This project is licensed under the MIT License - see the <a href="https://github.com/jkobject/scDataLoader/blob/main/LICENSE">LICENSE</a> file for details.</p>
 <h2 id="acknowledgments">Acknowledgments</h2>
 <ul>
 <li><a href="https://lamin.ai/">lamin.ai</a></li>
@@ -270,5 +313,5 @@ for i in tqdm.tqdm(datamodule.train_dataloader()):
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-09-04 15:45:33.981436+00:00
+Build Date UTC : 2024-09-09 15:06:37.030669+00:00
 -->
