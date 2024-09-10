@@ -1,7 +1,9 @@
-import numpy as np
-from .utils import load_genes, downsample_profile
-from torch import Tensor, long
 from typing import Optional
+
+import numpy as np
+from torch import Tensor, long
+
+from .utils import downsample_profile, load_genes
 
 
 class Collator:

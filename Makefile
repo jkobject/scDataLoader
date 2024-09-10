@@ -25,16 +25,16 @@ install:          ## Install the project in dev mode.
 	$(ENV_PREFIX)pip install -e '.[dev]'
 
 .PHONY: fmt
-fmt:              ## Format code using black & isort.
-	$(ENV_PREFIX)isort scdataloader/
-	$(ENV_PREFIX)black -l 88 scdataloader/
-	$(ENV_PREFIX)black -l 88 tests/
+fmt:              ## Format code using ruff & isort.
+	$(ENV_PREFIX)ruff check --fix scdataloader/
+	$(ENV_PREFIX)ruff check --fix tests/
+	$(ENV_PREFIX)ruff format tests/
+	$(ENV_PREFIX)ruff format scdataloader/
 
 .PHONY: lint
-lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)flake8 --ignore=E501,E203,E266,E265,W503,F401 scdataloader/
-	$(ENV_PREFIX)black -l 88 --check scdataloader/
-	$(ENV_PREFIX)black -l 88 --check tests/
+lint:             ## Run pep8, ruff, mypy linters.
+	$(ENV_PREFIX)ruff check --fix scdataloader/
+	$(ENV_PREFIX)ruff check --fix tests/
 ##	$(ENV_PREFIX)mypy --ignore-missing-imports scdataloader/
 
 .PHONY: test

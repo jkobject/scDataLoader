@@ -1,23 +1,21 @@
 import io
 import os
 import urllib
+from collections import Counter
+from functools import lru_cache
+from typing import List, Optional, Union
 
 import bionty as bt
 import lamindb as ln
 import numpy as np
 import pandas as pd
+import torch
+from anndata import AnnData
 from biomart import BiomartServer
 from django.db import IntegrityError
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
-from functools import lru_cache
-from collections import Counter
 from torch import Tensor
-import torch
-
-from typing import Union, List, Optional
-
-from anndata import AnnData
 
 
 def downsample_profile(mat: Tensor, dropout: float):

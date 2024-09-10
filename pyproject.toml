@@ -8,6 +8,17 @@ readme = ["README.md", "LICENSE"]
 repository = "https://github.com/jkobject/scDataLoader"
 keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 
+[project]
+requires-python = ">=3.10"
+
+[tool.ruff]
+# Set the maximum line length to 88.
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501", "E203", "E266", "E265", "F401"]
+
 [tool.poetry.dependencies]
 python = "3.10.*"
 lamindb = "0.76.3"
@@ -28,11 +39,8 @@ django = "*"
 scikit-misc = "*"
 pytest = { version = "^7.4.3", optional = true }
 coverage = { version = "^7.3.2", optional = true }
-flake8 = { version = "^6.1.0", optional = true }
-black = { version = "^23.10.1", optional = true }
-isort = { version = "^5.12.0", optional = true }
+ruff = { version = "^0.6.4", optional = true }
 pytest-cov = { version = "^4.1.0", optional = true }
-mypy = { version = "^1.6.1", optional = true }
 gitchangelog = { version = "^3.0.4", optional = true }
 mkdocs = { version = "^1.5.3", optional = true }
 
@@ -40,11 +48,8 @@ mkdocs = { version = "^1.5.3", optional = true }
 dev = [
     "pytest",
     "coverage",
-    "flake8",
-    "black",
-    "isort",
+    "ruff",
     "pytest-cov",
-    "mypy",
     "gitchangelog",
     "mkdocs",
     "mkdocs-git-revision-date-localized-plugin",
