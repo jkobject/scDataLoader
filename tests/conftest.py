@@ -1,7 +1,8 @@
-import sys
-import pytest
-import lamindb_setup as ln_setup
 import shutil
+import sys
+
+import lamindb_setup as ln_setup
+import pytest
 
 
 def pytest_sessionstart():

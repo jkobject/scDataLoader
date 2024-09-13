@@ -1,19 +1,16 @@
+import warnings
 from dataclasses import dataclass, field
-
-import lamindb as ln
+from typing import Literal, Optional, Union
 
 # ln.connect("scprint")
-
 import bionty as bt
+import lamindb as ln
 import pandas as pd
-from torch.utils.data import Dataset as torchDataset
-from typing import Union, Optional, Literal
-from scdataloader.mapped import MappedCollection
-import warnings
-
 from anndata import AnnData
 from scipy.sparse import issparse
+from torch.utils.data import Dataset as torchDataset
 
+from scdataloader.mapped import MappedCollection
 from scdataloader.utils import get_ancestry_mapping, load_genes
 
 from .config import LABELS_TOADD

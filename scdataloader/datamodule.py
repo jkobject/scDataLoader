@@ -1,21 +1,20 @@
+from typing import Optional, Sequence, Union
+
+import lamindb as ln
+import lightning as L
 import numpy as np
 import pandas as pd
-import lamindb as ln
-
-from torch.utils.data.sampler import (
-    WeightedRandomSampler,
-    SubsetRandomSampler,
-    SequentialSampler,
-    RandomSampler,
-)
 import torch
 from torch.utils.data import DataLoader, Sampler
-import lightning as L
+from torch.utils.data.sampler import (
+    RandomSampler,
+    SequentialSampler,
+    SubsetRandomSampler,
+    WeightedRandomSampler,
+)
 
-from typing import Optional, Union, Sequence
-
-from .data import Dataset
 from .collator import Collator
+from .data import Dataset
 from .utils import getBiomartTable
 
 

@@ -1,20 +1,15 @@
 # import lamindb as ln
-import scanpy as sc
-
 # import numpy as np
 import os
 import time
 
-from scdataloader.base import NAME
-from scdataloader import utils
+import pytest
+import scanpy as sc
+from torch.utils.data import DataLoader
 
 # from scdataloader import DataModule
-from scdataloader import SimpleAnnDataset
-from scdataloader import Collator
-from scdataloader import Preprocessor
-
-from torch.utils.data import DataLoader
-import pytest
+from scdataloader import Collator, Preprocessor, SimpleAnnDataset, utils
+from scdataloader.base import NAME
 
 
 def test_base():
