@@ -177,11 +177,14 @@ class Preprocessor:
         # # cleanup and dropping low expressed genes and unexpressed cells
         prevsize = adata.shape[0]
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
-        adata = adata[(adata.obs["nnz"] > self.min_nnz_genes)]
         if self.filter_gene_by_counts:
             sc.pp.filter_genes(adata, min_counts=self.filter_gene_by_counts)
-        if self.filter_cell_by_counts:
-            sc.pp.filter_cells(adata, min_counts=self.filter_cell_by_counts)
+        if self.filter_cell_by_counts and self.min_nnz_genes:
+            sc.pp.filter_cells(
+                adata,
+                min_counts=self.filter_cell_by_counts,
+                min_genes=self.min_nnz_genes,
+            )
         # if lost > 50% of the dataset, drop dataset
         # load the genes
         genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
