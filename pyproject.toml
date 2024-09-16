@@ -1,9 +1,9 @@
 [project]
 name = "scdataloader"
-version = "1.1.3"
+version = "1.1.4"
 description = "a dataloader for single cell data in lamindb"
 authors = [
-    {name = "jkobject", email = "jkobject@example.com"}
+    {name = "jkobject", email = "jkobject@gmail.com"}
 ]
 license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
@@ -65,7 +65,6 @@ allow-direct-references = true
 
 [tool.uv.sources]
 scdataloader = { workspace = true }
-
 
 [scripts]
 scdataloader = 'scdataloader.__main__:main'
