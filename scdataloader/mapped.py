@@ -157,7 +157,7 @@ class MappedCollection:
                 index = (
                     store["var"]["ensembl_gene_id"]
                     if "ensembl_gene_id" in store["var"]
-                    else store["var"]["_index"]
+                    else store["var"][store['var'].attrs['_index']]
                 )
                 if join is None:
                     if not all(
