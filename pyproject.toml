@@ -5,9 +5,9 @@ description = "a dataloader for single cell data in lamindb"
 authors = [
     {name = "jkobject", email = "jkobject@gmail.com"}
 ]
-license = {text = "GPL-3.0-or-later"}
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10"
 keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 dependencies = [
     "lamindb==0.76.3",
@@ -26,8 +26,6 @@ dependencies = [
     "decoupler>=1.2.0",
     "django>=4.0.0",
     "scikit-misc>=0.1.4",
-    "scdataloader",
-    "pip>=24.2",
 ]
 
 [project.optional-dependencies]

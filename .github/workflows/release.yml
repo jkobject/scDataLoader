@@ -24,7 +24,7 @@ jobs:
       - name: Generate Changelog
         run: .github/release_message.sh > release_message.md
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           body_path: release_message.md
 
@@ -38,12 +38,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
       - name: Build and publish
         run: |
-          poetry publish -u __token__ -p ${{ secrets.POETRY_TOKEN }} --build
+          uv build && uv publish -u __token__ -p ${{ secrets.POETRY_TOKEN }}

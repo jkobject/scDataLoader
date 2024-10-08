@@ -179,10 +179,14 @@ class Preprocessor:
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
         if self.filter_gene_by_counts:
             sc.pp.filter_genes(adata, min_counts=self.filter_gene_by_counts)
-        if self.filter_cell_by_counts and self.min_nnz_genes:
+        if self.filter_cell_by_counts:
             sc.pp.filter_cells(
                 adata,
                 min_counts=self.filter_cell_by_counts,
+            )
+        if self.min_nnz_genes:
+            sc.pp.filter_cells(
+                adata,
                 min_genes=self.min_nnz_genes,
             )
         # if lost > 50% of the dataset, drop dataset
@@ -300,7 +304,7 @@ class Preprocessor:
         # https://rapids-singlecell.readthedocs.io/en/latest/api/generated/rapids_singlecell.pp.pca.html#rapids_singlecell.pp.pca
         if self.do_postp:
             print("normalize")
-            adata.layers["clean"] = sc.pp.log1p(
+            adata.layers["norm"] = sc.pp.log1p(
                 sc.pp.normalize_total(
                     adata, target_sum=self.normalize_sum, inplace=False
                 )["X"]
@@ -309,20 +313,34 @@ class Preprocessor:
             if self.subset_hvg:
                 sc.pp.highly_variable_genes(
                     adata,
-                    layer="clean",
                     n_top_genes=self.subset_hvg,
                     batch_key=self.batch_key,
                     flavor=self.hvg_flavor,
                     subset=False,
                 )
-            adata.obsm["clean_pca"] = sc.pp.pca(
-                adata.layers["clean"],
-                n_comps=300 if adata.shape[0] > 300 else adata.shape[0] - 2,
+            sc.pp.log1p(adata, layer="norm")
+            sc.pp.pca(
+                adata,
+                layer="norm",
+                n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
             )
-            sc.pp.neighbors(adata, use_rep="clean_pca")
-            sc.tl.leiden(adata, key_added="leiden_3", resolution=3.0)
+            sc.pp.neighbors(adata, use_rep="X_pca")
             sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
             sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
+            sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
+            batches = [
+                "assay_ontology_term_id",
+                "self_reported_ethnicity_ontology_term_id",
+                "sex_ontology_term_id",
+                "development_stage_ontology_term_id",
+            ]
+            if "donor_id" in adata.obs.columns:
+                batches.append("donor_id")
+            if "suspension_type" in adata.obs.columns:
+                batches.append("suspension_type")
+            adata.obs["batches"] = adata.obs[batches].apply(
+                lambda x: ",".join(x.dropna().astype(str)), axis=1
+            )
             sc.tl.umap(adata)
             # additional
             if self.additional_postprocess is not None:
@@ -382,14 +400,12 @@ class LaminPreprocessor(Preprocessor):
     def __init__(
         self,
         *args,
-        erase_prev_dataset: bool = False,
         cache: bool = True,
         stream: bool = False,
         keep_files: bool = True,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.erase_prev_dataset = erase_prev_dataset
         self.cache = cache
         self.stream = stream
         self.keep_files = keep_files
@@ -421,14 +437,17 @@ class LaminPreprocessor(Preprocessor):
         elif isinstance(data, ln.Collection):
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
-                print(i)
+                print(i + start_at)
                 if file.stem_uid in all_ready_processed_keys:
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
                 print(file)
-                backed = file.backed()
+                backed = file.open()
                 if backed.obs.is_primary_data.sum() == 0:
                     print(f"{file.key} only contains non primary cells.. dropping")
+                    # Save the stem_uid to a file to avoid loading it again
+                    with open("nonprimary.txt", "a") as f:
+                        f.write(f"{file.stem_uid}\n")
                     continue
                 if backed.shape[1] < 1000:
                     print(
@@ -452,17 +471,17 @@ class LaminPreprocessor(Preprocessor):
                             (np.ceil(badata.shape[0] / 30_000) * 30_000) // num_blocks
                         )
                         print("num blocks ", num_blocks)
-                        for i in range(num_blocks):
-                            start_index = i * block_size
-                            end_index = min((i + 1) * block_size, badata.shape[0])
+                        for j in range(num_blocks):
+                            start_index = j * block_size
+                            end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
                             print(block)
                             block = super().__call__(block)
-                            myfile = ln.Artifact(
+                            myfile = ln.from_anndata(
                                 block,
-                                is_new_version_of=file,
+                                revises=file,
                                 description=description,
-                                version=str(version) + "_s" + str(i),
+                                version=str(version) + "_s" + str(j),
                             )
                             myfile.save()
                             if self.keep_files:
@@ -473,9 +492,13 @@ class LaminPreprocessor(Preprocessor):
 
                     else:
                         adata = super().__call__(adata)
-                        myfile = ln.Artifact(
+                        try:
+                            sc.pl.umap(adata, color=["cell_type"])
+                        except Exception:
+                            sc.pl.umap(adata, color=["cell_type_ontology_term_id"])
+                        myfile = ln.from_anndata(
                             adata,
-                            is_new_version_of=file,
+                            revises=file,
                             description=description,
                             version=str(version),
                         )
@@ -649,46 +672,35 @@ def additional_preprocess(adata):
 
 
 def additional_postprocess(adata):
+    import palantir
+
     # define the "up to" 10 neighbors for each cells and add to obs
     # compute neighbors
     # need to be connectivities and same labels [cell type, assay, dataset, disease]
     # define the "neighbor" up to 10(N) cells and add to obs
     # define the "next time point" up to 5(M) cells and add to obs  # step 1: filter genes
+    del adata.obsp["connectivities"]
+    del adata.obsp["distances"]
+    sc.external.pp.harmony_integrate(adata, key="batches")
+    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    sc.tl.umap(adata)
+    sc.pl.umap(
+        adata,
+        color=["cell_type", "batches"],
+    )
+    palantir.utils.run_diffusion_maps(adata, n_components=20)
+    palantir.utils.determine_multiscale_space(adata)
+    terminal_states = palantir.utils.find_terminal_states(
+        adata,
+        celltypes=adata.obs.cell_type_ontology_term_id.unique(),
+        celltype_column="cell_type_ontology_term_id",
+    )
     sc.tl.diffmap(adata)
-    # create a meta group
-    adata.obs["dpt_group"] = (
-        adata.obs["leiden_1"].astype(str)
-        + "_"
-        + adata.obs["disease_ontology_term_id"].astype(str)
-        + "_"
-        + adata.obs["cell_type_ontology_term_id"].astype(str)
-        + "_"
-        + adata.obs["tissue_ontology_term_id"].astype(str)
-    )  # + "_" + adata.obs['dataset_id'].astype(str)
-
-    # if group is too small
-    okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j >= 10]
-    not_okgroup = [i for i, j in adata.obs["dpt_group"].value_counts().items() if j < 3]
-    # set the group to empty
-    adata.obs.loc[adata.obs["dpt_group"].isin(not_okgroup), "dpt_group"] = ""
-    adata.obs["heat_diff"] = np.nan
-    # for each group
-    for val in set(okgroup):
-        if val == "":
-            continue
-        # get the best root cell
-        eq = adata.obs.dpt_group == val
-        loc = np.where(eq)[0]
-
-        root_ixs = loc[adata.obsm["X_diffmap"][eq, 0].argmin()]
-        adata.uns["iroot"] = root_ixs
-        # compute the diffusion pseudo time from it
+    adata.obs["heat_diff"] = 1
+    for terminal_state in terminal_states.index.tolist():
+        adata.uns["iroot"] = np.where(adata.obs.index == terminal_state)[0][0]
         sc.tl.dpt(adata)
-        adata.obs.loc[eq, "heat_diff"] = adata.obs.loc[eq, "dpt_pseudotime"]
-        adata.obs.drop(columns=["dpt_pseudotime"], inplace=True)
-
-    # sort so that the next time points are aligned for all groups
-    adata = adata[adata.obs.sort_values(["dpt_group", "heat_diff"]).index]
-    # to query N next time points we just get the N elements below and check they are in the group
-    # to query the N nearest neighbors we just get the N elements above and N below and check they are in the group
+        adata.obs["heat_diff"] = np.minimum(
+            adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
+        )
     return adata

@@ -396,7 +396,7 @@ def populate_my_ontology(
 
     add whatever value you need afterward like it is done here with:
 
-    `bt.$ontology(name="ddd", ontology_id="ddddd").save()`
+    `bt.$ontology(name="ddd", ontolbogy_id="ddddd").save()`
 
     `df["assay_ontology_term_id"].unique()`
 
