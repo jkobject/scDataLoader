@@ -10,8 +10,10 @@ from anndata import AnnData
 from scipy.sparse import issparse
 from torch.utils.data import Dataset as torchDataset
 
-from scdataloader.mapped import MappedCollection
+from lamindb.core import MappedCollection
+from lamindb.core._mapped_collection import _Connect
 from scdataloader.utils import get_ancestry_mapping, load_genes
+from lamindb.core.storage._anndata_accessor import _safer_read_index
 
 from .config import LABELS_TOADD
 
@@ -107,7 +109,16 @@ class Dataset(torchDataset):
             self.genedf = load_genes(self.organisms)
 
         self.genedf.columns = self.genedf.columns.astype(str)
-        self.mapped_dataset._check_aligned_vars(self.genedf.index.tolist())
+        self.check_aligned_vars()
+
+    def check_aligned_vars(self):
+        vars = self.genedf.index.tolist()
+        i = 0
+        for storage in self.mapped_dataset.storages:
+            with _Connect(storage) as store:
+                if len(set(_safer_read_index(store["var"]).tolist()) - set(vars)) == 0:
+                    i += 1
+        print("{}% are aligned".format(i * 100 / len(self.mapped_dataset.storages)))
 
     def __len__(self, **kwargs):
         return self.mapped_dataset.__len__(**kwargs)
