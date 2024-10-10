@@ -120,7 +120,7 @@
               Bases: <code><span title="lightning.LightningDataModule">LightningDataModule</span></code></p>
 
 
-      <p>DataModule a pytorch lighting datamodule directly from a lamin Collection.
+        <p>DataModule a pytorch lighting datamodule directly from a lamin Collection.
 it can work with bare pytorch too</p>
 <p>It implements train / val / test dataloaders. the train is weighted random, val is random, test is one to many separated datasets.
 This is where the mappedCollection, dataset, and collator are combined to create the dataloaders.</p>
@@ -362,7 +362,8 @@ any genes within this distance of each other will be considered at the same posi
 </table>
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 22</span>
+<span class="normal"> 23</span>
 <span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
@@ -600,7 +601,8 @@ any genes within this distance of each other will be considered at the same posi
                     <span class="s2">&quot;need to provide your own table as this automated function only works for humans for now&quot;</span>
                 <span class="p">)</span>
             <span class="n">biomart</span> <span class="o">=</span> <span class="n">getBiomartTable</span><span class="p">(</span>
-                <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">,</span> <span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span>
+                <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">,</span> <span class="s2">&quot;chromosome_name&quot;</span><span class="p">],</span>
+                <span class="n">useCache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span>
             <span class="n">biomart</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">biomart</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
             <span class="n">biomart</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">,</span> <span class="s2">&quot;start_position&quot;</span><span class="p">])</span>
@@ -619,7 +621,7 @@ any genes within this distance of each other will be considered at the same posi
                 <span class="n">prev_chromosome</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reduced the size to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">biomart</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">biomart</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
-        <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">biomart</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">biomart</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">gene_embeddings</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
@@ -688,7 +690,7 @@ any genes within this distance of each other will be considered at the same posi
 
     <div class="doc doc-contents ">
 
-      <p>decoders the decoders for any labels that would have been encoded</p>
+        <p>decoders the decoders for any labels that would have been encoded</p>
 
 
 <table class="field-list">
@@ -731,7 +733,7 @@ any genes within this distance of each other will be considered at the same posi
 
     <div class="doc doc-contents ">
 
-      <p>genes the genes used in this datamodule</p>
+        <p>genes the genes used in this datamodule</p>
 
 
 <table class="field-list">
@@ -774,7 +776,7 @@ any genes within this distance of each other will be considered at the same posi
 
     <div class="doc doc-contents ">
 
-      <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
+        <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
 
 
 <table class="field-list">
@@ -814,7 +816,7 @@ any genes within this distance of each other will be considered at the same posi
 
     <div class="doc doc-contents ">
 
-      <p>setup method is used to prepare the data for the training, validation, and test sets.
+        <p>setup method is used to prepare the data for the training, validation, and test sets.
 It shuffles the data, calculates weights for each set, and creates samplers for each set.</p>
 
 
