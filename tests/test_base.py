@@ -45,6 +45,7 @@ def test_base():
             how="most expr",  # for the collator (most expr genes only will be selected)
             max_len=1000,  # only the 1000 most expressed
             batch_size=64,
+            do_gene_pos=False,
             num_workers=1,
             clss_to_weight=["organism_ontology_term_id", "cell_type_ontology_term_id"],
             clss_to_pred=["organism_ontology_term_id", "cell_type_ontology_term_id"],
