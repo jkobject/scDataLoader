@@ -16,7 +16,11 @@ from scdataloader.base import NAME
 def test_base():
     assert NAME == "scdataloader"
     adata = sc.read_h5ad(os.path.join(os.path.dirname(__file__), "test.h5ad"))
-
+    preprocessor = Preprocessor(
+        do_postp=False,
+        force_preprocess=True,
+    )
+    adata = preprocessor(adata)
     try:
         print("populating ontology...")
         start_time = time.time()

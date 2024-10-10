@@ -30,8 +30,8 @@ lint:             ## Run ruff linter.
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
 	$(ENV_PREFIX)uv run pytest -v --cov-config .coveragerc --cov=scdataloader -l --tb=short --maxfail=1 tests/
-	$(ENV_PREFIX)coverage xml
-	$(ENV_PREFIX)coverage html
+	$(ENV_PREFIX)uv run coverage xml
+	$(ENV_PREFIX)uv run coverage html
 
 .PHONY: watch
 watch:            ## Run tests on every change.
@@ -60,6 +60,7 @@ virtualenv:       ## Create a virtual environment.
 	@uv venv
 	@$(ENV_PREFIX)source .venv/bin/activate
 	@make install
+	@echo "!!! Please run 'source .venv/bin/activate' to enable the environment !!!"
 
 .PHONY: release
 release:          ## Create a new tag for release.
