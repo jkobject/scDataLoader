@@ -21,15 +21,15 @@ install:          ## Install the project in dev mode.
 
 .PHONY: fmt
 fmt:              ## Format code using ruff.
-	$(ENV_PREFIX)ruff format scdataloader/ tests/
+	$(ENV_PREFIX)uv run ruff format scdataloader/ tests/
 
 .PHONY: lint
 lint:             ## Run ruff linter.
-	$(ENV_PREFIX)ruff check --fix scdataloader/ tests/
+	$(ENV_PREFIX)uv run ruff check --fix scdataloader/ tests/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
-	$(ENV_PREFIX)pytest -v --cov-config .coveragerc --cov=scdataloader -l --tb=short --maxfail=1 tests/
+	$(ENV_PREFIX)uv run pytest -v --cov-config .coveragerc --cov=scdataloader -l --tb=short --maxfail=1 tests/
 	$(ENV_PREFIX)coverage xml
 	$(ENV_PREFIX)coverage html
 
