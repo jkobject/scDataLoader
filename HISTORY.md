@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.2.0 (2024-10-10)
+------------------
+- Release: version 1.2.0 🚀 [jkobject]
 - Debug. [jkobject]
 - Merge pull request #7 from mossjacob/main. [Jérémie Kalfon]
 
