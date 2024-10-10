@@ -17,21 +17,21 @@ show:             ## Show the current environment.
 
 .PHONY: install
 install:          ## Install the project in dev mode.
-	$(ENV_PREFIX)uv sync --all-extras --dev
+	$(ENV_PREFIX)uv sync --dev --all-extras
 
 .PHONY: fmt
 fmt:              ## Format code using ruff.
-	$(ENV_PREFIX)uv run ruff format scdataloader/ tests/
+	$(ENV_PREFIX)ruff format scdataloader/ tests/
 
 .PHONY: lint
 lint:             ## Run ruff linter.
-	$(ENV_PREFIX)uv run ruff check --fix scdataloader/ tests/
+	$(ENV_PREFIX)ruff check --fix scdataloader/ tests/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
-	$(ENV_PREFIX)uv run pytest -v --cov-config .coveragerc --cov=scdataloader -l --tb=short --maxfail=1 tests/
-	$(ENV_PREFIX)uv run coverage xml
-	$(ENV_PREFIX)uv run coverage html
+	$(ENV_PREFIX)pytest -v --cov-config .coveragerc --cov=scdataloader -l --tb=short --maxfail=1 tests/
+	$(ENV_PREFIX)coverage xml
+	$(ENV_PREFIX)coverage html
 
 .PHONY: watch
 watch:            ## Run tests on every change.
@@ -58,7 +58,7 @@ virtualenv:       ## Create a virtual environment.
 	@echo "creating virtualenv ..."
 	@rm -rf .venv
 	@uv venv
-	@source .venv/bin/activate
+	@$(ENV_PREFIX)source .venv/bin/activate
 	@make install
 
 .PHONY: release

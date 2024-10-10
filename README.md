@@ -44,8 +44,7 @@ pip install scdataloader
 # or
 pip install scDataLoader[dev] # for dev dependencies
 
-lamin login <email> --key <API-key>
-lamin init --storage [folder-name-where-lamin-data-will-be-stored] --schema bionty
+lamin init --storage ./testdb --name test --schema bionty
 ```
 
 if you start with lamin and had to do a `lamin init`, you will also need to populate your ontologies. This is because scPRINT is using ontologies to define its cell types, diseases, sexes, ethnicities, etc.
@@ -84,7 +83,7 @@ pip install -e scDataLoader[dev]
 
 ```python
 # initialize a local lamin database
-# !lamin init --storage ~/scdataloader --schema bionty
+#! lamin init --storage ./testdb --name test --schema bionty
 
 from scdataloader import utils
 from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, additional_preprocess

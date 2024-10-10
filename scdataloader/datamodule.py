@@ -109,7 +109,8 @@ class DataModule(L.LightningDataModule):
                         "need to provide your own table as this automated function only works for humans for now"
                     )
                 biomart = getBiomartTable(
-                    attributes=["start_position", "chromosome_name"]
+                    attributes=["start_position", "chromosome_name"],
+                    useCache=True,
                 ).set_index("ensembl_gene_id")
                 biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
                 biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
@@ -128,7 +129,7 @@ class DataModule(L.LightningDataModule):
                     prev_chromosome = r["chromosome_name"]
                 print(f"reduced the size to {len(set(c))/len(biomart)}")
                 biomart["pos"] = c
-            mdataset.genedf = biomart.loc[mdataset.genedf.index]
+            mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
 
         if gene_embeddings != "":
