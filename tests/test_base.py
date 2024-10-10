@@ -16,11 +16,6 @@ from scdataloader.base import NAME
 def test_base():
     assert NAME == "scdataloader"
     adata = sc.read_h5ad(os.path.join(os.path.dirname(__file__), "test.h5ad"))
-    preprocessor = Preprocessor(
-        do_postp=False,
-        force_preprocess=True,
-    )
-    adata = preprocessor(adata)
     try:
         print("populating ontology...")
         start_time = time.time()
@@ -36,6 +31,11 @@ def test_base():
         )
         end_time = time.time()
         print(f"ontology populated in {end_time - start_time:.2f} seconds")
+        preprocessor = Preprocessor(
+            do_postp=False,
+            force_preprocess=True,
+        )
+        adata = preprocessor(adata)
         art = ln.Artifact(adata, description="test")
         art.save()
         ln.Collection(art, name="test", description="test").save()
