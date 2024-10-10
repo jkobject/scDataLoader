@@ -1,19 +1,22 @@
 import warnings
+from collections import Counter
 from dataclasses import dataclass, field
+from functools import reduce
 from typing import Literal, Optional, Union
 
 # ln.connect("scprint")
 import bionty as bt
 import lamindb as ln
+import numpy as np
 import pandas as pd
 from anndata import AnnData
+from lamindb.core import MappedCollection
+from lamindb.core._mapped_collection import _Connect
+from lamindb.core.storage._anndata_accessor import _safer_read_index
 from scipy.sparse import issparse
 from torch.utils.data import Dataset as torchDataset
 
-from lamindb.core import MappedCollection
-from lamindb.core._mapped_collection import _Connect
 from scdataloader.utils import get_ancestry_mapping, load_genes
-from lamindb.core.storage._anndata_accessor import _safer_read_index
 
 from .config import LABELS_TOADD
 
@@ -153,14 +156,27 @@ class Dataset(torchDataset):
             )
         )
 
-    def get_label_weights(self, *args, **kwargs):
-        """
-        get_label_weights is a wrapper around mappedDataset.get_label_weights
+    def get_label_weights(self, obs_keys: str | list[str], scaler: int = 10):
+        """Get all weights for the given label keys."""
+        if isinstance(obs_keys, str):
+            obs_keys = [obs_keys]
+        labels_list = []
+        for label_key in obs_keys:
+            labels_to_str = (
+                self.mapped_dataset.get_merged_labels(label_key).astype(str).astype("O")
+            )
+            labels_list.append(labels_to_str)
+        if len(labels_list) > 1:
+            labels = reduce(lambda a, b: a + b, labels_list)
+        else:
+            labels = labels_list[0]
 
-        Returns:
-            dict: dictionary of weights for each label
-        """
-        return self.mapped_dataset.get_label_weights(*args, **kwargs)
+        counter = Counter(labels)  # type: ignore
+        rn = {n: i for i, n in enumerate(counter.keys())}
+        labels = np.array([rn[label] for label in labels])
+        counter = np.array(list(counter.values()))
+        weights = scaler / (counter + scaler)
+        return weights, labels
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
         """
@@ -244,7 +260,7 @@ class Dataset(torchDataset):
                         clss
                     )
                 )
-            cats = self.mapped_dataset.get_merged_categories(clss)
+            cats = set(self.mapped_dataset.get_merged_categories(clss))
             addition = set(LABELS_TOADD.get(clss, {}).values())
             cats |= addition
             groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
