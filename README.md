@@ -3,7 +3,6 @@
 [![codecov](https://codecov.io/gh/jkobject/scDataLoader/branch/main/graph/badge.svg?token=scDataLoader_token_here)](https://codecov.io/gh/jkobject/scDataLoader)
 [![CI](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/scDataLoader/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/scDataLoader.svg)](https://badge.fury.io/py/scDataLoader)
-[![Documentation Status](https://readthedocs.org/projects/scDataLoader/badge/?version=latest)](https://scDataLoader.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://pepy.tech/badge/scDataLoader)](https://pepy.tech/project/scDataLoader)
 [![Downloads](https://pepy.tech/badge/scDataLoader/month)](https://pepy.tech/project/scDataLoader)
 [![Downloads](https://pepy.tech/badge/scDataLoader/week)](https://pepy.tech/project/scDataLoader)
@@ -44,8 +43,7 @@ pip install scdataloader
 # or
 pip install scDataLoader[dev] # for dev dependencies
 
-lamin login <email> --key <API-key>
-lamin init --storage [folder-name-where-lamin-data-will-be-stored] --schema bionty
+lamin init --storage ./testdb --name test --schema bionty
 ```
 
 if you start with lamin and had to do a `lamin init`, you will also need to populate your ontologies. This is because scPRINT is using ontologies to define its cell types, diseases, sexes, ethnicities, etc.
@@ -57,7 +55,7 @@ from scdataloader.utils import populate_my_ontology
 
 populate_my_ontology() #to populate everything (recommended) (can take 2-10mns)
 
-populate_my_ontology( #the minimum for scprint to run some inferences (denoising, grn inference)
+populate_my_ontology( #the minimum to the tool
 organisms: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
     sex: List[str] = ["PATO:0000384", "PATO:0000383"],
     celltypes = None,
@@ -80,11 +78,91 @@ pip install -e scDataLoader[dev]
 
 ## Usage
 
-### Direct Usage
+### DataModule usage
 
 ```python
 # initialize a local lamin database
-# !lamin init --storage ~/scdataloader --schema bionty
+#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
+from scdataloader import utils, Preprocessor, DataModule
+
+
+# preprocess datasets
+preprocessor = Preprocessor(
+    do_postp=False,
+    force_preprocess=True,
+)
+adata = preprocessor(adata)
+
+art = ln.Artifact(adata, description="test")
+art.save()
+ln.Collection(art, name="test", description="test").save()
+
+datamodule = DataModule(
+    collection_name="test",
+    organisms=["NCBITaxon:9606"], #organism that we will work on
+    how="most expr", # for the collator (most expr genes only will be selected)
+    max_len=1000, # only the 1000 most expressed
+    batch_size=64,
+    num_workers=1,
+    validation_split=0.1,
+)
+```
+
+### lightning-free usage (Dataset+Collator+DataLoader)
+
+```python
+# initialize a local lamin database
+#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
+
+from scdataloader import utils, Preprocessor, SimpleAnnDataset, Collator, DataLoader
+
+# preprocess dataset
+preprocessor = Preprocessor(
+    do_postp=False,
+    force_preprocess=True,
+)
+adata = preprocessor(adata)
+
+# create dataset
+adataset = SimpleAnnDataset(
+    adata, obs_to_output=["organism_ontology_term_id"]
+)
+# create collator
+col = Collator(
+    organisms="NCBITaxon:9606",
+    valid_genes=adata.var_names,
+    max_len=2000, #maximum number of genes to use
+    how="some" |"most expr"|"random_expr",
+    # genelist = [geneA, geneB] if how=='some'
+)
+# create dataloader
+dataloader = DataLoader(
+    adataset,
+    collate_fn=col,
+    batch_size=64,
+    num_workers=4,
+    shuffle=False,
+)
+
+# predict
+for batch in tqdm(dataloader):
+    gene_pos, expression, depth = (
+        batch["genes"],
+        batch["x"],
+        batch["depth"],
+    )
+    model.predict(
+        gene_pos,
+        expression,
+        depth,
+    )
+```
+
+### Usage on all of cellxgene
+
+```python
+# initialize a local lamin database
+#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
 
 from scdataloader import utils
 from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, additional_preprocess

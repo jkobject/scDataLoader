@@ -90,7 +90,7 @@ def _fetchFromServer(
 
 
 def getBiomartTable(
-    ensemble_server: str = "http://jul2023.archive.ensembl.org/biomart",
+    ensemble_server: str = "http://may2024.archive.ensembl.org/biomart",
     useCache: bool = False,
     cache_folder: str = "/tmp/biomart/",
     attributes: List[str] = [],
@@ -100,7 +100,7 @@ def getBiomartTable(
     """generate a genelist dataframe from ensembl's biomart
 
     Args:
-        ensemble_server (str, optional): the biomart server. Defaults to "http://jul2023.archive.ensembl.org/biomart".
+        ensemble_server (str, optional): the biomart server. Defaults to "http://may2023.archive.ensembl.org/biomart".
         useCache (bool, optional): whether to use the cache or not. Defaults to False.
         cache_folder (str, optional): the cache folder. Defaults to "/tmp/biomart/".
         attributes (List[str], optional): the attributes to fetch. Defaults to [].
@@ -127,21 +127,20 @@ def getBiomartTable(
 
     cache_folder = os.path.expanduser(cache_folder)
     createFoldersFor(cache_folder)
-    cachefile = os.path.join(cache_folder, ".biomart.csv")
+    cachefile = os.path.join(cache_folder, ".biomart.parquet")
     if useCache & os.path.isfile(cachefile):
         print("fetching gene names from biomart cache")
-        res = pd.read_csv(cachefile)
+        res = pd.read_parquet(cachefile)
     else:
         print("downloading gene names from biomart")
 
         res = _fetchFromServer(ensemble_server, attr + attributes, database=database)
-        res.to_csv(cachefile, index=False)
+        res.to_parquet(cachefile, index=False)
     res.columns = attr + attributes
     if type(res) is not type(pd.DataFrame()):
         raise ValueError("should be a dataframe")
     res = res[~(res["ensembl_gene_id"].isna())]
     if "hgnc_symbol" in res.columns:
-        res = res[res["hgnc_symbol"].isna()]
         res.loc[res[res.hgnc_symbol.isna()].index, "hgnc_symbol"] = res[
             res.hgnc_symbol.isna()
         ]["ensembl_gene_id"]
@@ -369,10 +368,16 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf["organism"] = organism
         organismdf.append(genesdf)
     organismdf = pd.concat(organismdf)
-    organismdf.drop(
-        columns=["source_id", "run_id", "created_by_id", "updated_at", "stable_id"],
-        inplace=True,
-    )
+    for col in [
+        "source_id",
+        "run_id",
+        "created_by_id",
+        "updated_at",
+        "stable_id",
+        "created_at",
+    ]:
+        if col in organismdf.columns:
+            organismdf.drop(columns=[col], inplace=True)
     return organismdf
 
 
@@ -396,7 +401,7 @@ def populate_my_ontology(
 
     add whatever value you need afterward like it is done here with:
 
-    `bt.$ontology(name="ddd", ontology_id="ddddd").save()`
+    `bt.$ontology(name="ddd", ontolbogy_id="ddddd").save()`
 
     `df["assay_ontology_term_id"].unique()`
 
@@ -507,12 +512,17 @@ def populate_my_ontology(
         # convert onto to name
         organism = bt.Organism.filter(ontology_id=organism).one().name
         names = bt.Gene.public(organism=organism).df()["ensembl_gene_id"]
-        records = bt.Gene.from_values(
-            names,
-            field="ensembl_gene_id",
-            organism=organism,
-        )
-        ln.save(records)
+
+        # Process names in blocks of 10,000 elements
+        block_size = 10000
+        for i in range(0, len(names), block_size):
+            block = names[i : i + block_size]
+            records = bt.Gene.from_values(
+                block,
+                field="ensembl_gene_id",
+                organism=organism,
+            )
+            ln.save(records)
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int):
