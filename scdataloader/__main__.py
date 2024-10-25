@@ -53,14 +53,14 @@ def main():
     )
     parser.add_argument(
         "--filter_gene_by_counts",
-        type=Union[int, bool],
-        default=False,
+        type=int,
+        default=0,
         help="Determines whether to filter genes by counts.",
     )
     parser.add_argument(
         "--filter_cell_by_counts",
-        type=Union[int, bool],
-        default=False,
+        type=int,
+        default=0,
         help="Determines whether to filter cells by counts.",
     )
     parser.add_argument(
@@ -153,6 +153,12 @@ def main():
         default=False,
         help="Determines whether to do postprocessing.",
     )
+    parser.add_argument(
+        "--cache",
+        type=bool,
+        default=True,
+        help="Determines whether to cache the dataset.",
+    )
     args = parser.parse_args()
 
     # Load the collection
@@ -178,6 +184,7 @@ def main():
         normalize_sum=args.normalize_sum,
         subset_hvg=args.subset_hvg,
         hvg_flavor=args.hvg_flavor,
+        cache=args.cache,
         binning=args.binning,
         result_binned_key=args.result_binned_key,
         length_normalize=args.length_normalize,
