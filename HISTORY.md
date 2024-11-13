@@ -2,6 +2,40 @@ Changelog
 =========
 
 
+(unreleased)
+------------
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader.
+  [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/scDataLoader into
+  main. [jkobject]
+- Merge pull request #8 from
+  jkobject/dependabot/github_actions/softprops/action-gh-release-2.
+  [Jérémie Kalfon]
+
+  Bump softprops/action-gh-release from 1 to 2
+- Bump softprops/action-gh-release from 1 to 2. [dependabot[bot]]
+
+  Bumps [softprops/action-gh-release](https://github.com/softprops/action-gh-release) from 1 to 2.
+  - [Release notes](https://github.com/softprops/action-gh-release/releases)
+  - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/softprops/action-gh-release/compare/v1...v2)
+
+  ---
+  updated-dependencies:
+  - dependency-name: softprops/action-gh-release
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Making it run easy. [jkobject]
+- Debugged the biomart issue. [jkobject]
+- Some debug of scdataloader. [maestro-jk]
+
+
+1.2.1 (2024-10-10)
+------------------
+- Release: version 1.2.1 🚀 [jkobject]
+
+
 1.2.0 (2024-10-10)
 ------------------
 - Release: version 1.2.0 🚀 [jkobject]
