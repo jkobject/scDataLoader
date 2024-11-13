@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Small debug. [jkobject]
+
+
+1.2.2 (2024-11-13)
+------------------
+- Release: version 1.2.2 🚀 [jkobject]
 - Merge branch 'main' of https://github.com/jkobject/scDataLoader.
   [maestro-jk]
 - Merge branch 'main' of https://github.com/jkobject/scDataLoader into
