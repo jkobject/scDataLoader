@@ -10,6 +10,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue)](https://doi.org/10.1101/2024.07.29.605556)
 
+<img src="scdataloader.png" width="600">
+
 This single cell pytorch dataloader / lighting datamodule is designed to be used with:
 
 - [lamindb](https://lamin.ai/)
