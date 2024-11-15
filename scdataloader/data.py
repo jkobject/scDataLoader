@@ -97,8 +97,8 @@ class Dataset(torchDataset):
             for clss in self.clss_to_pred:
                 if clss not in self.hierarchical_clss:
                     # otherwise it's already been done
-                    self.class_topred[clss] = self.mapped_dataset.get_merged_categories(
-                        clss
+                    self.class_topred[clss] = set(
+                        self.mapped_dataset.get_merged_categories(clss)
                     )
                     if (
                         self.mapped_dataset.unknown_label

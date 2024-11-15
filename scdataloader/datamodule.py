@@ -290,7 +290,7 @@ class DataModule(L.LightningDataModule):
                     break
                 else:
                     self.test_datasets.append(
-                        self.dataset.mapped_dataset._path_list[i].path
+                        self.dataset.mapped_dataset.path_list[i].path
                     )
                     cs += c
             len_test = cs
