@@ -1,6 +1,6 @@
 [project]
 name = "scdataloader"
-version = "1.6.3"
+version = "1.6.4"
 description = "a dataloader for single cell data in lamindb"
 authors = [
     {name = "jkobject", email = "jkobject@gmail.com"}
