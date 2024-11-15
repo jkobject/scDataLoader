@@ -31,7 +31,7 @@ class Preprocessor:
         filter_gene_by_counts: Union[int, bool] = False,
         filter_cell_by_counts: Union[int, bool] = False,
         normalize_sum: float = 1e4,
-        subset_hvg: int = 0,
+        n_hvg_for_postp: int = 0,
         use_layer: Optional[str] = None,
         is_symbol: bool = False,
         hvg_flavor: str = "seurat_v3",
@@ -65,7 +65,7 @@ class Preprocessor:
                 Defaults to 1e4.
             log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.
                 Defaults to True.
-            subset_hvg (int or bool, optional): Determines whether to subset highly variable genes.
+            n_hvg_for_postp (int or bool, optional): Determines whether to subset to highly variable genes for the PCA.
                 Defaults to False.
             hvg_flavor (str, optional): Specifies the flavor of highly variable genes selection.
                 See :func:`scanpy.pp.highly_variable_genes` for more details. Defaults to "seurat_v3".
@@ -310,13 +310,15 @@ class Preprocessor:
                 )["X"]
             )
             # step 5: subset hvg
-            if self.subset_hvg:
+            if self.n_hvg_for_postp:
                 sc.pp.highly_variable_genes(
                     adata,
-                    n_top_genes=self.subset_hvg,
+                    n_top_genes=self.n_hvg_for_postp,
                     batch_key=self.batch_key,
                     flavor=self.hvg_flavor,
-                    subset=False,
+                    subset=True,
+                    layer="norm",
+
                 )
             sc.pp.log1p(adata, layer="norm")
             sc.pp.pca(
