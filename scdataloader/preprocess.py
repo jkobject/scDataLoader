@@ -96,7 +96,6 @@ class Preprocessor:
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
         self.normalize_sum = normalize_sum
-        self.subset_hvg = subset_hvg
         self.hvg_flavor = hvg_flavor
         self.binning = binning
         self.organisms = organisms
@@ -318,7 +317,6 @@ class Preprocessor:
                     flavor=self.hvg_flavor,
                     subset=True,
                     layer="norm",
-
                 )
             sc.pp.log1p(adata, layer="norm")
             sc.pp.pca(
