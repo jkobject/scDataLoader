@@ -108,6 +108,7 @@ class Preprocessor:
         self.min_nnz_genes = min_nnz_genes
         self.maxdropamount = maxdropamount
         self.madoutlier = madoutlier
+        self.n_hvg_for_postp = n_hvg_for_postp
         self.pct_mt_outlier = pct_mt_outlier
         self.batch_key = batch_key
         self.length_normalize = length_normalize
