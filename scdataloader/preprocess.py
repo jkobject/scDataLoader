@@ -144,10 +144,6 @@ class Preprocessor:
             del adata.obsm
         if len(adata.obsp.keys()) > 0 and self.do_postp:
             del adata.obsp
-        if len(adata.uns.keys()) > 0:
-            del adata.uns
-        if len(adata.varp.keys()) > 0:
-            del adata.varp
         # check that it is a count
         print("checking raw counts")
         if np.abs(
@@ -325,15 +321,10 @@ class Preprocessor:
                 layer="norm",
                 n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
             )
-            sc.pp.neighbors(adata, use_rep="X_pca")
-            sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
-            sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
-            sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
             batches = [
                 "assay_ontology_term_id",
                 "self_reported_ethnicity_ontology_term_id",
                 "sex_ontology_term_id",
-                "development_stage_ontology_term_id",
             ]
             if "donor_id" in adata.obs.columns:
                 batches.append("donor_id")
@@ -342,7 +333,7 @@ class Preprocessor:
             adata.obs["batches"] = adata.obs[batches].apply(
                 lambda x: ",".join(x.dropna().astype(str)), axis=1
             )
-            sc.tl.umap(adata)
+
             # additional
             if self.additional_postprocess is not None:
                 adata = self.additional_postprocess(adata)
@@ -402,13 +393,11 @@ class LaminPreprocessor(Preprocessor):
         self,
         *args,
         cache: bool = True,
-        stream: bool = False,
         keep_files: bool = True,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.cache = cache
-        self.stream = stream
         self.keep_files = keep_files
 
     def __call__(
@@ -456,12 +445,11 @@ class LaminPreprocessor(Preprocessor):
                     )
                     continue
                 if file.size <= MAXFILESIZE:
-                    adata = file.load(stream=self.stream)
+                    adata = file.load()
                     print(adata)
                 else:
                     badata = backed
                     print(badata)
-
                 try:
                     if file.size > MAXFILESIZE:
                         print(
@@ -477,6 +465,7 @@ class LaminPreprocessor(Preprocessor):
                             end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
                             print(block)
+                            block.uns["dataset_id"] = file.stem_uid + "_p" + str(j)
                             block = super().__call__(block)
                             myfile = ln.from_anndata(
                                 block,
@@ -492,6 +481,7 @@ class LaminPreprocessor(Preprocessor):
                                 del block
 
                     else:
+                        adata.uns["dataset_id"] = file.stem_uid
                         adata = super().__call__(adata)
                         try:
                             sc.pl.umap(adata, color=["cell_type"])
@@ -680,15 +670,21 @@ def additional_postprocess(adata):
     # need to be connectivities and same labels [cell type, assay, dataset, disease]
     # define the "neighbor" up to 10(N) cells and add to obs
     # define the "next time point" up to 5(M) cells and add to obs  # step 1: filter genes
-    del adata.obsp["connectivities"]
-    del adata.obsp["distances"]
-    sc.external.pp.harmony_integrate(adata, key="batches")
-    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    if len(adata.obs["batches"].unique()) > 1:
+        sc.external.pp.harmony_integrate(adata, key="batches")
+        sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    else:
+        sc.pp.neighbors(adata, use_rep="X_pca")
+    sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
+    sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
+    sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
     sc.tl.umap(adata)
     sc.pl.umap(
         adata,
         color=["cell_type", "batches"],
+        save="umap_" + adata.uns["dataset_id"] + ".png",
     )
+
     palantir.utils.run_diffusion_maps(adata, n_components=20)
     palantir.utils.determine_multiscale_space(adata)
     terminal_states = palantir.utils.find_terminal_states(

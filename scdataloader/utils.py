@@ -582,7 +582,7 @@ def populate_my_ontology(
     # cell type
     if celltypes is not None:
         if len(celltypes) == 0:
-            bt.CellType.import_from_source(update=True)
+            bt.CellType.import_source()
         else:
             names = bt.CellType.public().df().index if not celltypes else celltypes
             records = bt.CellType.from_values(names, field="ontology_id")
@@ -616,7 +616,7 @@ def populate_my_ontology(
     # ethnicity
     if ethnicities is not None:
         if len(ethnicities) == 0:
-            bt.Ethnicity.import_from_source(update=True)
+            bt.Ethnicity.import_source()
         else:
             names = bt.Ethnicity.public().df().index if not ethnicities else ethnicities
             records = bt.Ethnicity.from_values(names, field="ontology_id")
@@ -627,7 +627,7 @@ def populate_my_ontology(
     # ExperimentalFactor
     if assays is not None:
         if len(assays) == 0:
-            bt.ExperimentalFactor.import_from_source(update=True)
+            bt.ExperimentalFactor.import_source()
         else:
             names = bt.ExperimentalFactor.public().df().index if not assays else assays
             records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
@@ -638,7 +638,7 @@ def populate_my_ontology(
     # Tissue
     if tissues is not None:
         if len(tissues) == 0:
-            bt.Tissue.import_from_source(update=True)
+            bt.Tissue.import_source()
         else:
             names = bt.Tissue.public().df().index if not tissues else tissues
             records = bt.Tissue.from_values(names, field="ontology_id")
@@ -647,9 +647,9 @@ def populate_my_ontology(
     # DevelopmentalStage
     if dev_stages is not None:
         if len(dev_stages) == 0:
-            bt.DevelopmentalStage.import_from_source(update=True)
+            bt.DevelopmentalStage.import_source()
             source = bt.PublicSource.filter(organism="mouse", name="mmusdv").last()
-            bt.DevelopmentalStage.import_from_source(source=source)
+            bt.DevelopmentalStage.import_source(source=source)
         else:
             names = (
                 bt.DevelopmentalStage.public().df().index
@@ -663,7 +663,7 @@ def populate_my_ontology(
     # Disease
     if diseases is not None:
         if len(diseases) == 0:
-            bt.Disease.import_from_source(update=True)
+            bt.Disease.import_source()
         else:
             names = bt.Disease.public().df().index if not diseases else diseases
             records = bt.Disease.from_values(names, field="ontology_id")

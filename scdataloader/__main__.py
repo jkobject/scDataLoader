@@ -10,7 +10,12 @@ from scdataloader.preprocess import (
 )
 
 
-# scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" --description="preprocessed for scprint" --new_name="scprint main" --start_at=39
+# scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" \
+# --description="scPRINT-V2 datasets" --new_name="scprint v2" --n_hvg_for_postp=4000 --cache=False \
+# --filter_gene_by_counts=0 --filter_cell_by_counts=300 --min_valid_genes_id=500 \
+# --min_nnz_genes=120 --min_dataset_size=2000 --maxdropamount=90 \
+# --organisms=["NCBITaxon:9606","NCBITaxon:9544","NCBITaxon:9483","NCBITaxon:10090"] \
+# --batch_key="assay_ontology_term_id" --start_at=39
 def main():
     """
     main function to preprocess datasets in a given lamindb collection.
@@ -70,7 +75,7 @@ def main():
         help="Determines whether to normalize the total counts of each cell to a specific value.",
     )
     parser.add_argument(
-        "--subset_hvg",
+        "--n_hvg_for_postp",
         type=int,
         default=0,
         help="Determines whether to subset highly variable genes.",
@@ -139,7 +144,7 @@ def main():
         help="Specifies the percentage of MT outlier.",
     )
     parser.add_argument(
-        "--batch_key", type=Optional[str], default=None, help="Specifies the batch key."
+        "--batch_key", type=str, default=None, help="Specifies the batch key."
     )
     parser.add_argument(
         "--skip_validate",
@@ -158,6 +163,15 @@ def main():
         type=bool,
         default=True,
         help="Determines whether to cache the dataset.",
+    )
+    parser.add_argument(
+        "--organisms",
+        type=list,
+        default=[
+            "NCBITaxon:9606",
+            "NCBITaxon:10090",
+        ],
+        help="Determines the organisms to keep.",
     )
     args = parser.parse_args()
 
@@ -182,7 +196,7 @@ def main():
         filter_gene_by_counts=args.filter_gene_by_counts,
         filter_cell_by_counts=args.filter_cell_by_counts,
         normalize_sum=args.normalize_sum,
-        subset_hvg=args.subset_hvg,
+        n_hvg_for_postp=args.n_hvg_for_postp,
         hvg_flavor=args.hvg_flavor,
         cache=args.cache,
         binning=args.binning,
