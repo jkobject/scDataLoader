@@ -32,7 +32,6 @@ class DataModule(L.LightningDataModule):
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
-        clss_to_pred: list = ["organism_ontology_term_id"],
         all_clss: list = ["organism_ontology_term_id"],
         hierarchical_clss: list = [],
         # this is for the collator
@@ -82,7 +81,6 @@ class DataModule(L.LightningDataModule):
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
             all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
-            clss_to_pred (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
 
             see @file data.py and @file collator.py for more details about some of the parameters
@@ -92,7 +90,6 @@ class DataModule(L.LightningDataModule):
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
                 obs=all_clss,
-                clss_to_pred=clss_to_pred,
                 hierarchical_clss=hierarchical_clss,
             )
             # print(mdataset)
@@ -185,12 +182,14 @@ class DataModule(L.LightningDataModule):
             f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
             + (
-                "\twith train_dataset size of=("
-                + str((self.train_weights != 0).sum())
-                + ")\n)"
+                (
+                    "\twith train_dataset size of=("
+                    + str((self.train_weights != 0).sum())
+                    + ")\n)"
+                )
+                if self.train_weights is not None
+                else ")"
             )
-            if self.train_weights is not None
-            else ")"
         )
 
     @property
