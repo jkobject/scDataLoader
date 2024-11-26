@@ -243,7 +243,9 @@ class Preprocessor:
             adata.uns["dataset_id"] = dataset_id
         if not self.skip_validate:
             print("validating")
-            data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
+            data_utils.validate(
+                adata, organism=adata.obs.organism_ontology_term_id[0], need_all=False
+            )
             # length normalization
             if (
                 adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()

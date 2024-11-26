@@ -147,7 +147,7 @@ def getBiomartTable(
     return res
 
 
-def validate(adata: AnnData, organism: str):
+def validate(adata: AnnData, organism: str, need_all=True):
     """
     validate checks if the adata object is valid for lamindb
 
@@ -185,7 +185,7 @@ def validate(adata: AnnData, organism: str):
         "tissue_ontology_term_id",
         "assay_ontology_term_id",
     ]:
-        if val not in adata.obs.columns:
+        if val not in adata.obs.columns and need_all:
             raise ValueError(
                 f"Column '{val}' is missing in the provided anndata object."
             )
@@ -193,7 +193,9 @@ def validate(adata: AnnData, organism: str):
     if not bt.Ethnicity.validate(
         adata.obs["self_reported_ethnicity_ontology_term_id"],
         field="ontology_id",
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid ethnicity ontology term id found")
     if not bt.Organism.validate(
         adata.obs["organism_ontology_term_id"], field="ontology_id"
@@ -201,28 +203,40 @@ def validate(adata: AnnData, organism: str):
         raise ValueError("Invalid organism ontology term id found")
     if not bt.Phenotype.validate(
         adata.obs["sex_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid sex ontology term id found")
     if not bt.Disease.validate(
         adata.obs["disease_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid disease ontology term id found")
     if not bt.CellType.validate(
         adata.obs["cell_type_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid cell type ontology term id found")
     if not bt.DevelopmentalStage.validate(
         adata.obs["development_stage_ontology_term_id"],
         field="ontology_id",
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid dev stage ontology term id found")
     if not bt.Tissue.validate(
         adata.obs["tissue_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid tissue ontology term id found")
     if not bt.ExperimentalFactor.validate(
         adata.obs["assay_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid assay ontology term id found")
     if not bt.Gene.validate(
         adata.var.index, field="ensembl_gene_id", organism=organism
