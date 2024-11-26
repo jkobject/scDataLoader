@@ -45,7 +45,13 @@ class Preprocessor:
         maxdropamount: int = 50,
         madoutlier: int = 5,
         pct_mt_outlier: int = 8,
-        batch_key: Optional[str] = None,
+        batch_keys: list[str] = [
+            "assay_ontology_term_id",
+            "self_reported_ethnicity_ontology_term_id",
+            "sex_ontology_term_id",
+            "donor_id",
+            "suspension_type",
+        ],
         skip_validate: bool = False,
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
@@ -110,7 +116,7 @@ class Preprocessor:
         self.madoutlier = madoutlier
         self.n_hvg_for_postp = n_hvg_for_postp
         self.pct_mt_outlier = pct_mt_outlier
-        self.batch_key = batch_key
+        self.batch_keys = batch_keys
         self.length_normalize = length_normalize
         self.skip_validate = skip_validate
         self.use_layer = use_layer
@@ -205,9 +211,9 @@ class Preprocessor:
             )
         )
 
-        if self.is_symbol or not adata.var.index.str.contains("ENSG").any():
-            if not adata.var.index.str.contains("ENSG").any():
-                print("No ENSG genes found, assuming gene symbols...")
+        if self.is_symbol or not adata.var.index.str.contains("ENS").any():
+            if not adata.var.index.str.contains("ENS").any():
+                print("No ENS genes found, assuming gene symbols...")
             genesdf["ensembl_gene_id"] = genesdf.index
             var = (
                 adata.var.merge(
@@ -310,11 +316,18 @@ class Preprocessor:
                 )["X"]
             )
             # step 5: subset hvg
+            batches = []
+            for i in self.batch_keys:
+                if i in adata.obs.columns:
+                    batches.append(i)
+            adata.obs["batches"] = adata.obs[batches].apply(
+                lambda x: ",".join(x.dropna().astype(str)), axis=1
+            )
             if self.n_hvg_for_postp:
                 sc.pp.highly_variable_genes(
                     adata,
                     n_top_genes=self.n_hvg_for_postp,
-                    batch_key=self.batch_key,
+                    batch_key="batches",
                     flavor=self.hvg_flavor,
                     subset=True,
                     layer="norm",
@@ -324,18 +337,6 @@ class Preprocessor:
                 adata,
                 layer="norm",
                 n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
-            )
-            batches = [
-                "assay_ontology_term_id",
-                "self_reported_ethnicity_ontology_term_id",
-                "sex_ontology_term_id",
-            ]
-            if "donor_id" in adata.obs.columns:
-                batches.append("donor_id")
-            if "suspension_type" in adata.obs.columns:
-                batches.append("suspension_type")
-            adata.obs["batches"] = adata.obs[batches].apply(
-                lambda x: ",".join(x.dropna().astype(str)), axis=1
             )
 
             # additional
@@ -431,7 +432,8 @@ class LaminPreprocessor(Preprocessor):
         elif isinstance(data, ln.Collection):
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
-                print(i + start_at)
+                i = i + start_at
+                print(i)
                 if file.stem_uid in all_ready_processed_keys:
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
@@ -474,9 +476,15 @@ class LaminPreprocessor(Preprocessor):
                             )
                             myfile = ln.Artifact.from_anndata(
                                 block,
-                                revises=file,
-                                description=description,
-                                version=version + "_p" + str(j),
+                                description=description
+                                + " n"
+                                + str(i)
+                                + " p"
+                                + str(j)
+                                + " ( revises file "
+                                + str(file.key)
+                                + " )",
+                                version=version,
                             )
                             myfile.save()
                             if self.keep_files:
@@ -487,14 +495,10 @@ class LaminPreprocessor(Preprocessor):
 
                     else:
                         adata = super().__call__(adata, dataset_id=file.stem_uid)
-                        try:
-                            sc.pl.umap(adata, color=["cell_type"])
-                        except Exception:
-                            sc.pl.umap(adata, color=["cell_type_ontology_term_id"])
                         myfile = ln.Artifact.from_anndata(
                             adata,
                             revises=file,
-                            description=description,
+                            description=description + " p" + str(i),
                             version=version,
                         )
                         myfile.save()

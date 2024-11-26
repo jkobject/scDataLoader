@@ -125,7 +125,7 @@ def main():
     parser.add_argument(
         "--min_nnz_genes",
         type=int,
-        default=400,
+        default=200,
         help="Specifies the minimum non-zero genes.",
     )
     parser.add_argument(
@@ -144,7 +144,16 @@ def main():
         help="Specifies the percentage of MT outlier.",
     )
     parser.add_argument(
-        "--batch_key", type=str, default=None, help="Specifies the batch key."
+        "--batch_keys",
+        type=list[str],
+        default=[
+            "assay_ontology_term_id",
+            "self_reported_ethnicity_ontology_term_id",
+            "sex_ontology_term_id",
+            "donor_id",
+            "suspension_type",
+        ],
+        help="Specifies the batch keys.",
     )
     parser.add_argument(
         "--skip_validate",
@@ -155,13 +164,13 @@ def main():
     parser.add_argument(
         "--do_postp",
         type=bool,
-        default=False,
+        default=True,
         help="Determines whether to do postprocessing.",
     )
     parser.add_argument(
         "--cache",
         type=bool,
-        default=True,
+        default=False,
         help="Determines whether to cache the dataset.",
     )
     parser.add_argument(
