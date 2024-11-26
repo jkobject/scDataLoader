@@ -118,7 +118,7 @@ class Preprocessor:
         self.do_postp = do_postp
         self.use_raw = use_raw
 
-    def __call__(self, adata) -> AnnData:
+    def __call__(self, adata, dataset_id=None) -> AnnData:
         if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
@@ -239,6 +239,8 @@ class Preprocessor:
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
+        if dataset_id is not None:
+            adata.uns["dataset_id"] = dataset_id
         if not self.skip_validate:
             print("validating")
             data_utils.validate(
@@ -405,10 +407,10 @@ class LaminPreprocessor(Preprocessor):
     def __call__(
         self,
         data: Union[ln.Collection, AnnData] = None,
-        name="preprocessed dataset",
-        description="preprocessed dataset using scprint",
-        start_at=0,
-        version=2,
+        name: str = "preprocessed dataset",
+        description: str = "preprocessed dataset using scprint",
+        start_at: int = 0,
+        version: str = "2",
     ):
         """
         format controls the different input value wrapping, including categorical
@@ -467,13 +469,14 @@ class LaminPreprocessor(Preprocessor):
                             end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
                             print(block)
-                            block.uns["dataset_id"] = file.stem_uid + "_p" + str(j)
-                            block = super().__call__(block)
-                            myfile = ln.from_anndata(
+                            block = super().__call__(
+                                block, dataset_id=file.stem_uid + "_p" + str(j)
+                            )
+                            myfile = ln.Artifact.from_anndata(
                                 block,
                                 revises=file,
                                 description=description,
-                                version=str(version) + "_s" + str(j),
+                                version=version + "_p" + str(j),
                             )
                             myfile.save()
                             if self.keep_files:
@@ -483,17 +486,16 @@ class LaminPreprocessor(Preprocessor):
                                 del block
 
                     else:
-                        adata.uns["dataset_id"] = file.stem_uid
-                        adata = super().__call__(adata)
+                        adata = super().__call__(adata, dataset_id=file.stem_uid)
                         try:
                             sc.pl.umap(adata, color=["cell_type"])
                         except Exception:
                             sc.pl.umap(adata, color=["cell_type_ontology_term_id"])
-                        myfile = ln.from_anndata(
+                        myfile = ln.Artifact.from_anndata(
                             adata,
                             revises=file,
                             description=description,
-                            version=str(version),
+                            version=version,
                         )
                         myfile.save()
                         if self.keep_files:
@@ -665,18 +667,18 @@ def additional_preprocess(adata):
 
 
 def additional_postprocess(adata):
-    import palantir
+    # import palantir
 
     # define the "up to" 10 neighbors for each cells and add to obs
     # compute neighbors
     # need to be connectivities and same labels [cell type, assay, dataset, disease]
     # define the "neighbor" up to 10(N) cells and add to obs
     # define the "next time point" up to 5(M) cells and add to obs  # step 1: filter genes
-    if len(adata.obs["batches"].unique()) > 1:
-        sc.external.pp.harmony_integrate(adata, key="batches")
-        sc.pp.neighbors(adata, use_rep="X_pca_harmony")
-    else:
-        sc.pp.neighbors(adata, use_rep="X_pca")
+    # if len(adata.obs["batches"].unique()) > 1:
+    #    sc.external.pp.harmony_integrate(adata, key="batches")
+    #    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    # else:
+    sc.pp.neighbors(adata, use_rep="X_pca")
     sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
     sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
     sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
@@ -686,20 +688,19 @@ def additional_postprocess(adata):
         color=["cell_type", "batches"],
         save="umap_" + adata.uns["dataset_id"] + ".png",
     )
-
-    palantir.utils.run_diffusion_maps(adata, n_components=20)
-    palantir.utils.determine_multiscale_space(adata)
-    terminal_states = palantir.utils.find_terminal_states(
-        adata,
-        celltypes=adata.obs.cell_type_ontology_term_id.unique(),
-        celltype_column="cell_type_ontology_term_id",
-    )
-    sc.tl.diffmap(adata)
-    adata.obs["heat_diff"] = 1
-    for terminal_state in terminal_states.index.tolist():
-        adata.uns["iroot"] = np.where(adata.obs.index == terminal_state)[0][0]
-        sc.tl.dpt(adata)
-        adata.obs["heat_diff"] = np.minimum(
-            adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
-        )
+    # palantir.utils.run_diffusion_maps(adata, n_components=20)
+    # palantir.utils.determine_multiscale_space(adata)
+    # terminal_states = palantir.utils.find_terminal_states(
+    #    adata,
+    #    celltypes=adata.obs.cell_type_ontology_term_id.unique(),
+    #    celltype_column="cell_type_ontology_term_id",
+    # )
+    # sc.tl.diffmap(adata)
+    # adata.obs["heat_diff"] = 1
+    # for terminal_state in terminal_states.index.tolist():
+    #    adata.uns["iroot"] = np.where(adata.obs.index == terminal_state)[0][0]
+    #    sc.tl.dpt(adata)
+    #    adata.obs["heat_diff"] = np.minimum(
+    #        adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
+    #    )
     return adata
