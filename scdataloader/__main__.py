@@ -13,7 +13,7 @@ from scdataloader.preprocess import (
 # scdataloader --instance="laminlabs/cellxgene" --name="cellxgene-census" --version="2023-12-15" \
 # --description="scPRINT-V2 datasets" --new_name="scprint v2" --n_hvg_for_postp=4000 --cache=False \
 # --filter_gene_by_counts=0 --filter_cell_by_counts=300 --min_valid_genes_id=500 \
-# --min_nnz_genes=120 --min_dataset_size=2000 --maxdropamount=90 \
+# --min_nnz_genes=120 --min_dataset_size=100 --maxdropamount=90 \
 # --organisms=["NCBITaxon:9606","NCBITaxon:9544","NCBITaxon:9483","NCBITaxon:10090"] \
 # --batch_key="assay_ontology_term_id" --start_at=39
 def main():
