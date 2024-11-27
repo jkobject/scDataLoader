@@ -358,12 +358,16 @@ class LabelWeightedSampler(Sampler[int]):
     label_weights: Sequence[float]
     klass_indices: Sequence[Sequence[int]]
     num_samples: int
-
+    replacement: bool
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
-    # NOTE: here we use replacement=True, you can change it if you don't upsample a class.
+
     def __init__(
-        self, label_weights: Sequence[float], labels: Sequence[int], num_samples: int
+        self,
+        label_weights: Sequence[float],
+        labels: Sequence[int],
+        num_samples: int,
+        replacement: bool = True,
     ) -> None:
         """
 
@@ -378,6 +382,7 @@ class LabelWeightedSampler(Sampler[int]):
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
+        self.replacement = replacement
         self.num_samples = num_samples
         # list of tensor.
         self.klass_indices = [
@@ -387,7 +392,9 @@ class LabelWeightedSampler(Sampler[int]):
 
     def __iter__(self):
         sample_labels = torch.multinomial(
-            self.label_weights, num_samples=self.num_samples, replacement=True
+            self.label_weights,
+            num_samples=self.num_samples,
+            replacement=self.replacement,
         )
         sample_indices = torch.empty_like(sample_labels)
         for i_klass, klass_index in enumerate(self.klass_indices):

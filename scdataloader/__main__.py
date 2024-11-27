@@ -15,7 +15,7 @@ from scdataloader.preprocess import (
 # --filter_gene_by_counts=0 --filter_cell_by_counts=300 --min_valid_genes_id=500 \
 # --min_nnz_genes=120 --min_dataset_size=100 --maxdropamount=90 \
 # --organisms=["NCBITaxon:9606","NCBITaxon:9544","NCBITaxon:9483","NCBITaxon:10090"] \
-# --batch_key="assay_ontology_term_id" --start_at=39
+# --start_at=0
 def main():
     """
     main function to preprocess datasets in a given lamindb collection.
@@ -182,6 +182,12 @@ def main():
         ],
         help="Determines the organisms to keep.",
     )
+    parser.add_argument(
+        "--force_preloaded",
+        type=bool,
+        default=False,
+        help="Determines whether the dataset is preloaded.",
+    )
     args = parser.parse_args()
 
     # Load the collection
@@ -218,12 +224,13 @@ def main():
         maxdropamount=args.maxdropamount,
         madoutlier=args.madoutlier,
         pct_mt_outlier=args.pct_mt_outlier,
-        batch_key=args.batch_key,
+        batch_keys=args.batch_keys,
         skip_validate=args.skip_validate,
         do_postp=args.do_postp,
         additional_preprocess=additional_preprocess,
         additional_postprocess=additional_postprocess,
         keep_files=False,
+        force_preloaded=args.force_preloaded,
     )
 
     # Preprocess the dataset

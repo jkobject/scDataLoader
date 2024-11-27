@@ -8,8 +8,10 @@ import pandas as pd
 import scanpy as sc
 from anndata import AnnData
 from scipy.sparse import csr_matrix
-
+from anndata import read_h5ad
 from scdataloader import utils as data_utils
+from upath import UPath
+
 
 FULL_LENGTH_ASSAYS = [
     "EFO: 0700016",
@@ -324,18 +326,29 @@ class Preprocessor:
                 lambda x: ",".join(x.dropna().astype(str)), axis=1
             )
             if self.n_hvg_for_postp:
-                sc.pp.highly_variable_genes(
-                    adata,
-                    n_top_genes=self.n_hvg_for_postp,
-                    batch_key="batches",
-                    flavor=self.hvg_flavor,
-                    subset=True,
-                    layer="norm",
-                )
-            sc.pp.log1p(adata, layer="norm")
-            sc.pp.pca(
-                adata,
-                layer="norm",
+                try:
+                    sc.pp.highly_variable_genes(
+                        adata,
+                        n_top_genes=self.n_hvg_for_postp,
+                        batch_key="batches",
+                        flavor=self.hvg_flavor,
+                        subset=False,
+                        layer="norm",
+                    )
+                except ValueError as e:
+                    print("retrying with span")
+                    sc.pp.highly_variable_genes(
+                        adata,
+                        n_top_genes=self.n_hvg_for_postp,
+                        # batch_key="batches",
+                        flavor=self.hvg_flavor,
+                        span=0.5,
+                        subset=False,
+                        layer="norm",
+                    )
+
+            adata.obsm["X_pca"] = sc.pp.pca(
+                adata.layers["norm"][:, adata.var.highly_variable],
                 n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
             )
 
@@ -399,11 +412,13 @@ class LaminPreprocessor(Preprocessor):
         *args,
         cache: bool = True,
         keep_files: bool = True,
+        force_preloaded: bool = False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.cache = cache
         self.keep_files = keep_files
+        self.force_preloaded = force_preloaded
 
     def __call__(
         self,
@@ -438,7 +453,9 @@ class LaminPreprocessor(Preprocessor):
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
                 print(file)
-                backed = file.open()
+
+                path = cache_path(file) if self.force_preloaded else file.cache()
+                backed = read_h5ad(path, backed="r")
                 if backed.obs.is_primary_data.sum() == 0:
                     print(f"{file.key} only contains non primary cells.. dropping")
                     # Save the stem_uid to a file to avoid loading it again
@@ -451,7 +468,7 @@ class LaminPreprocessor(Preprocessor):
                     )
                     continue
                 if file.size <= MAXFILESIZE:
-                    adata = file.load()
+                    adata = backed.to_memory()
                     print(adata)
                 else:
                     badata = backed
@@ -689,8 +706,9 @@ def additional_postprocess(adata):
     sc.tl.umap(adata)
     sc.pl.umap(
         adata,
+        ncols=1,
         color=["cell_type", "batches"],
-        save="umap_" + adata.uns["dataset_id"] + ".png",
+        save="_" + adata.uns["dataset_id"] + ".png",
     )
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
@@ -708,3 +726,9 @@ def additional_postprocess(adata):
     #        adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
     #    )
     return adata
+
+
+def cache_path(artifact):
+    cloud_path = UPath(artifact.storage.root) / artifact.key
+    cache_path = ln.setup.settings.paths.cloud_to_local_no_update(cloud_path)
+    return cache_path
