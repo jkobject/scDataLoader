@@ -47,6 +47,7 @@ class DataModule(L.LightningDataModule):
             "EFO:0030007",
             "EFO:0030062",
         ],
+        metacell_mode: bool = False,
         **kwargs,
     ):
         """
@@ -81,6 +82,7 @@ class DataModule(L.LightningDataModule):
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
             all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
+            metacell_mode (bool, optional): Whether to use metacell mode. Defaults to False.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
 
             see @file data.py and @file collator.py for more details about some of the parameters
@@ -91,6 +93,7 @@ class DataModule(L.LightningDataModule):
                 organisms=organisms,
                 obs=all_clss,
                 hierarchical_clss=hierarchical_clss,
+                metacell_mode=metacell_mode,
             )
             # print(mdataset)
         # and location
@@ -250,6 +253,8 @@ class DataModule(L.LightningDataModule):
             weights, labels = self.dataset.get_label_weights(
                 self.clss_to_weight, scaler=self.weight_scaler
             )
+            if "nnz" in self.clss_to_weight:
+                self.nnz = self.dataset.get_merged_labels("nnz")
         else:
             weights = np.ones(1)
             labels = np.zeros(self.n_samples)
@@ -318,11 +323,15 @@ class DataModule(L.LightningDataModule):
         #    int(self.n_samples*self.train_oversampling_per_epoch),
         #    replacement=True,
         # )
-        train_sampler = LabelWeightedSampler(
-            self.train_weights,
-            self.train_labels,
-            num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
-        )
+        try:
+            train_sampler = LabelWeightedSampler(
+                self.train_weights,
+                self.train_labels,
+                num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
+                nnz=self.nnz if "nnz" in self.clss_to_weight else None,
+            )
+        except ValueError as e:
+            raise ValueError(e + "have you run `datamodule.setup()`?")
         return DataLoader(self.dataset, sampler=train_sampler, **self.kwargs, **kwargs)
 
     def val_dataloader(self):
@@ -358,6 +367,7 @@ class LabelWeightedSampler(Sampler[int]):
     label_weights: Sequence[float]
     klass_indices: Sequence[Sequence[int]]
     num_samples: int
+    nnz: Optional[Sequence[int]]
 
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
@@ -378,12 +388,14 @@ class LabelWeightedSampler(Sampler[int]):
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
+        self.nnz = torch.as_tensor(nnz, dtype=torch.int) if nnz is not None else None
         self.num_samples = num_samples
         # list of tensor.
         self.klass_indices = [
             (self.labels == i_klass).nonzero().squeeze(1)
             for i_klass in range(len(label_weights))
         ]
+        self.klass_sizes = [len(klass_indices) for klass_indices in self.klass_indices]
 
     def __iter__(self):
         sample_labels = torch.multinomial(

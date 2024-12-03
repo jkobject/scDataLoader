@@ -10,8 +10,7 @@ import lamindb as ln
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-from lamindb.core import MappedCollection
-from lamindb.core._mapped_collection import _Connect
+from .mapped import MappedCollection, _Connect
 from lamindb.core.storage._anndata_accessor import _safer_read_index
 from scipy.sparse import issparse
 from torch.utils.data import Dataset as torchDataset
@@ -71,6 +70,7 @@ class Dataset(torchDataset):
     # set of obs that need to be hierarchically prepared
     hierarchical_clss: Optional[list[str]] = field(default_factory=list)
     join_vars: Literal["inner", "outer"] | None = None
+    metacell_mode: bool = False
 
     def __post_init__(self):
         self.mapped_dataset = mapped(
@@ -81,6 +81,7 @@ class Dataset(torchDataset):
             unknown_label="unknown",
             stream=True,
             parallel=True,
+            metacell_mode=self.metacell_mode,
         )
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
@@ -359,6 +360,7 @@ def mapped(
     dtype: str | None = None,
     stream: bool = False,
     is_run_input: bool | None = None,
+    metacell_mode: bool = False,
 ) -> MappedCollection:
     path_list = []
     for artifact in dataset.artifacts.all():
@@ -381,5 +383,6 @@ def mapped(
         cache_categories=cache_categories,
         parallel=parallel,
         dtype=dtype,
+        metacell_mode=metacell_mode,
     )
     return ds

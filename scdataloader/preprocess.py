@@ -690,7 +690,7 @@ def additional_postprocess(adata):
     sc.pl.umap(
         adata,
         color=["cell_type", "batches"],
-        save="umap_" + adata.uns["dataset_id"] + ".png",
+        save="_" + adata.uns["dataset_id"] + ".png",
     )
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
