@@ -39,6 +39,7 @@ class DataModule(L.LightningDataModule):
         organism_name: str = "organism_ontology_term_id",
         max_len: int = 1000,
         add_zero_genes: int = 100,
+        replacement: bool = True,
         do_gene_pos: Union[bool, str] = True,
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: list = [
@@ -156,6 +157,7 @@ class DataModule(L.LightningDataModule):
         self.validation_split = validation_split
         self.test_split = test_split
         self.dataset = mdataset
+        self.replacement = replacement
         self.kwargs = kwargs
         if "sampler" in self.kwargs:
             self.kwargs.pop("sampler")
@@ -250,8 +252,11 @@ class DataModule(L.LightningDataModule):
             It can be either 'fit' or 'test'. Defaults to None.
         """
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
+            import pdb
+
+            pdb.set_trace()
             weights, labels = self.dataset.get_label_weights(
-                self.clss_to_weight, scaler=self.weight_scaler
+                self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
             )
             if "nnz" in self.clss_to_weight:
                 self.nnz = self.dataset.get_merged_labels("nnz")
@@ -272,12 +277,11 @@ class DataModule(L.LightningDataModule):
 
         idx_full = []
         if len(self.assays_to_drop) > 0:
-            for i, a in enumerate(
-                self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id")
-            ):
-                if a not in self.assays_to_drop:
-                    idx_full.append(i)
-            idx_full = np.array(idx_full)
+            badloc = np.isin(
+                self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id"),
+                self.assays_to_drop,
+            )
+            idx_full = np.arange(len(labels))[~badloc]
         else:
             idx_full = np.arange(self.n_samples)
         if len_test > 0:
@@ -311,7 +315,9 @@ class DataModule(L.LightningDataModule):
             self.valid_idx = None
         weights = np.concatenate([weights, np.zeros(1)])
         labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
-
+        # some labels will now not exist anymore as replaced by len(weights) - 1.
+        # this means that the associated weights should be 0.
+        # by doing np.bincount(labels)*weights this will be taken into account
         self.train_weights = weights
         self.train_labels = labels
         self.idx_full = idx_full
@@ -329,6 +335,7 @@ class DataModule(L.LightningDataModule):
                 self.train_labels,
                 num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
                 nnz=self.nnz if "nnz" in self.clss_to_weight else None,
+                replacement=self.replacement,
             )
         except ValueError as e:
             raise ValueError(e + "have you run `datamodule.setup()`?")
@@ -368,12 +375,16 @@ class LabelWeightedSampler(Sampler[int]):
     klass_indices: Sequence[Sequence[int]]
     num_samples: int
     nnz: Optional[Sequence[int]]
-
+    replacement: bool
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
-    # NOTE: here we use replacement=True, you can change it if you don't upsample a class.
+
     def __init__(
-        self, label_weights: Sequence[float], labels: Sequence[int], num_samples: int
+        self,
+        label_weights: Sequence[float],
+        labels: Sequence[int],
+        num_samples: int,
+        replacement: bool = True,
     ) -> None:
         """
 
@@ -389,6 +400,7 @@ class LabelWeightedSampler(Sampler[int]):
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
         self.nnz = torch.as_tensor(nnz, dtype=torch.int) if nnz is not None else None
+        self.replacement = replacement
         self.num_samples = num_samples
         # list of tensor.
         self.klass_indices = [
@@ -399,14 +411,21 @@ class LabelWeightedSampler(Sampler[int]):
 
     def __iter__(self):
         sample_labels = torch.multinomial(
-            self.label_weights, num_samples=self.num_samples, replacement=True
+            self.label_weights,
+            num_samples=self.num_samples,
+            replacement=True,
         )
+
         sample_indices = torch.empty_like(sample_labels)
         for i_klass, klass_index in enumerate(self.klass_indices):
             if klass_index.numel() == 0:
                 continue
             left_inds = (sample_labels == i_klass).nonzero().squeeze(1)
-            right_inds = torch.randint(len(klass_index), size=(len(left_inds),))
+            right_inds = (
+                torch.randint(len(klass_index), size=(len(left_inds),), generator=None)
+                if self.replacement
+                else torch.randperm(len(klass_index))[: len(left_inds)]
+            )
             sample_indices[left_inds] = klass_index[right_inds]
         yield from iter(sample_indices.tolist())
 

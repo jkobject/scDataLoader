@@ -154,7 +154,13 @@ class Dataset(torchDataset):
             )
         )
 
-    def get_label_weights(self, obs_keys: str | list[str], scaler: int = 10):
+    def get_label_weights(
+        self,
+        obs_keys: str | list[str],
+        scaler: int = 10,
+        return_categories=False,
+        bypass_label=["neuron"],
+    ):
         """Get all weights for the given label keys."""
         if isinstance(obs_keys, str):
             obs_keys = [obs_keys]
@@ -165,16 +171,24 @@ class Dataset(torchDataset):
             )
             labels_list.append(labels_to_str)
         if len(labels_list) > 1:
-            labels = reduce(lambda a, b: a + b, labels_list)
+            labels = ["___".join(labels_obs) for labels_obs in zip(*labels_list)]
         else:
             labels = labels_list[0]
 
         counter = Counter(labels)  # type: ignore
-        rn = {n: i for i, n in enumerate(counter.keys())}
-        labels = np.array([rn[label] for label in labels])
-        counter = np.array(list(counter.values()))
-        weights = scaler / (counter + scaler)
-        return weights, labels
+        if return_categories:
+            rn = {n: i for i, n in enumerate(counter.keys())}
+            labels = np.array([rn[label] for label in labels])
+            counter = np.array(list(counter.values()))
+            weights = scaler / (counter + scaler)
+            return weights, labels
+        else:
+            counts = np.array([counter[label] for label in labels])
+            if scaler is None:
+                weights = 1.0 / counts
+            else:
+                weights = scaler / (counts + scaler)
+            return weights
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
         """
