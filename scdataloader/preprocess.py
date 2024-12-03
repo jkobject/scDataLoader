@@ -335,7 +335,7 @@ class Preprocessor:
                         subset=False,
                         layer="norm",
                     )
-                except ValueError as e:
+                except (ValueError, ZeroDivisionError) as e:
                     print("retrying with span")
                     sc.pp.highly_variable_genes(
                         adata,
@@ -484,6 +484,8 @@ class LaminPreprocessor(Preprocessor):
                         )
                         print("num blocks ", num_blocks)
                         for j in range(num_blocks):
+                            if j == 0 and i == 390:
+                                continue
                             start_index = j * block_size
                             end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
