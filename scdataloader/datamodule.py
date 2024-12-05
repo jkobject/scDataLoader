@@ -32,6 +32,7 @@ class DataModule(L.LightningDataModule):
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
+        clss_to_predict: list = ["organism_ontology_term_id"],
         all_clss: list = ["organism_ontology_term_id"],
         hierarchical_clss: list = [],
         # this is for the collator
@@ -60,7 +61,6 @@ class DataModule(L.LightningDataModule):
 
         Args:
             collection_name (str): The lamindb collection to be used.
-            clss_to_weight (list, optional): The classes to weight in the trainer's weighted random sampler. Defaults to ["organism_ontology_term_id"].
             organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
             weight_scaler (int, optional): how much more you will see the most present vs less present category.
             train_oversampling_per_epoch (float, optional): The proportion of the dataset to include in the training set for each epoch. Defaults to 0.1.
@@ -84,6 +84,7 @@ class DataModule(L.LightningDataModule):
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
             all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
             metacell_mode (bool, optional): Whether to use metacell mode. Defaults to False.
+            clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
 
             see @file data.py and @file collator.py for more details about some of the parameters
@@ -93,6 +94,7 @@ class DataModule(L.LightningDataModule):
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
                 obs=all_clss,
+                clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
                 metacell_mode=metacell_mode,
             )
@@ -187,14 +189,12 @@ class DataModule(L.LightningDataModule):
             f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
             + (
-                (
-                    "\twith train_dataset size of=("
-                    + str((self.train_weights != 0).sum())
-                    + ")\n)"
-                )
-                if self.train_weights is not None
-                else ")"
+                "\twith train_dataset size of=("
+                + str((self.train_weights != 0).sum())
+                + ")\n)"
             )
+            if self.train_weights is not None
+            else ")"
         )
 
     @property

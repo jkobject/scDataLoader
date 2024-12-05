@@ -42,6 +42,7 @@ class Dataset(torchDataset):
         organisms (list[str]): list of organisms to load
             (for now only validates the the genes map to this organism)
         obs (list[str]): list of observations to load from the Collection
+        clss_to_pred (list[str]): list of observations to encode
         join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
         hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
     """
@@ -67,6 +68,8 @@ class Dataset(torchDataset):
             # "nnz",
         ]
     )
+    # set of obs to prepare for prediction (encode)
+    clss_to_pred: Optional[list[str]] = field(default_factory=list)
     # set of obs that need to be hierarchically prepared
     hierarchical_clss: Optional[list[str]] = field(default_factory=list)
     join_vars: Literal["inner", "outer"] | None = None
@@ -77,7 +80,7 @@ class Dataset(torchDataset):
             self.lamin_dataset,
             obs_keys=self.obs,
             join=self.join_vars,
-            encode_labels=self.obs,
+            encode_labels=self.clss_to_pred,
             unknown_label="unknown",
             stream=True,
             parallel=True,
@@ -91,8 +94,8 @@ class Dataset(torchDataset):
         # generate tree from ontologies
         if len(self.hierarchical_clss) > 0:
             self.define_hierarchies(self.hierarchical_clss)
-        if len(self.obs) > 0:
-            for clss in self.obs:
+        if len(self.clss_to_pred) > 0:
+            for clss in self.clss_to_pred:
                 if clss not in self.hierarchical_clss:
                     # otherwise it's already been done
                     self.class_topred[clss] = set(
@@ -142,7 +145,7 @@ class Dataset(torchDataset):
             + "     {} cells\n".format(self.mapped_dataset.__len__())
             + "     {} genes\n".format(self.genedf.shape[0])
             + "     {} labels\n".format(len(self.obs))
-            + "     {} obs\n".format(len(self.obs))
+            + "     {} clss_to_pred\n".format(len(self.clss_to_pred))
             + "     {} hierarchical_clss\n".format(len(self.hierarchical_clss))
             + "     {} organisms\n".format(len(self.organisms))
             + (
@@ -280,7 +283,7 @@ class Dataset(torchDataset):
                 if len(j) == 0:
                     groupings.pop(i)
             self.labels_groupings[clss] = groupings
-            if clss in self.obs:
+            if clss in self.clss_to_pred:
                 # if we have added new clss, we need to update the encoder with them too.
                 mlength = len(self.mapped_dataset.encoders[clss])
 
