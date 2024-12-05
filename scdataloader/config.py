@@ -110,3 +110,83 @@ COARSE_ASSAY = {
     "TruDrop": "",
     "Visium Spatial Gene Expression": "",
 }
+
+
+MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
+    "HsapDv:0000204": [  # mature stage
+        "MmusDv:0000110",  # mature stage
+    ],
+    "HsapDv:0000227": [  # late adult stage
+        "MmusDv:0000091",  # 20 month-old stage
+        "MmusDv:0000089",  # 18 month-old stage
+    ],
+    "HsapDv:0000272": [],  # 60-79 year-old stage
+    "HsapDv:0000095": [],  # 80 year-old and over stage
+    "HsapDv:0000092": [  # middle aged stage
+        "MmusDv:0000087",  # 16 month-old stage
+    ],
+    "HsapDv:0000089": [  # young adult stage
+        "MmusDv:0000061",  # early adult stage
+        "MmusDv:0000074",  # 24 weeks
+        "MmusDv:0000098",  # 25 weeks
+        "MmusDv:0000066",  # 17 weeks
+        "MmusDv:0000099",  # 26 weeks
+        "MmusDv:0000073",  # 23 weeks
+        "MmusDv:0000051",  # 7 weeks
+        "MmusDv:0000070",  # 20 weeks
+        "MmusDv:0000059",  # 15 weeks
+        "MmusDv:0000102",  # 29 weeks
+        "MmusDv:0000053",  # 9 weeks
+        "MmusDv:0000072",  # 22 weeks
+        "MmusDv:0000058",  # 14 weeks
+        "MmusDv:0000055",  # 11 weeks
+        "MmusDv:0000068",  # 19 weeks
+        "MmusDv:0000071",  # 21 weeks
+        "MmusDv:0000054",  # 10 weeks
+        "MmusDv:0000057",  # 13 weeks
+        "MmusDv:0000052",  # 8 weeks
+        "MmusDv:0000065",  # 16 weeks
+        "MmusDv:0000067",  # 18 weeks
+        "MmusDv:0000062",  # 2 month-old stage
+        "MmusDv:0000077",  # 6 month-old stage
+        "MmusDv:0000079",  # 8 month-old stage
+        "MmusDv:0000050",  # 6 weeks
+        "MmusDv:0000056",  # 12 weeks
+        "MmusDv:0000063",  # 3 month-old stage
+        "MmusDv:0000064",  # 4 month-old stage
+    ],
+    "HsapDv:0000265": [],  # child stage (1-4 yo)
+    "HsapDv:0000271": [  # juvenile stage (5-14 yo)
+        "MmusDv:0000048",  # 4 weeks
+        "MmusDv:0000049",  # 5 weeks
+    ],
+    "HsapDv:0000083": [  # infant stage
+        "MmusDv:0000046",  # 2 weeks:[]
+    ],
+    "HsapDv:0000262": [  # newborn stage (0-28 days)
+        "MmusDv:0000036",  # Theiler stage 27
+        "MmusDv:0000037",  # Theiler stage 28
+        "MmusDv:0000113",  # 4-7 days
+    ],
+    "HsapDv:0000007": [],  # Carnegie stage 03
+    "HsapDv:0000008": [],  # Carnegie stage 04
+    "HsapDv:0000009": [],  # Carnegie stage 05
+    "HsapDv:0000003": [],  # Carnegie stage 01
+    "HsapDv:0000005": [],  # Carnegie stage 02
+    "HsapDv:0000010": [],  # gastrula stage
+    "HsapDv:0000012": [],  # neurula stage
+    "HsapDv:0000015": [  # organogenesis stage
+        "MmusDv:0000021",  # Theiler stage 14
+        "MmusDv:0000026",  # Theiler stage 19
+        "MmusDv:0000027",  # Theiler stage 20
+        "MmusDv:0000028",  # Theiler stage 21
+        "MmusDv:0000029",  # Theiler stage 22
+        "MmusDv:0000024",  # Theiler stage 17
+    ],
+    "HsapDv:0000037": [  # fetal stage
+        "MmusDv:0000033",  # Theiler stage 24
+        "MmusDv:0000034",  # Theiler stage 25
+        "MmusDv:0000035",  # Theiler stage 26
+        "MmusDv:0000032",  # Theiler stage 23
+    ],
+}

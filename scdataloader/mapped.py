@@ -521,7 +521,6 @@ class MappedCollection:
     def get_label_weights(
         self,
         obs_keys: str | list[str],
-        nnz_weights: bool = False,
         scaler: float | None = None,
         return_categories: bool = False,
     ):
