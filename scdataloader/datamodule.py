@@ -252,9 +252,6 @@ class DataModule(L.LightningDataModule):
             It can be either 'fit' or 'test'. Defaults to None.
         """
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
-            import pdb
-
-            pdb.set_trace()
             weights, labels = self.dataset.get_label_weights(
                 self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
             )
@@ -334,7 +331,7 @@ class DataModule(L.LightningDataModule):
                 self.train_weights,
                 self.train_labels,
                 num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
-                nnz=self.nnz if "nnz" in self.clss_to_weight else None,
+                element_weights=self.nnz if "nnz" in self.clss_to_weight else None,
                 replacement=self.replacement,
             )
         except ValueError as e:
@@ -385,6 +382,7 @@ class LabelWeightedSampler(Sampler[int]):
         labels: Sequence[int],
         num_samples: int,
         replacement: bool = True,
+        element_weights: Sequence[float] = None,
     ) -> None:
         """
 
@@ -399,7 +397,11 @@ class LabelWeightedSampler(Sampler[int]):
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
-        self.nnz = torch.as_tensor(nnz, dtype=torch.int) if nnz is not None else None
+        self.element_weights = (
+            torch.as_tensor(element_weights, dtype=torch.float32)
+            if element_weights is not None
+            else None
+        )
         self.replacement = replacement
         self.num_samples = num_samples
         # list of tensor.
@@ -413,7 +415,6 @@ class LabelWeightedSampler(Sampler[int]):
         sample_labels = torch.multinomial(
             self.label_weights,
             num_samples=self.num_samples,
-            replacement=True,
         )
 
         sample_indices = torch.empty_like(sample_labels)
@@ -421,11 +422,25 @@ class LabelWeightedSampler(Sampler[int]):
             if klass_index.numel() == 0:
                 continue
             left_inds = (sample_labels == i_klass).nonzero().squeeze(1)
-            right_inds = (
-                torch.randint(len(klass_index), size=(len(left_inds),), generator=None)
-                if self.replacement
-                else torch.randperm(len(klass_index))[: len(left_inds)]
-            )
+            if self.element_weights is not None:
+                right_inds = torch.multinomial(
+                    self.element_weights[klass_index],
+                    num_samples=len(klass_index)
+                    if not self.replacement and len(klass_index) < len(left_inds)
+                    else len(left_inds),
+                    replacement=self.replacement,
+                )
+            elif self.replacement:
+                right_inds = torch.randint(
+                    len(klass_index), size=(len(left_inds),), generator=None
+                )
+            else:
+                maxelem = (
+                    len(left_inds)
+                    if len(left_inds) < len(klass_index)
+                    else len(klass_index)
+                )
+                right_inds = torch.randperm(len(klass_index))[:maxelem]
             sample_indices[left_inds] = klass_index[right_inds]
         yield from iter(sample_indices.tolist())
 

@@ -752,18 +752,22 @@ def translate(
         dict: the mapping for the translation
     """
     if t == "cell_type_ontology_term_id":
-        obj = bt.CellType.public(organism="all")
+        obj = bt.CellType
     elif t == "assay_ontology_term_id":
-        obj = bt.ExperimentalFactor.public()
+        obj = bt.ExperimentalFactor
     elif t == "tissue_ontology_term_id":
-        obj = bt.Tissue.public()
+        obj = bt.Tissue
+    elif t == "development_stage_ontology_term_id":
+        obj = bt.DevelopmentalStage
+    elif t == "disease_ontology_term_id":
+        obj = bt.Disease
+    elif t == "self_reported_ethnicity_ontology_term_id":
+        obj = bt.Ethnicity
     else:
         return None
     if type(val) is str:
-        return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
+        return {val: obj.filter(ontology_id=val).one().name}
     elif type(val) is list or type(val) is set:
-        return {i: obj.search(i, field=obj.ontology_id).name.iloc[0] for i in set(val)}
+        return {i: obj.filter(ontology_id=i).one().name for i in set(val)}
     elif type(val) is dict or type(val) is Counter:
-        return {
-            obj.search(k, field=obj.ontology_id).name.iloc[0]: v for k, v in val.items()
-        }
+        return {obj.filter(ontology_id=k).one().name: v for k, v in val.items()}
