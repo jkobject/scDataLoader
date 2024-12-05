@@ -52,7 +52,6 @@ def test_base():
         use_default_col=True,
         clss_to_weight=["organism_ontology_term_id", "cell_type_ontology_term_id"],
         clss_to_predict=["organism_ontology_term_id", "cell_type_ontology_term_id"],
-        all_clss=["organism_ontology_term_id", "cell_type_ontology_term_id"],
         hierarchical_clss=["cell_type_ontology_term_id"],
         validation_split=0.1,
         test_split=0,

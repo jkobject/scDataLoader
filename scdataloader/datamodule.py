@@ -33,7 +33,6 @@ class DataModule(L.LightningDataModule):
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
         clss_to_predict: list = ["organism_ontology_term_id"],
-        all_clss: list = ["organism_ontology_term_id"],
         hierarchical_clss: list = [],
         # this is for the collator
         how: str = "random expr",
@@ -82,7 +81,6 @@ class DataModule(L.LightningDataModule):
             organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
-            all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
             metacell_mode (bool, optional): Whether to use metacell mode. Defaults to False.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
@@ -93,7 +91,7 @@ class DataModule(L.LightningDataModule):
             mdataset = Dataset(
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
-                obs=all_clss,
+                obs=list(set(clss_to_weight + clss_to_predict)),
                 clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
                 metacell_mode=metacell_mode,
