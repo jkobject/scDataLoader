@@ -42,7 +42,7 @@ class Dataset(torchDataset):
         organisms (list[str]): list of organisms to load
             (for now only validates the the genes map to this organism)
         obs (list[str]): list of observations to load from the Collection
-        clss_to_pred (list[str]): list of observations to encode
+        clss_to_predict (list[str]): list of observations to encode
         join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
         hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
     """
@@ -52,35 +52,19 @@ class Dataset(torchDataset):
     organisms: Optional[Union[list[str], str]] = field(
         default_factory=["NCBITaxon:9606", "NCBITaxon:10090"]
     )
-    obs: Optional[list[str]] = field(
-        default_factory=[
-            "self_reported_ethnicity_ontology_term_id",
-            "assay_ontology_term_id",
-            "development_stage_ontology_term_id",
-            "disease_ontology_term_id",
-            "cell_type_ontology_term_id",
-            "tissue_ontology_term_id",
-            "sex_ontology_term_id",
-            #'dataset_id',
-            #'cell_culture',
-            # "dpt_group",
-            # "heat_diff",
-            # "nnz",
-        ]
-    )
     # set of obs to prepare for prediction (encode)
-    clss_to_pred: Optional[list[str]] = field(default_factory=list)
+    clss_to_predict: Optional[list[str]] = field(default_factory=list)
     # set of obs that need to be hierarchically prepared
     hierarchical_clss: Optional[list[str]] = field(default_factory=list)
     join_vars: Literal["inner", "outer"] | None = None
-    metacell_mode: bool = False
+    metacell_mode: float = 0.0
 
     def __post_init__(self):
         self.mapped_dataset = mapped(
             self.lamin_dataset,
-            obs_keys=self.obs,
+            obs_keys=list(set(self.hierarchical_clss + self.clss_to_predict)),
             join=self.join_vars,
-            encode_labels=self.clss_to_pred,
+            encode_labels=self.clss_to_predict,
             unknown_label="unknown",
             stream=True,
             parallel=True,
@@ -94,8 +78,8 @@ class Dataset(torchDataset):
         # generate tree from ontologies
         if len(self.hierarchical_clss) > 0:
             self.define_hierarchies(self.hierarchical_clss)
-        if len(self.clss_to_pred) > 0:
-            for clss in self.clss_to_pred:
+        if len(self.clss_to_predict) > 0:
+            for clss in self.clss_to_predict:
                 if clss not in self.hierarchical_clss:
                     # otherwise it's already been done
                     self.class_topred[clss] = set(
@@ -144,8 +128,7 @@ class Dataset(torchDataset):
             + "dataset contains:\n"
             + "     {} cells\n".format(self.mapped_dataset.__len__())
             + "     {} genes\n".format(self.genedf.shape[0])
-            + "     {} labels\n".format(len(self.obs))
-            + "     {} clss_to_pred\n".format(len(self.clss_to_pred))
+            + "     {} clss_to_predict\n".format(len(self.clss_to_predict))
             + "     {} hierarchical_clss\n".format(len(self.hierarchical_clss))
             + "     {} organisms\n".format(len(self.organisms))
             + (
@@ -155,6 +138,7 @@ class Dataset(torchDataset):
                 if len(self.class_topred) > 0
                 else ""
             )
+            + "     {} metacell_mode\n".format(self.metacell_mode)
         )
 
     def get_label_weights(
@@ -224,6 +208,8 @@ class Dataset(torchDataset):
                 "tissue_ontology_term_id",
                 "disease_ontology_term_id",
                 "development_stage_ontology_term_id",
+                "simplified_dev_stage",
+                "age_group",
                 "assay_ontology_term_id",
                 "self_reported_ethnicity_ontology_term_id",
             ]:
@@ -250,7 +236,11 @@ class Dataset(torchDataset):
                     .df(include=["parents__ontology_id"])
                     .set_index("ontology_id")
                 )
-            elif clss == "development_stage_ontology_term_id":
+            elif clss in [
+                "development_stage_ontology_term_id",
+                "simplified_dev_stage",
+                "age_group",
+            ]:
                 parentdf = (
                     bt.DevelopmentalStage.filter()
                     .df(include=["parents__ontology_id"])
@@ -283,7 +273,7 @@ class Dataset(torchDataset):
                 if len(j) == 0:
                     groupings.pop(i)
             self.labels_groupings[clss] = groupings
-            if clss in self.clss_to_pred:
+            if clss in self.clss_to_predict:
                 # if we have added new clss, we need to update the encoder with them too.
                 mlength = len(self.mapped_dataset.encoders[clss])
 

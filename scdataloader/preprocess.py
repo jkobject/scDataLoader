@@ -12,7 +12,6 @@ from anndata import read_h5ad
 from scdataloader import utils as data_utils
 from upath import UPath
 
-
 FULL_LENGTH_ASSAYS = [
     "EFO: 0700016",
     "EFO:0008930",
@@ -403,6 +402,7 @@ class Preprocessor:
             adata.layers[self.result_binned_key] = np.stack(binned_rows)
             adata.obsm["bin_edges"] = np.stack(bin_edges)
         print("done")
+        print(adata)
         return adata
 
 
@@ -712,6 +712,116 @@ def additional_postprocess(adata):
         color=["cell_type", "batches"],
         save="_" + adata.uns["dataset_id"] + ".png",
     )
+    COL = "cell_type_ontology_term_id"
+    NEWOBS = "clust_cell_type"
+    MINCELLS = 10
+    MAXSIM = 0.94
+    from collections import Counter
+
+    from .config import MAIN_HUMAN_MOUSE_DEV_STAGE_MAP
+
+    adata.obs[NEWOBS] = (
+        adata.obs[COL].astype(str) + "_" + adata.obs["leiden_1"].astype(str)
+    )
+    coun = Counter(adata.obs[NEWOBS])
+    relab = {}
+    for i in adata.obs[COL].unique():
+        num = 0
+        for n, c in sorted(coun.items(), key=lambda x: x[1], reverse=True):
+            if i in n:
+                if c < MINCELLS or num == 0:
+                    relab[n] = i
+                else:
+                    relab[n] = i + "_" + str(num)
+                num += 1
+
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(relab)
+
+    cluster_means = pd.DataFrame(
+        np.array(
+            [
+                adata.X[adata.obs[NEWOBS] == i].mean(axis=0)
+                for i in adata.obs[NEWOBS].unique()
+            ]
+        )[:, 0, :],
+        index=adata.obs[NEWOBS].unique(),
+    )
+
+    # Calculate correlation matrix between clusters
+    cluster_similarity = cluster_means.T.corr()
+    cluster_similarity.values[np.tril_indices(len(cluster_similarity), -1)] = 0
+
+    # Get pairs with similarity > 0.95
+    high_sim_pairs = []
+    for i in range(len(cluster_similarity)):
+        for j in range(i + 1, len(cluster_similarity)):
+            if (
+                cluster_similarity.iloc[i, j] > MAXSIM
+                and cluster_similarity.columns[i].split("_")[0]
+                == cluster_similarity.columns[j].split("_")[0]
+            ):
+                high_sim_pairs.append(
+                    (
+                        cluster_similarity.index[i],
+                        cluster_similarity.columns[j],
+                    )
+                )
+    # Create mapping for merging similar clusters
+    merge_mapping = {}
+    for pair in high_sim_pairs:
+        if pair[0] not in merge_mapping:
+            merge_mapping[pair[1]] = pair[0]
+        else:
+            merge_mapping[pair[1]] = merge_mapping[pair[0]]
+
+    # Apply merging
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].astype(str)
+    coun = Counter(adata.obs[NEWOBS]).most_common()
+    merge_mapping = {}
+    for i in adata.obs[COL].unique():
+        num = 0
+        for j, c in coun:
+            if i in j:
+                merge_mapping[j] = i + "_" + str(num) if num > 0 else i
+                num += 1
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
+
+    import bionty as bt
+
+    stages = adata.obs["development_stage_ontology_term_id"].unique()
+    if adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:9606"]:
+        relabel = {i: i for i in stages}
+        for stage in stages:
+            stage_obj = bt.DevelopmentalStage.filter(ontology_id=stage).first()
+            parents = set([i.ontology_id for i in stage_obj.parents.filter()])
+            parents = parents - set(
+                [
+                    "HsapDv:0010000",
+                    "HsapDv:0000204",
+                    "HsapDv:0000227",
+                ]
+            )
+            if len(parents) > 0:
+                for p in parents:
+                    if p in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP:
+                        relabel[stage] = p
+        adata.obs["simplified_dev_stage"] = adata.obs[
+            "development_stage_ontology_term_id"
+        ].map(relabel)
+    elif adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:10090"]:
+        rename_mapping = {
+            k: v for v, j in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for k in j
+        }
+        relabel = {i: "unknown" for i in stages}
+        for stage in stages:
+            if stage in rename_mapping:
+                relabel[stage] = rename_mapping[stage]
+        adata.obs["simplified_dev_stage"] = adata.obs[
+            "development_stage_ontology_term_id"
+        ].map(relabel)
+    else:
+        raise ValueError("organism not supported")
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
     # terminal_states = palantir.utils.find_terminal_states(

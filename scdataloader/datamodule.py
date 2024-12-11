@@ -48,7 +48,7 @@ class DataModule(L.LightningDataModule):
             "EFO:0030007",
             "EFO:0030062",
         ],
-        metacell_mode: bool = False,
+        metacell_mode: float = 0.0,
         **kwargs,
     ):
         """
@@ -81,7 +81,7 @@ class DataModule(L.LightningDataModule):
             organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
-            metacell_mode (bool, optional): Whether to use metacell mode. Defaults to False.
+            metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
 
@@ -91,7 +91,6 @@ class DataModule(L.LightningDataModule):
             mdataset = Dataset(
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
-                obs=list(set(clss_to_weight + clss_to_predict)),
                 clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
                 metacell_mode=metacell_mode,
@@ -152,7 +151,7 @@ class DataModule(L.LightningDataModule):
                 org_to_id=mdataset.encoder[organism_name],
                 tp_name=tp_name,
                 organism_name=organism_name,
-                class_names=clss_to_weight,
+                class_names=clss_to_predict,
             )
         self.validation_split = validation_split
         self.test_split = test_split
@@ -168,6 +167,7 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.nnz = None
         self.test_datasets = []
         self.test_idx = []
         super().__init__()
@@ -249,12 +249,18 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
+        SCALE = 10
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
+            if "nnz" in self.clss_to_weight:
+                self.nnz = self.dataset.mapped_dataset.get_merged_labels("nnz")
+                self.clss_to_weight.remove("nnz")
+                (
+                    (self.nnz.max() / SCALE)
+                    / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
+                ).min()
             weights, labels = self.dataset.get_label_weights(
                 self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
             )
-            if "nnz" in self.clss_to_weight:
-                self.nnz = self.dataset.get_merged_labels("nnz")
         else:
             weights = np.ones(1)
             labels = np.zeros(self.n_samples)
@@ -329,7 +335,7 @@ class DataModule(L.LightningDataModule):
                 self.train_weights,
                 self.train_labels,
                 num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
-                element_weights=self.nnz if "nnz" in self.clss_to_weight else None,
+                element_weights=self.nnz,
                 replacement=self.replacement,
             )
         except ValueError as e:
@@ -413,13 +419,17 @@ class LabelWeightedSampler(Sampler[int]):
         sample_labels = torch.multinomial(
             self.label_weights,
             num_samples=self.num_samples,
+            replacement=True,
         )
 
         sample_indices = torch.empty_like(sample_labels)
+
         for i_klass, klass_index in enumerate(self.klass_indices):
             if klass_index.numel() == 0:
                 continue
             left_inds = (sample_labels == i_klass).nonzero().squeeze(1)
+            if len(left_inds) == 0:
+                continue
             if self.element_weights is not None:
                 right_inds = torch.multinomial(
                     self.element_weights[klass_index],

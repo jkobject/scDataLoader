@@ -757,7 +757,11 @@ def translate(
         obj = bt.ExperimentalFactor
     elif t == "tissue_ontology_term_id":
         obj = bt.Tissue
-    elif t == "development_stage_ontology_term_id":
+    elif t in [
+        "development_stage_ontology_term_id",
+        "simplified_dev_stage",
+        "age_group",
+    ]:
         obj = bt.DevelopmentalStage
     elif t == "disease_ontology_term_id":
         obj = bt.Disease

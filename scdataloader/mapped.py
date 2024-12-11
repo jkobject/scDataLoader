@@ -61,6 +61,7 @@ def mapped(
     dtype: str | None = None,
     stream: bool = False,
     is_run_input: bool | None = None,
+    meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
 ) -> MappedCollection:
     path_list = []
     if self._state.adding:
@@ -158,7 +159,8 @@ class MappedCollection:
         cache_categories: bool = True,
         parallel: bool = False,
         dtype: str | None = None,
-        metacell_mode: bool = False,
+        metacell_mode: float = 0.0,
+        meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
     ):
         if join not in {None, "inner", "outer"}:  # pragma: nocover
             raise ValueError(
@@ -211,6 +213,7 @@ class MappedCollection:
         self.parallel = parallel
         self.metacell_mode = metacell_mode
         self.path_list = path_list
+        self.meta_assays = meta_assays
         self._make_connections(path_list, parallel)
 
         self._cache_cats: dict = {}
@@ -418,18 +421,7 @@ class MappedCollection:
                 out[layers_key] = self._get_data_idx(
                     lazy_data, obs_idx, self.join_vars, var_idxs_join, self.n_vars
                 )
-            if self.metacell_mode:
-                out["is_meta"] = True
-                distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
-                nn_idx = np.argsort(-1 / (distances - 1e-6))[:3]
-                for i in nn_idx:
-                    out[layers_key] += self._get_data_idx(
-                        lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
-                    )
-            else:
-                out["is_meta"] = False
-
-                # out[layers_key]
+            # out[layers_key]
             if self.obsm_keys is not None:
                 for obsm_key in self.obsm_keys:
                     lazy_data = store["obsm"][obsm_key]
@@ -447,6 +439,22 @@ class MappedCollection:
                     if label in self.encoders:
                         label_idx = self.encoders[label][label_idx]
                     out[label] = label_idx
+
+            out["is_meta"] = False
+            if len(self.meta_assays) > 0 and "assay_ontology_term_id" in self.obs_keys:
+                if out["assay_ontology_term_id"] in self.meta_assays:
+                    out["is_meta"] = True
+                    return out
+            if self.metacell_mode > 0:
+                if np.random.random() < self.metacell_mode:
+                    out["is_meta"] = True
+                    distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
+                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:3]
+                    for i in nn_idx:
+                        out[layers_key] += self._get_data_idx(
+                            lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
+                        )
+
         return out
 
     def _get_data_idx(
@@ -550,16 +558,19 @@ class MappedCollection:
         else:
             labels = labels_list[0]
         counter = Counter(labels)
+        MIN, MAX = counter.values().min(), counter.values().max()
         if return_categories:
             return {
-                k: 1.0 / v if scaler is None else scaler / (v + scaler)
+                k: 1.0 / v
+                if scaler is None
+                else (MIN / scaler) / ((1 + v - MIN) + MIN / scaler)
                 for k, v in counter.items()
             }
         counts = np.array([counter[label] for label in labels])
         if scaler is None:
             weights = 1.0 / counts
         else:
-            weights = scaler / (counts + scaler)
+            weights = (MIN / scaler) / ((1 + counts - MIN) + MIN / scaler)
         return weights
 
     def get_merged_labels(self, label_key: str):

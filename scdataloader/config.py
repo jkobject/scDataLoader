@@ -116,8 +116,9 @@ MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
     "HsapDv:0010000": [
         "MmusDv:0000092",  # postnatal stage
     ],
-    "HsapDv:0000204": [  # mature stage
+    "HsapDv:0000258": [  # mature stage
         "MmusDv:0000110",  # mature stage
+        "HsapDv:0000204",
     ],
     "HsapDv:0000227": [  # late adult stage
         "MmusDv:0000091",  # 20 month-old stage
@@ -125,13 +126,15 @@ MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
     ],
     "HsapDv:0000272": [],  # 60-79 year-old stage
     "HsapDv:0000095": [],  # 80 year-old and over stage
-    "HsapDv:0000092": [  # middle aged stage
+    "HsapDv:0000267": [  # middle aged stage
         "MmusDv:0000087",  # 16 month-old stage
         "UBERON:0018241",  # prime adult stage
         "MmusDv:0000083",  # 12 month-old stage
+        "HsapDv:0000092",  # same
     ],
-    "HsapDv:0000089": [  # young adult stage
+    "HsapDv:0000266": [  # young adult stage
         "MmusDv:0000050",  # 6 weeks
+        "HsapDv:0000089",  # same
         "MmusDv:0000051",  # 7 weeks
         "MmusDv:0000052",  # 8 weeks
         "MmusDv:0000053",  # 9 weeks
@@ -165,10 +168,11 @@ MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
         "MmusDv:0000048",  # 4 weeks
         "MmusDv:0000049",  # 5 weeks
     ],
-    "HsapDv:0000083": [  # infant stage
+    "HsapDv:0000260": [  # infant stage
         "MmusDv:0000046",  # 2 weeks
         "MmusDv:0000045",  # 1 week
         "MmusDv:0000047",  # 3 weeks
+        "HsapDv:0000083",
     ],
     "HsapDv:0000262": [  # newborn stage (0-28 days)
         "MmusDv:0000036",  # Theiler stage 27
