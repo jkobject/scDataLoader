@@ -249,9 +249,6 @@ class DataModule(L.LightningDataModule):
             It can be either 'fit' or 'test'. Defaults to None.
         """
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
-            import pdb
-
-            pdb.set_trace()
             weights, labels = self.dataset.get_label_weights(
                 self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
             )
@@ -403,7 +400,6 @@ class LabelWeightedSampler(Sampler[int]):
             num_samples=self.num_samples,
             replacement=True,
         )
-
         sample_indices = torch.empty_like(sample_labels)
         for i_klass, klass_index in enumerate(self.klass_indices):
             if klass_index.numel() == 0:
@@ -415,6 +411,8 @@ class LabelWeightedSampler(Sampler[int]):
                 else torch.randperm(len(klass_index))[: len(left_inds)]
             )
             sample_indices[left_inds] = klass_index[right_inds]
+        # torch shuffle
+        sample_indices = sample_indices[torch.randperm(len(sample_indices))]
         yield from iter(sample_indices.tolist())
 
     def __len__(self):

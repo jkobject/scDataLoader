@@ -706,11 +706,12 @@ def additional_postprocess(adata):
     sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
     sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
     sc.tl.umap(adata)
+    mid = adata.uns["dataset_id"] if "dataset_id" in adata.uns else "unknown_id"
     sc.pl.umap(
         adata,
         ncols=1,
         color=["cell_type", "batches"],
-        save="_" + adata.uns["dataset_id"] + ".png",
+        save="_" + mid + ".png",
     )
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
