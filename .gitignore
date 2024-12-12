@@ -133,3 +133,5 @@ dmypy.json
 .DS_Store
 figures/*/*.png
 figures/*.png
+figures/add_postp_clust.py
+figures/age_relabel.py
