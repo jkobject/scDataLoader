@@ -189,8 +189,8 @@ class Collator:
                 loc = loc[self.to_subset[organism_id]]
             exprs.append(expr)
             gene_locs.append(loc)
-            is_meta.append(elem["is_meta"])
-
+            if "is_meta" in elem:
+                is_meta.append(elem["is_meta"])
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
             else:
@@ -230,8 +230,9 @@ class Collator:
             "class": Tensor(other_classes).int(),
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
-            "is_meta": Tensor(is_meta),
         }
+        if len(is_meta) > 0:
+            ret.update({"is_meta": Tensor(is_meta)})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:
