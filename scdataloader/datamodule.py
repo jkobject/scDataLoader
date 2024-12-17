@@ -337,6 +337,7 @@ class DataModule(L.LightningDataModule):
                 num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
                 element_weights=self.nnz,
                 replacement=self.replacement,
+                pin_memory=True,
             )
         except ValueError as e:
             raise ValueError(e + "have you run `datamodule.setup()`?")
@@ -345,7 +346,10 @@ class DataModule(L.LightningDataModule):
     def val_dataloader(self):
         return (
             DataLoader(
-                self.dataset, sampler=SubsetRandomSampler(self.valid_idx), **self.kwargs
+                self.dataset,
+                sampler=SubsetRandomSampler(self.valid_idx),
+                pin_memory=True,
+                **self.kwargs,
             )
             if self.valid_idx is not None
             else None
