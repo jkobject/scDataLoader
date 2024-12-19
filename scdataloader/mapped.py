@@ -563,14 +563,14 @@ class MappedCollection:
             return {
                 k: 1.0 / v
                 if scaler is None
-                else (MIN / scaler) / ((1 + v - MIN) + MIN / scaler)
+                else (MAX / scaler) / ((1 + v - MIN) + MAX / scaler)
                 for k, v in counter.items()
             }
         counts = np.array([counter[label] for label in labels])
         if scaler is None:
             weights = 1.0 / counts
         else:
-            weights = (MIN / scaler) / ((1 + counts - MIN) + MIN / scaler)
+            weights = (MAX / scaler) / ((1 + counts - MIN) + MAX / scaler)
         return weights
 
     def get_merged_labels(self, label_key: str):
