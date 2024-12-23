@@ -43,10 +43,10 @@ class DataModule(L.LightningDataModule):
         do_gene_pos: Union[bool, str] = True,
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: list = [
-            "EFO:0008853",
-            "EFO:0010961",
-            "EFO:0030007",
-            "EFO:0030062",
+            # "EFO:0008853", #patch seq
+            # "EFO:0010961", # visium
+            "EFO:0030007",  # ATACseq
+            # "EFO:0030062", # slide-seq
         ],
         metacell_mode: float = 0.0,
         **kwargs,
