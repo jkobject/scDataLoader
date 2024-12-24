@@ -16,6 +16,10 @@ from torch.utils.data.sampler import (
 from .collator import Collator
 from .data import Dataset
 from .utils import getBiomartTable
+import os
+
+
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class DataModule(L.LightningDataModule):
@@ -98,6 +102,7 @@ class DataModule(L.LightningDataModule):
             # print(mdataset)
         # and location
         self.gene_pos = None
+        self.collection_name = collection_name
         if do_gene_pos:
             if type(do_gene_pos) is str:
                 print("seeing a string: loading gene positions as biomart parquet file")
@@ -311,6 +316,7 @@ class DataModule(L.LightningDataModule):
         np.random.shuffle(idx_full)
         if len_valid > 0:
             self.valid_idx = idx_full[:len_valid].copy()
+            # store it for later
             idx_full = idx_full[len_valid:]
         else:
             self.valid_idx = None
