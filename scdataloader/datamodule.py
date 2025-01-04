@@ -99,7 +99,6 @@ class DataModule(L.LightningDataModule):
                 hierarchical_clss=hierarchical_clss,
                 metacell_mode=metacell_mode,
             )
-            # print(mdataset)
         # and location
         self.gene_pos = None
         self.collection_name = collection_name
