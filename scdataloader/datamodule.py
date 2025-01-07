@@ -190,12 +190,8 @@ class DataModule(L.LightningDataModule):
             f"\ttest datasets={str(self.test_datasets)},\n"
             f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
-            + (
-                "\twith train_dataset size of=("
-                + str((self.train_weights != 0).sum())
-                + ")\n)"
-            )
-            if self.train_weights is not None
+            + ("\twith train_dataset size of=(" + str(len(self.idx_full)) + ")\n)")
+            if self.idx_full is not None
             else ")"
         )
 
@@ -401,12 +397,14 @@ class LabelWeightedSampler(Sampler[int]):
         num_samples: int,
         replacement: bool = True,
         element_weights: Sequence[float] = None,
+        restart_num = 0,
     ) -> None:
         """
 
         :param label_weights: list(len=num_classes)[float], weights for each class.
         :param labels: list(len=dataset_len)[int], labels of a dataset.
         :param num_samples: number of samples.
+        :param restart_num: if we are continuing a previous run, we need to restart the sampler from the same point.
         """
 
         super(LabelWeightedSampler, self).__init__(None)
