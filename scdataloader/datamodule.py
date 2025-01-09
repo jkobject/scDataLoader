@@ -16,6 +16,10 @@ from torch.utils.data.sampler import (
 from .collator import Collator
 from .data import Dataset
 from .utils import getBiomartTable
+import os
+
+
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class DataModule(L.LightningDataModule):
@@ -32,21 +36,24 @@ class DataModule(L.LightningDataModule):
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
-        all_clss: list = ["organism_ontology_term_id"],
+        clss_to_predict: list = ["organism_ontology_term_id"],
         hierarchical_clss: list = [],
         # this is for the collator
         how: str = "random expr",
         organism_name: str = "organism_ontology_term_id",
         max_len: int = 1000,
         add_zero_genes: int = 100,
+        replacement: bool = True,
         do_gene_pos: Union[bool, str] = True,
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: list = [
-            "EFO:0008853",
-            "EFO:0010961",
-            "EFO:0030007",
-            "EFO:0030062",
+            # "EFO:0008853", #patch seq
+            # "EFO:0010961", # visium
+            "EFO:0030007",  # ATACseq
+            # "EFO:0030062", # slide-seq
         ],
+        restart_num: int = 0,
+        metacell_mode: float = 0.0,
         **kwargs,
     ):
         """
@@ -58,7 +65,6 @@ class DataModule(L.LightningDataModule):
 
         Args:
             collection_name (str): The lamindb collection to be used.
-            clss_to_weight (list, optional): The classes to weight in the trainer's weighted random sampler. Defaults to ["organism_ontology_term_id"].
             organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
             weight_scaler (int, optional): how much more you will see the most present vs less present category.
             train_oversampling_per_epoch (float, optional): The proportion of the dataset to include in the training set for each epoch. Defaults to 0.1.
@@ -80,21 +86,23 @@ class DataModule(L.LightningDataModule):
             organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
-            all_clss (list, optional): List of all classes. Defaults to ["organism_ontology_term_id"].
+            metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
+            clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
-
+            restart_num (int, optional): The number of the restart if we are continuing a previous run -> /!\ NEEDS TO BE SET. Defaults to 0.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
         if collection_name is not None:
             mdataset = Dataset(
                 ln.Collection.filter(name=collection_name).first(),
                 organisms=organisms,
-                obs=all_clss,
+                clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
+                metacell_mode=metacell_mode,
             )
-            # print(mdataset)
         # and location
         self.gene_pos = None
+        self.collection_name = collection_name
         if do_gene_pos:
             if type(do_gene_pos) is str:
                 print("seeing a string: loading gene positions as biomart parquet file")
@@ -148,11 +156,12 @@ class DataModule(L.LightningDataModule):
                 org_to_id=mdataset.encoder[organism_name],
                 tp_name=tp_name,
                 organism_name=organism_name,
-                class_names=clss_to_weight,
+                class_names=clss_to_predict,
             )
         self.validation_split = validation_split
         self.test_split = test_split
         self.dataset = mdataset
+        self.replacement = replacement
         self.kwargs = kwargs
         if "sampler" in self.kwargs:
             self.kwargs.pop("sampler")
@@ -163,6 +172,8 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.nnz = None
+        self.restart_num = restart_num
         self.test_datasets = []
         self.test_idx = []
         super().__init__()
@@ -181,15 +192,9 @@ class DataModule(L.LightningDataModule):
             f"\ttest datasets={str(self.test_datasets)},\n"
             f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
-            + (
-                (
-                    "\twith train_dataset size of=("
-                    + str((self.train_weights != 0).sum())
-                    + ")\n)"
-                )
-                if self.train_weights is not None
-                else ")"
-            )
+            + ("\twith train_dataset size of=(" + str(len(self.idx_full)) + ")\n)")
+            if self.idx_full is not None
+            else ")"
         )
 
     @property
@@ -246,9 +251,17 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
+        SCALE = 10
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
+            if "nnz" in self.clss_to_weight:
+                self.nnz = self.dataset.mapped_dataset.get_merged_labels("nnz")
+                self.clss_to_weight.remove("nnz")
+                (
+                    (self.nnz.max() / SCALE)
+                    / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
+                ).min()
             weights, labels = self.dataset.get_label_weights(
-                self.clss_to_weight, scaler=self.weight_scaler
+                self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
             )
         else:
             weights = np.ones(1)
@@ -267,12 +280,11 @@ class DataModule(L.LightningDataModule):
 
         idx_full = []
         if len(self.assays_to_drop) > 0:
-            for i, a in enumerate(
-                self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id")
-            ):
-                if a not in self.assays_to_drop:
-                    idx_full.append(i)
-            idx_full = np.array(idx_full)
+            badloc = np.isin(
+                self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id"),
+                self.assays_to_drop,
+            )
+            idx_full = np.arange(len(labels))[~badloc]
         else:
             idx_full = np.arange(self.n_samples)
         if len_test > 0:
@@ -301,12 +313,15 @@ class DataModule(L.LightningDataModule):
         np.random.shuffle(idx_full)
         if len_valid > 0:
             self.valid_idx = idx_full[:len_valid].copy()
+            # store it for later
             idx_full = idx_full[len_valid:]
         else:
             self.valid_idx = None
         weights = np.concatenate([weights, np.zeros(1)])
         labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
-
+        # some labels will now not exist anymore as replaced by len(weights) - 1.
+        # this means that the associated weights should be 0.
+        # by doing np.bincount(labels)*weights this will be taken into account
         self.train_weights = weights
         self.train_labels = labels
         self.idx_full = idx_full
@@ -318,17 +333,30 @@ class DataModule(L.LightningDataModule):
         #    int(self.n_samples*self.train_oversampling_per_epoch),
         #    replacement=True,
         # )
-        train_sampler = LabelWeightedSampler(
-            self.train_weights,
-            self.train_labels,
-            num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
+        try:
+            train_sampler = LabelWeightedSampler(
+                self.train_weights,
+                self.train_labels,
+                num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
+                element_weights=self.nnz,
+                replacement=self.replacement,
+                restart_num=self.restart_num,
+            )
+        except ValueError as e:
+            raise ValueError(e + "have you run `datamodule.setup()`?")
+        return DataLoader(
+            self.dataset,
+            sampler=train_sampler,
+            **self.kwargs,
+            **kwargs,
         )
-        return DataLoader(self.dataset, sampler=train_sampler, **self.kwargs, **kwargs)
 
     def val_dataloader(self):
         return (
             DataLoader(
-                self.dataset, sampler=SubsetRandomSampler(self.valid_idx), **self.kwargs
+                self.dataset,
+                sampler=SubsetRandomSampler(self.valid_idx),
+                **self.kwargs,
             )
             if self.valid_idx is not None
             else None
@@ -345,7 +373,9 @@ class DataModule(L.LightningDataModule):
 
     def predict_dataloader(self):
         return DataLoader(
-            self.dataset, sampler=SubsetRandomSampler(self.idx_full), **self.kwargs
+            self.dataset,
+            sampler=SubsetRandomSampler(self.idx_full),
+            **self.kwargs,
         )
 
     # def teardown(self):
@@ -358,18 +388,27 @@ class LabelWeightedSampler(Sampler[int]):
     label_weights: Sequence[float]
     klass_indices: Sequence[Sequence[int]]
     num_samples: int
-
+    nnz: Optional[Sequence[int]]
+    replacement: bool
+    restart_num: int
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
-    # NOTE: here we use replacement=True, you can change it if you don't upsample a class.
+
     def __init__(
-        self, label_weights: Sequence[float], labels: Sequence[int], num_samples: int
+        self,
+        label_weights: Sequence[float],
+        labels: Sequence[int],
+        num_samples: int,
+        replacement: bool = True,
+        element_weights: Sequence[float] = None,
+        restart_num=0,
     ) -> None:
         """
 
         :param label_weights: list(len=num_classes)[float], weights for each class.
         :param labels: list(len=dataset_len)[int], labels of a dataset.
         :param num_samples: number of samples.
+        :param restart_num: if we are continuing a previous run, we need to restart the sampler from the same point.
         """
 
         super(LabelWeightedSampler, self).__init__(None)
@@ -378,24 +417,69 @@ class LabelWeightedSampler(Sampler[int]):
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
         self.labels = torch.as_tensor(labels, dtype=torch.int)
+        self.element_weights = (
+            torch.as_tensor(element_weights, dtype=torch.float32)
+            if element_weights is not None
+            else None
+        )
+        self.replacement = replacement
         self.num_samples = num_samples
+        self.restart_num = restart_num
         # list of tensor.
         self.klass_indices = [
             (self.labels == i_klass).nonzero().squeeze(1)
             for i_klass in range(len(label_weights))
         ]
+        self.klass_sizes = [len(klass_indices) for klass_indices in self.klass_indices]
 
     def __iter__(self):
         sample_labels = torch.multinomial(
-            self.label_weights, num_samples=self.num_samples, replacement=True
+            self.label_weights,
+            num_samples=self.num_samples,
+            replacement=True,
+            generator=None
+            if self.restart_num == 0
+            else torch.Generator().manual_seed(self.restart_num),
         )
         sample_indices = torch.empty_like(sample_labels)
+
         for i_klass, klass_index in enumerate(self.klass_indices):
             if klass_index.numel() == 0:
                 continue
             left_inds = (sample_labels == i_klass).nonzero().squeeze(1)
-            right_inds = torch.randint(len(klass_index), size=(len(left_inds),))
+            if len(left_inds) == 0:
+                continue
+            if self.element_weights is not None:
+                right_inds = torch.multinomial(
+                    self.element_weights[klass_index],
+                    num_samples=len(klass_index)
+                    if not self.replacement and len(klass_index) < len(left_inds)
+                    else len(left_inds),
+                    replacement=self.replacement,
+                    generator=None
+                    if self.restart_num == 0
+                    else torch.Generator().manual_seed(self.restart_num),
+                )
+            elif self.replacement:
+                right_inds = torch.randint(
+                    len(klass_index),
+                    size=(len(left_inds),),
+                    generator=None
+                    if self.restart_num == 0
+                    else torch.Generator().manual_seed(self.restart_num),
+                )
+            else:
+                maxelem = (
+                    len(left_inds)
+                    if len(left_inds) < len(klass_index)
+                    else len(klass_index)
+                )
+                right_inds = torch.randperm(len(klass_index))[:maxelem]
             sample_indices[left_inds] = klass_index[right_inds]
+        # torch shuffle
+        sample_indices = sample_indices[torch.randperm(len(sample_indices))]
+        print(sample_indices.tolist()[:10], sample_labels[:10])
+        # raise Exception("stop")
         yield from iter(sample_indices.tolist())
 
     def __len__(self):

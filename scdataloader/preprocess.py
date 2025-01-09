@@ -8,8 +8,9 @@ import pandas as pd
 import scanpy as sc
 from anndata import AnnData
 from scipy.sparse import csr_matrix
-
+from anndata import read_h5ad
 from scdataloader import utils as data_utils
+from upath import UPath
 
 FULL_LENGTH_ASSAYS = [
     "EFO: 0700016",
@@ -45,7 +46,13 @@ class Preprocessor:
         maxdropamount: int = 50,
         madoutlier: int = 5,
         pct_mt_outlier: int = 8,
-        batch_key: Optional[str] = None,
+        batch_keys: list[str] = [
+            "assay_ontology_term_id",
+            "self_reported_ethnicity_ontology_term_id",
+            "sex_ontology_term_id",
+            "donor_id",
+            "suspension_type",
+        ],
         skip_validate: bool = False,
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
@@ -110,7 +117,7 @@ class Preprocessor:
         self.madoutlier = madoutlier
         self.n_hvg_for_postp = n_hvg_for_postp
         self.pct_mt_outlier = pct_mt_outlier
-        self.batch_key = batch_key
+        self.batch_keys = batch_keys
         self.length_normalize = length_normalize
         self.skip_validate = skip_validate
         self.use_layer = use_layer
@@ -118,7 +125,7 @@ class Preprocessor:
         self.do_postp = do_postp
         self.use_raw = use_raw
 
-    def __call__(self, adata) -> AnnData:
+    def __call__(self, adata, dataset_id=None) -> AnnData:
         if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
@@ -144,10 +151,6 @@ class Preprocessor:
             del adata.obsm
         if len(adata.obsp.keys()) > 0 and self.do_postp:
             del adata.obsp
-        if len(adata.uns.keys()) > 0:
-            del adata.uns
-        if len(adata.varp.keys()) > 0:
-            del adata.varp
         # check that it is a count
         print("checking raw counts")
         if np.abs(
@@ -209,9 +212,9 @@ class Preprocessor:
             )
         )
 
-        if self.is_symbol or not adata.var.index.str.contains("ENSG").any():
-            if not adata.var.index.str.contains("ENSG").any():
-                print("No ENSG genes found, assuming gene symbols...")
+        if self.is_symbol or not adata.var.index.str.contains("ENS").any():
+            if not adata.var.index.str.contains("ENS").any():
+                print("No ENS genes found, assuming gene symbols...")
             genesdf["ensembl_gene_id"] = genesdf.index
             var = (
                 adata.var.merge(
@@ -243,9 +246,13 @@ class Preprocessor:
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
+        if dataset_id is not None:
+            adata.uns["dataset_id"] = dataset_id
         if not self.skip_validate:
             print("validating")
-            data_utils.validate(adata, organism=adata.obs.organism_ontology_term_id[0])
+            data_utils.validate(
+                adata, organism=adata.obs.organism_ontology_term_id[0], need_all=False
+            )
             # length normalization
             if (
                 adata.obs["assay_ontology_term_id"].isin(FULL_LENGTH_ASSAYS).any()
@@ -310,39 +317,42 @@ class Preprocessor:
                 )["X"]
             )
             # step 5: subset hvg
-            if self.n_hvg_for_postp:
-                sc.pp.highly_variable_genes(
-                    adata,
-                    n_top_genes=self.n_hvg_for_postp,
-                    batch_key=self.batch_key,
-                    flavor=self.hvg_flavor,
-                    subset=True,
-                    layer="norm",
-                )
-            sc.pp.log1p(adata, layer="norm")
-            sc.pp.pca(
-                adata,
-                layer="norm",
-                n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
-            )
-            sc.pp.neighbors(adata, use_rep="X_pca")
-            sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
-            sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
-            sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
-            batches = [
-                "assay_ontology_term_id",
-                "self_reported_ethnicity_ontology_term_id",
-                "sex_ontology_term_id",
-                "development_stage_ontology_term_id",
-            ]
-            if "donor_id" in adata.obs.columns:
-                batches.append("donor_id")
-            if "suspension_type" in adata.obs.columns:
-                batches.append("suspension_type")
+            batches = []
+            for i in self.batch_keys:
+                if i in adata.obs.columns:
+                    batches.append(i)
             adata.obs["batches"] = adata.obs[batches].apply(
                 lambda x: ",".join(x.dropna().astype(str)), axis=1
             )
-            sc.tl.umap(adata)
+            if self.n_hvg_for_postp:
+                try:
+                    sc.pp.highly_variable_genes(
+                        adata,
+                        n_top_genes=self.n_hvg_for_postp,
+                        batch_key="batches",
+                        flavor=self.hvg_flavor,
+                        subset=False,
+                        layer="norm",
+                    )
+                except (ValueError, ZeroDivisionError) as e:
+                    print("retrying with span")
+                    sc.pp.highly_variable_genes(
+                        adata,
+                        n_top_genes=self.n_hvg_for_postp,
+                        # batch_key="batches",
+                        flavor=self.hvg_flavor,
+                        span=0.5,
+                        subset=False,
+                        layer="norm",
+                    )
+
+            adata.obsm["X_pca"] = sc.pp.pca(
+                adata.layers["norm"][:, adata.var.highly_variable]
+                if "highly_variable" in adata.var.columns
+                else adata.layers["norm"],
+                n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
+            )
+
             # additional
             if self.additional_postprocess is not None:
                 adata = self.additional_postprocess(adata)
@@ -394,6 +404,7 @@ class Preprocessor:
             adata.layers[self.result_binned_key] = np.stack(binned_rows)
             adata.obsm["bin_edges"] = np.stack(bin_edges)
         print("done")
+        print(adata)
         return adata
 
 
@@ -402,22 +413,22 @@ class LaminPreprocessor(Preprocessor):
         self,
         *args,
         cache: bool = True,
-        stream: bool = False,
         keep_files: bool = True,
+        force_preloaded: bool = False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.cache = cache
-        self.stream = stream
         self.keep_files = keep_files
+        self.force_preloaded = force_preloaded
 
     def __call__(
         self,
         data: Union[ln.Collection, AnnData] = None,
-        name="preprocessed dataset",
-        description="preprocessed dataset using scprint",
-        start_at=0,
-        version=2,
+        name: str = "preprocessed dataset",
+        description: str = "preprocessed dataset using scprint",
+        start_at: int = 0,
+        version: str = "2",
     ):
         """
         format controls the different input value wrapping, including categorical
@@ -438,12 +449,15 @@ class LaminPreprocessor(Preprocessor):
         elif isinstance(data, ln.Collection):
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
-                print(i + start_at)
+                i = i + start_at
+                print(i)
                 if file.stem_uid in all_ready_processed_keys:
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
                 print(file)
-                backed = file.open()
+
+                path = cache_path(file) if self.force_preloaded else file.cache()
+                backed = read_h5ad(path, backed="r")
                 if backed.obs.is_primary_data.sum() == 0:
                     print(f"{file.key} only contains non primary cells.. dropping")
                     # Save the stem_uid to a file to avoid loading it again
@@ -456,12 +470,11 @@ class LaminPreprocessor(Preprocessor):
                     )
                     continue
                 if file.size <= MAXFILESIZE:
-                    adata = file.load(stream=self.stream)
+                    adata = backed.to_memory()
                     print(adata)
                 else:
                     badata = backed
                     print(badata)
-
                 try:
                     if file.size > MAXFILESIZE:
                         print(
@@ -473,16 +486,26 @@ class LaminPreprocessor(Preprocessor):
                         )
                         print("num blocks ", num_blocks)
                         for j in range(num_blocks):
+                            if j == 0 and i == 390:
+                                continue
                             start_index = j * block_size
                             end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
                             print(block)
-                            block = super().__call__(block)
-                            myfile = ln.from_anndata(
+                            block = super().__call__(
+                                block, dataset_id=file.stem_uid + "_p" + str(j)
+                            )
+                            myfile = ln.Artifact.from_anndata(
                                 block,
-                                revises=file,
-                                description=description,
-                                version=str(version) + "_s" + str(j),
+                                description=description
+                                + " n"
+                                + str(i)
+                                + " p"
+                                + str(j)
+                                + " ( revises file "
+                                + str(file.key)
+                                + " )",
+                                version=version,
                             )
                             myfile.save()
                             if self.keep_files:
@@ -492,16 +515,12 @@ class LaminPreprocessor(Preprocessor):
                                 del block
 
                     else:
-                        adata = super().__call__(adata)
-                        try:
-                            sc.pl.umap(adata, color=["cell_type"])
-                        except Exception:
-                            sc.pl.umap(adata, color=["cell_type_ontology_term_id"])
-                        myfile = ln.from_anndata(
+                        adata = super().__call__(adata, dataset_id=file.stem_uid)
+                        myfile = ln.Artifact.from_anndata(
                             adata,
                             revises=file,
-                            description=description,
-                            version=str(version),
+                            description=description + " p" + str(i),
+                            version=version,
                         )
                         myfile.save()
                         if self.keep_files:
@@ -673,35 +692,158 @@ def additional_preprocess(adata):
 
 
 def additional_postprocess(adata):
-    import palantir
+    # import palantir
 
     # define the "up to" 10 neighbors for each cells and add to obs
     # compute neighbors
     # need to be connectivities and same labels [cell type, assay, dataset, disease]
     # define the "neighbor" up to 10(N) cells and add to obs
     # define the "next time point" up to 5(M) cells and add to obs  # step 1: filter genes
-    del adata.obsp["connectivities"]
-    del adata.obsp["distances"]
-    sc.external.pp.harmony_integrate(adata, key="batches")
-    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    # if len(adata.obs["batches"].unique()) > 1:
+    #    sc.external.pp.harmony_integrate(adata, key="batches")
+    #    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
+    # else:
+    sc.pp.neighbors(adata, use_rep="X_pca")
+    sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
+    sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
+    sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
     sc.tl.umap(adata)
+    mid = adata.uns["dataset_id"] if "dataset_id" in adata.uns else "unknown_id"
     sc.pl.umap(
         adata,
+        ncols=1,
         color=["cell_type", "batches"],
+        save="_" + mid + ".png",
     )
-    palantir.utils.run_diffusion_maps(adata, n_components=20)
-    palantir.utils.determine_multiscale_space(adata)
-    terminal_states = palantir.utils.find_terminal_states(
-        adata,
-        celltypes=adata.obs.cell_type_ontology_term_id.unique(),
-        celltype_column="cell_type_ontology_term_id",
+    COL = "cell_type_ontology_term_id"
+    NEWOBS = "clust_cell_type"
+    MINCELLS = 10
+    MAXSIM = 0.94
+    from collections import Counter
+
+    from .config import MAIN_HUMAN_MOUSE_DEV_STAGE_MAP
+
+    adata.obs[NEWOBS] = (
+        adata.obs[COL].astype(str) + "_" + adata.obs["leiden_1"].astype(str)
     )
-    sc.tl.diffmap(adata)
-    adata.obs["heat_diff"] = 1
-    for terminal_state in terminal_states.index.tolist():
-        adata.uns["iroot"] = np.where(adata.obs.index == terminal_state)[0][0]
-        sc.tl.dpt(adata)
-        adata.obs["heat_diff"] = np.minimum(
-            adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
-        )
+    coun = Counter(adata.obs[NEWOBS])
+    relab = {}
+    for i in adata.obs[COL].unique():
+        num = 0
+        for n, c in sorted(coun.items(), key=lambda x: x[1], reverse=True):
+            if i in n:
+                if c < MINCELLS or num == 0:
+                    relab[n] = i
+                else:
+                    relab[n] = i + "_" + str(num)
+                num += 1
+
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(relab)
+
+    cluster_means = pd.DataFrame(
+        np.array(
+            [
+                adata.X[adata.obs[NEWOBS] == i].mean(axis=0)
+                for i in adata.obs[NEWOBS].unique()
+            ]
+        )[:, 0, :],
+        index=adata.obs[NEWOBS].unique(),
+    )
+
+    # Calculate correlation matrix between clusters
+    cluster_similarity = cluster_means.T.corr()
+    cluster_similarity.values[np.tril_indices(len(cluster_similarity), -1)] = 0
+
+    # Get pairs with similarity > 0.95
+    high_sim_pairs = []
+    for i in range(len(cluster_similarity)):
+        for j in range(i + 1, len(cluster_similarity)):
+            if (
+                cluster_similarity.iloc[i, j] > MAXSIM
+                and cluster_similarity.columns[i].split("_")[0]
+                == cluster_similarity.columns[j].split("_")[0]
+            ):
+                high_sim_pairs.append(
+                    (
+                        cluster_similarity.index[i],
+                        cluster_similarity.columns[j],
+                    )
+                )
+    # Create mapping for merging similar clusters
+    merge_mapping = {}
+    for pair in high_sim_pairs:
+        if pair[0] not in merge_mapping:
+            merge_mapping[pair[1]] = pair[0]
+        else:
+            merge_mapping[pair[1]] = merge_mapping[pair[0]]
+
+    # Apply merging
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].astype(str)
+    coun = Counter(adata.obs[NEWOBS]).most_common()
+    merge_mapping = {}
+    for i in adata.obs[COL].unique():
+        num = 0
+        for j, c in coun:
+            if i in j:
+                merge_mapping[j] = i + "_" + str(num) if num > 0 else i
+                num += 1
+    adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
+
+    import bionty as bt
+
+    stages = adata.obs["development_stage_ontology_term_id"].unique()
+    if adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:9606"]:
+        relabel = {i: i for i in stages}
+        for stage in stages:
+            stage_obj = bt.DevelopmentalStage.filter(ontology_id=stage).first()
+            parents = set([i.ontology_id for i in stage_obj.parents.filter()])
+            parents = parents - set(
+                [
+                    "HsapDv:0010000",
+                    "HsapDv:0000204",
+                    "HsapDv:0000227",
+                ]
+            )
+            if len(parents) > 0:
+                for p in parents:
+                    if p in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP:
+                        relabel[stage] = p
+        adata.obs["simplified_dev_stage"] = adata.obs[
+            "development_stage_ontology_term_id"
+        ].map(relabel)
+    elif adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:10090"]:
+        rename_mapping = {
+            k: v for v, j in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for k in j
+        }
+        relabel = {i: "unknown" for i in stages}
+        for stage in stages:
+            if stage in rename_mapping:
+                relabel[stage] = rename_mapping[stage]
+        adata.obs["simplified_dev_stage"] = adata.obs[
+            "development_stage_ontology_term_id"
+        ].map(relabel)
+    else:
+        raise ValueError("organism not supported")
+    # palantir.utils.run_diffusion_maps(adata, n_components=20)
+    # palantir.utils.determine_multiscale_space(adata)
+    # terminal_states = palantir.utils.find_terminal_states(
+    #    adata,
+    #    celltypes=adata.obs.cell_type_ontology_term_id.unique(),
+    #    celltype_column="cell_type_ontology_term_id",
+    # )
+    # sc.tl.diffmap(adata)
+    # adata.obs["heat_diff"] = 1
+    # for terminal_state in terminal_states.index.tolist():
+    #    adata.uns["iroot"] = np.where(adata.obs.index == terminal_state)[0][0]
+    #    sc.tl.dpt(adata)
+    #    adata.obs["heat_diff"] = np.minimum(
+    #        adata.obs["heat_diff"], adata.obs["dpt_pseudotime"]
+    #    )
     return adata
+
+
+def cache_path(artifact):
+    cloud_path = UPath(artifact.storage.root) / artifact.key
+    cache_path = ln.setup.settings.paths.cloud_to_local_no_update(cloud_path)
+    return cache_path

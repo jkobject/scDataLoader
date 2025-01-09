@@ -131,6 +131,7 @@ class Collator:
         tp = []
         dataset = []
         nnz_loc = []
+        is_meta = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
@@ -188,12 +189,12 @@ class Collator:
                 loc = loc[self.to_subset[organism_id]]
             exprs.append(expr)
             gene_locs.append(loc)
-
+            if "is_meta" in elem:
+                is_meta.append(elem["is_meta"])
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
             else:
                 tp.append(0)
-
             other_classes.append([elem[i] for i in self.class_names])
 
         expr = np.array(exprs)
@@ -202,6 +203,7 @@ class Collator:
         total_count = np.array(total_count)
         other_classes = np.array(other_classes)
         dataset = np.array(dataset)
+        is_meta = np.array(is_meta)
 
         # normalize counts
         if self.norm_to is not None:
@@ -229,6 +231,8 @@ class Collator:
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
         }
+        if len(is_meta) > 0:
+            ret.update({"is_meta": Tensor(is_meta)})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:

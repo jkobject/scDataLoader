@@ -147,7 +147,7 @@ def getBiomartTable(
     return res
 
 
-def validate(adata: AnnData, organism: str):
+def validate(adata: AnnData, organism: str, need_all=True):
     """
     validate checks if the adata object is valid for lamindb
 
@@ -185,7 +185,7 @@ def validate(adata: AnnData, organism: str):
         "tissue_ontology_term_id",
         "assay_ontology_term_id",
     ]:
-        if val not in adata.obs.columns:
+        if val not in adata.obs.columns and need_all:
             raise ValueError(
                 f"Column '{val}' is missing in the provided anndata object."
             )
@@ -193,7 +193,9 @@ def validate(adata: AnnData, organism: str):
     if not bt.Ethnicity.validate(
         adata.obs["self_reported_ethnicity_ontology_term_id"],
         field="ontology_id",
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid ethnicity ontology term id found")
     if not bt.Organism.validate(
         adata.obs["organism_ontology_term_id"], field="ontology_id"
@@ -201,28 +203,40 @@ def validate(adata: AnnData, organism: str):
         raise ValueError("Invalid organism ontology term id found")
     if not bt.Phenotype.validate(
         adata.obs["sex_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid sex ontology term id found")
     if not bt.Disease.validate(
         adata.obs["disease_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid disease ontology term id found")
     if not bt.CellType.validate(
         adata.obs["cell_type_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid cell type ontology term id found")
     if not bt.DevelopmentalStage.validate(
         adata.obs["development_stage_ontology_term_id"],
         field="ontology_id",
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid dev stage ontology term id found")
     if not bt.Tissue.validate(
         adata.obs["tissue_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid tissue ontology term id found")
     if not bt.ExperimentalFactor.validate(
         adata.obs["assay_ontology_term_id"], field="ontology_id"
-    ).all():
+    ).all() and not set(adata.obs["self_reported_ethnicity_ontology_term_id"]) == set(
+        ["unknown"]
+    ):
         raise ValueError("Invalid assay ontology term id found")
     if not bt.Gene.validate(
         adata.var.index, field="ensembl_gene_id", organism=organism
@@ -582,7 +596,7 @@ def populate_my_ontology(
     # cell type
     if celltypes is not None:
         if len(celltypes) == 0:
-            bt.CellType.import_from_source(update=True)
+            bt.CellType.import_source()
         else:
             names = bt.CellType.public().df().index if not celltypes else celltypes
             records = bt.CellType.from_values(names, field="ontology_id")
@@ -597,9 +611,9 @@ def populate_my_ontology(
         )
         source = bt.PublicSource.filter(name="ensembl", organism=organism_clade).last()
         records = [
-            i[0] if type(i) is list else i
-            for i in [
-                bt.Organism.from_source(ontology_id=i, source=source) for i in names
+            organism_or_organismlist if isinstance(organism_or_organismlist, bt.Organism) else organism_or_organismlist[0]
+            for organism_or_organismlist in [
+                bt.Organism.from_source(ontology_id=name, source=source) for name in names
             ]
         ]
         ln.save(records)
@@ -616,7 +630,7 @@ def populate_my_ontology(
     # ethnicity
     if ethnicities is not None:
         if len(ethnicities) == 0:
-            bt.Ethnicity.import_from_source(update=True)
+            bt.Ethnicity.import_source()
         else:
             names = bt.Ethnicity.public().df().index if not ethnicities else ethnicities
             records = bt.Ethnicity.from_values(names, field="ontology_id")
@@ -627,7 +641,7 @@ def populate_my_ontology(
     # ExperimentalFactor
     if assays is not None:
         if len(assays) == 0:
-            bt.ExperimentalFactor.import_from_source(update=True)
+            bt.ExperimentalFactor.import_source()
         else:
             names = bt.ExperimentalFactor.public().df().index if not assays else assays
             records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
@@ -638,7 +652,7 @@ def populate_my_ontology(
     # Tissue
     if tissues is not None:
         if len(tissues) == 0:
-            bt.Tissue.import_from_source(update=True)
+            bt.Tissue.import_source()
         else:
             names = bt.Tissue.public().df().index if not tissues else tissues
             records = bt.Tissue.from_values(names, field="ontology_id")
@@ -647,9 +661,9 @@ def populate_my_ontology(
     # DevelopmentalStage
     if dev_stages is not None:
         if len(dev_stages) == 0:
-            bt.DevelopmentalStage.import_from_source(update=True)
+            bt.DevelopmentalStage.import_source()
             source = bt.PublicSource.filter(organism="mouse", name="mmusdv").last()
-            bt.DevelopmentalStage.import_from_source(source=source)
+            bt.DevelopmentalStage.import_source(source=source)
         else:
             names = (
                 bt.DevelopmentalStage.public().df().index
@@ -663,7 +677,7 @@ def populate_my_ontology(
     # Disease
     if diseases is not None:
         if len(diseases) == 0:
-            bt.Disease.import_from_source(update=True)
+            bt.Disease.import_source()
         else:
             names = bt.Disease.public().df().index if not diseases else diseases
             records = bt.Disease.from_values(names, field="ontology_id")
@@ -738,18 +752,26 @@ def translate(
         dict: the mapping for the translation
     """
     if t == "cell_type_ontology_term_id":
-        obj = bt.CellType.public(organism="all")
+        obj = bt.CellType
     elif t == "assay_ontology_term_id":
-        obj = bt.ExperimentalFactor.public()
+        obj = bt.ExperimentalFactor
     elif t == "tissue_ontology_term_id":
-        obj = bt.Tissue.public()
+        obj = bt.Tissue
+    elif t in [
+        "development_stage_ontology_term_id",
+        "simplified_dev_stage",
+        "age_group",
+    ]:
+        obj = bt.DevelopmentalStage
+    elif t == "disease_ontology_term_id":
+        obj = bt.Disease
+    elif t == "self_reported_ethnicity_ontology_term_id":
+        obj = bt.Ethnicity
     else:
         return None
     if type(val) is str:
-        return {val: obj.search(val, field=obj.ontology_id).name.iloc[0]}
+        return {val: obj.filter(ontology_id=val).one().name}
     elif type(val) is list or type(val) is set:
-        return {i: obj.search(i, field=obj.ontology_id).name.iloc[0] for i in set(val)}
+        return {i: obj.filter(ontology_id=i).one().name for i in set(val)}
     elif type(val) is dict or type(val) is Counter:
-        return {
-            obj.search(k, field=obj.ontology_id).name.iloc[0]: v for k, v in val.items()
-        }
+        return {obj.filter(ontology_id=k).one().name: v for k, v in val.items()}
