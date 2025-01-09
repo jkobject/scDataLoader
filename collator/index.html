@@ -655,7 +655,11 @@ elem["class_names.."]: other classes</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    __call__ applies the collator to a minibatch of data</span>
 
@@ -680,6 +684,7 @@ elem["class_names.."]: other classes</p>
     <span class="n">tp</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">nnz_loc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">is_meta</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
         <span class="n">organism_id</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">organism_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span><span class="p">:</span>
@@ -737,12 +742,12 @@ elem["class_names.."]: other classes</p>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
         <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="n">gene_locs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="s2">&quot;is_meta&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+            <span class="n">is_meta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;is_meta&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
         <span class="n">other_classes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span><span class="p">])</span>
 
     <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span>
@@ -751,6 +756,7 @@ elem["class_names.."]: other classes</p>
     <span class="n">total_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
     <span class="n">other_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">is_meta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)</span>
 
     <span class="c1"># normalize counts</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -778,6 +784,8 @@ elem["class_names.."]: other classes</p>
         <span class="s2">&quot;tp&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span>
         <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">total_count</span><span class="p">),</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;is_meta&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)})</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;dataset&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">long</span><span class="p">)})</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

@@ -650,21 +650,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">270</span>
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
@@ -681,7 +667,21 @@ returns the final matrix count.</p>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function generates a mapping of all elements to their ancestors in the ontology dataframe.</span>
 
@@ -796,23 +796,23 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
-<span class="normal">702</span>
-<span class="normal">703</span>
-<span class="normal">704</span>
-<span class="normal">705</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">705</span>
 <span class="normal">706</span>
-<span class="normal">707</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -904,19 +904,19 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">710</span>
-<span class="normal">711</span>
-<span class="normal">712</span>
-<span class="normal">713</span>
-<span class="normal">714</span>
-<span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
-<span class="normal">718</span>
-<span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -1048,21 +1048,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">304</span>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
@@ -1107,7 +1093,21 @@ returns the final matrix count.</p>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
-<span class="normal">349</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
     <span class="n">remote_dataset</span><span class="p">:</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span>
     <span class="n">download_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1297,21 +1297,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">561</span>
 <span class="normal">562</span>
 <span class="normal">563</span>
 <span class="normal">564</span>
@@ -1438,7 +1424,21 @@ returns the final matrix count.</p>
 <span class="normal">685</span>
 <span class="normal">686</span>
 <span class="normal">687</span>
-<span class="normal">688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">sex</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
     <span class="n">celltypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -1476,7 +1476,7 @@ returns the final matrix count.</p>
     <span class="c1"># cell type</span>
     <span class="k">if</span> <span class="n">celltypes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">celltypes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span> <span class="k">else</span> <span class="n">celltypes</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
@@ -1491,9 +1491,9 @@ returns the final matrix count.</p>
         <span class="p">)</span>
         <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ensembl&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">i</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
+            <span class="n">organism_or_organismlist</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">organism_or_organismlist</span><span class="p">,</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="p">)</span> <span class="k">else</span> <span class="n">organism_or_organismlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">organism_or_organismlist</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span>
             <span class="p">]</span>
         <span class="p">]</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
@@ -1510,7 +1510,7 @@ returns the final matrix count.</p>
     <span class="c1"># ethnicity</span>
     <span class="k">if</span> <span class="n">ethnicities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ethnicities</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span> <span class="k">else</span> <span class="n">ethnicities</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
@@ -1521,7 +1521,7 @@ returns the final matrix count.</p>
     <span class="c1"># ExperimentalFactor</span>
     <span class="k">if</span> <span class="n">assays</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span> <span class="k">else</span> <span class="n">assays</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
@@ -1532,7 +1532,7 @@ returns the final matrix count.</p>
     <span class="c1"># Tissue</span>
     <span class="k">if</span> <span class="n">tissues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tissues</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span> <span class="k">else</span> <span class="n">tissues</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
@@ -1541,9 +1541,9 @@ returns the final matrix count.</p>
     <span class="c1"># DevelopmentalStage</span>
     <span class="k">if</span> <span class="n">dev_stages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_stages</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="s2">&quot;mouse&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mmusdv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">import_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
@@ -1557,7 +1557,7 @@ returns the final matrix count.</p>
     <span class="c1"># Disease</span>
     <span class="k">if</span> <span class="n">diseases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diseases</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">import_from_source</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span> <span class="k">else</span> <span class="n">diseases</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
@@ -1659,21 +1659,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span>
-<span class="normal">734</span>
-<span class="normal">735</span>
-<span class="normal">736</span>
-<span class="normal">737</span>
-<span class="normal">738</span>
-<span class="normal">739</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">739</span>
 <span class="normal">740</span>
 <span class="normal">741</span>
 <span class="normal">742</span>
@@ -1689,7 +1675,29 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">752</span>
 <span class="normal">753</span>
 <span class="normal">754</span>
-<span class="normal">755</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
     <span class="n">val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">t</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1705,21 +1713,29 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="sd">        dict: the mapping for the translation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span>
     <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">public</span><span class="p">()</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span>
     <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">public</span><span class="p">()</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;simplified_dev_stage&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;age_group&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">set</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">val</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">val</span><span class="p">)}</span>
     <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Counter</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">ontology_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">obj</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1963,7 +1979,21 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">need_all</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    validate checks if the adata object is valid for lamindb</span>
 
@@ -2001,7 +2031,7 @@ Defaults to "cell_type_ontology_term_id".</p>
         <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">,</span>
         <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">,</span>
     <span class="p">]:</span>
-        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">need_all</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&#39; is missing in the provided anndata object.&quot;</span>
             <span class="p">)</span>
@@ -2009,7 +2039,9 @@ Defaults to "cell_type_ontology_term_id".</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">],</span>
         <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid ethnicity ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
@@ -2017,28 +2049,40 @@ Defaults to "cell_type_ontology_term_id".</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid organism ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;sex_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid sex ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid disease ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid cell type ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">],</span>
         <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid dev stage ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid tissue ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid assay ontology term id found&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
         <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span>

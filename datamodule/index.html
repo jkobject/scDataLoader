@@ -145,16 +145,6 @@ This is where the mappedCollection, dataset, and collator are combined to create
               </div>
             </li>
             <li>
-              <b><code>clss_to_weight</code></b>
-                  (<code>list</code>, default:
-                      <code>[&#39;organism_ontology_term_id&#39;]</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The classes to weight in the trainer's weighted random sampler. Defaults to ["organism_ontology_term_id"].</p>
-              </div>
-            </li>
-            <li>
               <b><code>organisms</code></b>
                   (<code>list</code>, default:
                       <code>[&#39;NCBITaxon:9606&#39;]</code>
@@ -251,7 +241,7 @@ any genes within this distance of each other will be considered at the same posi
             <li>
               <b><code>assays_to_drop</code></b>
                   (<code>list</code>, default:
-                      <code>[&#39;EFO:0008853&#39;, &#39;EFO:0010961&#39;, &#39;EFO:0030007&#39;, &#39;EFO:0030062&#39;]</code>
+                      <code>[&#39;EFO:0030007&#39;]</code>
 )
               –
               <div class="doc-md-description">
@@ -329,17 +319,17 @@ any genes within this distance of each other will be considered at the same posi
               </div>
             </li>
             <li>
-              <b><code>all_clss</code></b>
-                  (<code>list</code>, default:
-                      <code>[&#39;organism_ontology_term_id&#39;]</code>
+              <b><code>metacell_mode</code></b>
+                  (<code>float</code>, default:
+                      <code>0.0</code>
 )
               –
               <div class="doc-md-description">
-                <p>List of all classes. Defaults to ["organism_ontology_term_id"].</p>
+                <p>The probability of using metacell mode. Defaults to 0.0.</p>
               </div>
             </li>
             <li>
-              <b><code>clss_to_pred</code></b>
+              <b><code>clss_to_predict</code></b>
                   (<code>list</code>, default:
                       <code>[&#39;organism_ontology_term_id&#39;]</code>
 )
@@ -355,6 +345,16 @@ any genes within this distance of each other will be considered at the same posi
                 <p>Additional keyword arguments passed to the pytorch DataLoader.</p>
               </div>
             </li>
+            <li>
+              <b><code>restart_num</code></b>
+                  (<code>int</code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The number of the restart if we are continuing a previous run -&gt; /!\ NEEDS TO BE SET. Defaults to 0.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
@@ -362,11 +362,7 @@ any genes within this distance of each other will be considered at the same posi
 </table>
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -511,7 +507,15 @@ any genes within this distance of each other will be considered at the same posi
 <span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
-<span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">clss_to_weight</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
@@ -524,22 +528,24 @@ any genes within this distance of each other will be considered at the same posi
     <span class="n">use_default_col</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">gene_position_tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
     <span class="c1"># this is for the mappedCollection</span>
-    <span class="n">clss_to_pred</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
-    <span class="n">all_clss</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
+    <span class="n">clss_to_predict</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
     <span class="n">hierarchical_clss</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="c1"># this is for the collator</span>
     <span class="n">how</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;random expr&quot;</span><span class="p">,</span>
     <span class="n">organism_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">,</span>
     <span class="n">max_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="n">add_zero_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">replacement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">do_gene_pos</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">tp_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># &quot;heat_diff&quot;</span>
     <span class="n">assays_to_drop</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;EFO:0008853&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;EFO:0010961&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;EFO:0030007&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;EFO:0030062&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;EFO:0008853&quot;, #patch seq</span>
+        <span class="c1"># &quot;EFO:0010961&quot;, # visium</span>
+        <span class="s2">&quot;EFO:0030007&quot;</span><span class="p">,</span>  <span class="c1"># ATACseq</span>
+        <span class="c1"># &quot;EFO:0030062&quot;, # slide-seq</span>
     <span class="p">],</span>
+    <span class="n">restart_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">metacell_mode</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -551,7 +557,6 @@ any genes within this distance of each other will be considered at the same posi
 
 <span class="sd">    Args:</span>
 <span class="sd">        collection_name (str): The lamindb collection to be used.</span>
-<span class="sd">        clss_to_weight (list, optional): The classes to weight in the trainer&#39;s weighted random sampler. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
 <span class="sd">        organisms (list, optional): The organisms to include in the dataset. Defaults to [&quot;NCBITaxon:9606&quot;].</span>
 <span class="sd">        weight_scaler (int, optional): how much more you will see the most present vs less present category.</span>
 <span class="sd">        train_oversampling_per_epoch (float, optional): The proportion of the dataset to include in the training set for each epoch. Defaults to 0.1.</span>
@@ -573,23 +578,23 @@ any genes within this distance of each other will be considered at the same posi
 <span class="sd">        organism_name (str, optional): The name of the organism. Defaults to &quot;organism_ontology_term_id&quot;.</span>
 <span class="sd">        tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.</span>
 <span class="sd">        hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].</span>
-<span class="sd">        all_clss (list, optional): List of all classes. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
-<span class="sd">        clss_to_pred (list, optional): List of classes to predict. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
+<span class="sd">        metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.</span>
+<span class="sd">        clss_to_predict (list, optional): List of classes to predict. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
 <span class="sd">        **kwargs: Additional keyword arguments passed to the pytorch DataLoader.</span>
-
+<span class="sd">        restart_num (int, optional): The number of the restart if we are continuing a previous run -&gt; /!\ NEEDS TO BE SET. Defaults to 0.</span>
 <span class="sd">        see @file data.py and @file collator.py for more details about some of the parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">collection_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">mdataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">collection_name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">(),</span>
             <span class="n">organisms</span><span class="o">=</span><span class="n">organisms</span><span class="p">,</span>
-            <span class="n">obs</span><span class="o">=</span><span class="n">all_clss</span><span class="p">,</span>
-            <span class="n">clss_to_pred</span><span class="o">=</span><span class="n">clss_to_pred</span><span class="p">,</span>
+            <span class="n">clss_to_predict</span><span class="o">=</span><span class="n">clss_to_predict</span><span class="p">,</span>
             <span class="n">hierarchical_clss</span><span class="o">=</span><span class="n">hierarchical_clss</span><span class="p">,</span>
+            <span class="n">metacell_mode</span><span class="o">=</span><span class="n">metacell_mode</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># print(mdataset)</span>
     <span class="c1"># and location</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="k">if</span> <span class="n">do_gene_pos</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">do_gene_pos</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;seeing a string: loading gene positions as biomart parquet file&quot;</span><span class="p">)</span>
@@ -643,11 +648,12 @@ any genes within this distance of each other will be considered at the same posi
             <span class="n">org_to_id</span><span class="o">=</span><span class="n">mdataset</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="n">organism_name</span><span class="p">],</span>
             <span class="n">tp_name</span><span class="o">=</span><span class="n">tp_name</span><span class="p">,</span>
             <span class="n">organism_name</span><span class="o">=</span><span class="n">organism_name</span><span class="p">,</span>
-            <span class="n">class_names</span><span class="o">=</span><span class="n">clss_to_weight</span><span class="p">,</span>
+            <span class="n">class_names</span><span class="o">=</span><span class="n">clss_to_predict</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="n">test_split</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">mdataset</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">replacement</span> <span class="o">=</span> <span class="n">replacement</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="k">if</span> <span class="s2">&quot;sampler&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sampler&quot;</span><span class="p">)</span>
@@ -658,6 +664,8 @@ any genes within this distance of each other will be considered at the same posi
     <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span> <span class="o">=</span> <span class="n">clss_to_weight</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_weights</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_labels</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">restart_num</span> <span class="o">=</span> <span class="n">restart_num</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_datasets</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_idx</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -847,11 +855,7 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
@@ -920,7 +924,21 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    setup method is used to prepare the data for the training, validation, and test sets.</span>
 <span class="sd">    It shuffles the data, calculates weights for each set, and creates samplers for each set.</span>
@@ -929,9 +947,17 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="sd">        stage (str, optional): The stage of the model training process.</span>
 <span class="sd">        It can be either &#39;fit&#39; or &#39;test&#39;. Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SCALE</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;nnz&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">))</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="n">weights</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">get_label_weights</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span><span class="p">,</span> <span class="n">return_categories</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -950,12 +976,11 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 
     <span class="n">idx_full</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assays_to_drop</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assays_to_drop</span><span class="p">:</span>
-                <span class="n">idx_full</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="n">idx_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">idx_full</span><span class="p">)</span>
+        <span class="n">badloc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assays_to_drop</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">idx_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">))[</span><span class="o">~</span><span class="n">badloc</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">idx_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">len_test</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -984,12 +1009,15 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx_full</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">len_valid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_idx</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[:</span><span class="n">len_valid</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># store it for later</span>
         <span class="n">idx_full</span> <span class="o">=</span> <span class="n">idx_full</span><span class="p">[</span><span class="n">len_valid</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_idx</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">weights</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span>
     <span class="n">labels</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">),</span> <span class="n">idx_full</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-
+    <span class="c1"># some labels will now not exist anymore as replaced by len(weights) - 1.</span>
+    <span class="c1"># this means that the associated weights should be 0.</span>
+    <span class="c1"># by doing np.bincount(labels)*weights this will be taken into account</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_weights</span> <span class="o">=</span> <span class="n">weights</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_labels</span> <span class="o">=</span> <span class="n">labels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">idx_full</span> <span class="o">=</span> <span class="n">idx_full</span>

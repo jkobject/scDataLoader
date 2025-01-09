@@ -177,13 +177,13 @@ Defaults to True.</p>
               </div>
             </li>
             <li>
-              <b><code>subset_hvg</code></b>
+              <b><code>n_hvg_for_postp</code></b>
                   (<code>int or bool</code>, default:
                       <code>0</code>
 )
               –
               <div class="doc-md-description">
-                <p>Determines whether to subset highly variable genes.
+                <p>Determines whether to subset to highly variable genes for the PCA.
 Defaults to False.</p>
               </div>
             </li>
@@ -309,9 +309,7 @@ Defaults to 8.</p>
             </li>
             <li>
               <b><code>batch_key</code></b>
-                  (<code>str</code>, default:
-                      <code>None</code>
-)
+                  (<code>str</code>)
               –
               <div class="doc-md-description">
                 <p>The key of :class:<code>~anndata.AnnData.obs</code> to use for batch information.
@@ -336,8 +334,7 @@ Defaults to False.</p>
 </table>
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
-<span class="normal"> 30</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
 <span class="normal"> 33</span>
@@ -426,12 +423,19 @@ Defaults to False.</p>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filter_gene_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filter_cell_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">normalize_sum</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e4</span><span class="p">,</span>
-    <span class="n">subset_hvg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">n_hvg_for_postp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">use_layer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">is_symbol</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">hvg_flavor</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;seurat_v3&quot;</span><span class="p">,</span>
@@ -445,7 +449,13 @@ Defaults to False.</p>
     <span class="n">maxdropamount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
     <span class="n">madoutlier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">pct_mt_outlier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="n">batch_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sex_ontology_term_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;donor_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;suspension_type&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
     <span class="n">skip_validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">additional_preprocess</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">AnnData</span><span class="p">],</span> <span class="n">AnnData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">additional_postprocess</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">AnnData</span><span class="p">],</span> <span class="n">AnnData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -465,7 +475,7 @@ Defaults to False.</p>
 <span class="sd">            Defaults to 1e4.</span>
 <span class="sd">        log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.</span>
 <span class="sd">            Defaults to True.</span>
-<span class="sd">        subset_hvg (int or bool, optional): Determines whether to subset highly variable genes.</span>
+<span class="sd">        n_hvg_for_postp (int or bool, optional): Determines whether to subset to highly variable genes for the PCA.</span>
 <span class="sd">            Defaults to False.</span>
 <span class="sd">        hvg_flavor (str, optional): Specifies the flavor of highly variable genes selection.</span>
 <span class="sd">            See :func:`scanpy.pp.highly_variable_genes` for more details. Defaults to &quot;seurat_v3&quot;.</span>
@@ -496,7 +506,6 @@ Defaults to False.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">filter_gene_by_counts</span> <span class="o">=</span> <span class="n">filter_gene_by_counts</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">filter_cell_by_counts</span> <span class="o">=</span> <span class="n">filter_cell_by_counts</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">normalize_sum</span> <span class="o">=</span> <span class="n">normalize_sum</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">subset_hvg</span> <span class="o">=</span> <span class="n">subset_hvg</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hvg_flavor</span> <span class="o">=</span> <span class="n">hvg_flavor</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">binning</span> <span class="o">=</span> <span class="n">binning</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">organisms</span> <span class="o">=</span> <span class="n">organisms</span>
@@ -509,8 +518,9 @@ Defaults to False.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">min_nnz_genes</span> <span class="o">=</span> <span class="n">min_nnz_genes</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">maxdropamount</span> <span class="o">=</span> <span class="n">maxdropamount</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">madoutlier</span> <span class="o">=</span> <span class="n">madoutlier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_hvg_for_postp</span> <span class="o">=</span> <span class="n">n_hvg_for_postp</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pct_mt_outlier</span> <span class="o">=</span> <span class="n">pct_mt_outlier</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">batch_key</span> <span class="o">=</span> <span class="n">batch_key</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batch_keys</span> <span class="o">=</span> <span class="n">batch_keys</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">length_normalize</span> <span class="o">=</span> <span class="n">length_normalize</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">skip_validate</span> <span class="o">=</span> <span class="n">skip_validate</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">use_layer</span> <span class="o">=</span> <span class="n">use_layer</span>
@@ -557,29 +567,29 @@ Defaults to False.</p>
 
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">stream</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">keep_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">force_preloaded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">stream</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">keep_files</span> <span class="o">=</span> <span class="n">keep_files</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">force_preloaded</span> <span class="o">=</span> <span class="n">force_preloaded</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -644,19 +654,7 @@ is used in the highly variable gene selection step.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
 <span class="normal">428</span>
@@ -764,13 +762,33 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">530</span>
 <span class="normal">531</span>
 <span class="normal">532</span>
-<span class="normal">533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;preprocessed dataset using scprint&quot;</span><span class="p">,</span>
-    <span class="n">start_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset using scprint&quot;</span><span class="p">,</span>
+    <span class="n">start_at</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    format controls the different input value wrapping, including categorical</span>
@@ -791,12 +809,15 @@ is used in the highly variable gene selection step.</p>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="n">start_at</span><span class="p">:]):</span>
             <span class="c1"># use the counts matrix</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">start_at</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">start_at</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">stem_uid</span> <span class="ow">in</span> <span class="n">all_ready_processed_keys</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">stem_uid</span><span class="si">}</span><span class="s2"> is already processed... not preprocessing&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-            <span class="n">backed</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+            <span class="n">path</span> <span class="o">=</span> <span class="n">cache_path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_preloaded</span> <span class="k">else</span> <span class="n">file</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+            <span class="n">backed</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">backed</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">backed</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">is_primary_data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> only contains non primary cells.. dropping&quot;</span><span class="p">)</span>
                 <span class="c1"># Save the stem_uid to a file to avoid loading it again</span>
@@ -809,12 +830,11 @@ is used in the highly variable gene selection step.</p>
                 <span class="p">)</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">MAXFILESIZE</span><span class="p">:</span>
-                <span class="n">adata</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">)</span>
+                <span class="n">adata</span> <span class="o">=</span> <span class="n">backed</span><span class="o">.</span><span class="n">to_memory</span><span class="p">()</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">badata</span> <span class="o">=</span> <span class="n">backed</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">badata</span><span class="p">)</span>
-
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">MAXFILESIZE</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
@@ -826,16 +846,26 @@ is used in the highly variable gene selection step.</p>
                     <span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;num blocks &quot;</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_blocks</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">390</span><span class="p">:</span>
+                            <span class="k">continue</span>
                         <span class="n">start_index</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> <span class="n">block_size</span>
                         <span class="n">end_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">block_size</span><span class="p">,</span> <span class="n">badata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="n">block</span> <span class="o">=</span> <span class="n">badata</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span><span class="o">.</span><span class="n">to_memory</span><span class="p">()</span>
                         <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-                        <span class="n">block</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-                        <span class="n">myfile</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">from_anndata</span><span class="p">(</span>
+                        <span class="n">block</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span>
+                            <span class="n">block</span><span class="p">,</span> <span class="n">dataset_id</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">stem_uid</span> <span class="o">+</span> <span class="s2">&quot;_p&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="n">myfile</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Artifact</span><span class="o">.</span><span class="n">from_anndata</span><span class="p">(</span>
                             <span class="n">block</span><span class="p">,</span>
-                            <span class="n">revises</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
-                            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-                            <span class="n">version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_s&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span>
+                            <span class="n">description</span><span class="o">=</span><span class="n">description</span>
+                            <span class="o">+</span> <span class="s2">&quot; n&quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot; p&quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot; ( revises file &quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot; )&quot;</span><span class="p">,</span>
+                            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">myfile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_files</span><span class="p">:</span>
@@ -845,16 +875,12 @@ is used in the highly variable gene selection step.</p>
                             <span class="k">del</span> <span class="n">block</span>
 
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">adata</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">])</span>
-                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                        <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">])</span>
-                    <span class="n">myfile</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">from_anndata</span><span class="p">(</span>
+                    <span class="n">adata</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">dataset_id</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">stem_uid</span><span class="p">)</span>
+                    <span class="n">myfile</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Artifact</span><span class="o">.</span><span class="n">from_anndata</span><span class="p">(</span>
                         <span class="n">adata</span><span class="p">,</span>
                         <span class="n">revises</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
-                        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-                        <span class="n">version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">),</span>
+                        <span class="n">description</span><span class="o">=</span><span class="n">description</span> <span class="o">+</span> <span class="s2">&quot; p&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                        <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">myfile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_files</span><span class="p">:</span>
@@ -912,27 +938,7 @@ is used in the highly variable gene selection step.</p>
 
             <details class="quote">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
-<span class="normal">635</span>
-<span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">638</span>
 <span class="normal">639</span>
 <span class="normal">640</span>
 <span class="normal">641</span>
@@ -965,7 +971,27 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
-<span class="normal">671</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1038,27 +1064,7 @@ is used in the highly variable gene selection step.</p>
 
             <details class="quote">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span>
-<span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">694</span>
 <span class="normal">695</span>
 <span class="normal">696</span>
 <span class="normal">697</span>
@@ -1070,38 +1076,292 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">703</span>
 <span class="normal">704</span>
 <span class="normal">705</span>
-<span class="normal">706</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
-    <span class="kn">import</span> <span class="nn">palantir</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+    <span class="c1"># import palantir</span>
 
     <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>
     <span class="c1"># compute neighbors</span>
     <span class="c1"># need to be connectivities and same labels [cell type, assay, dataset, disease]</span>
     <span class="c1"># define the &quot;neighbor&quot; up to 10(N) cells and add to obs</span>
     <span class="c1"># define the &quot;next time point&quot; up to 5(M) cells and add to obs  # step 1: filter genes</span>
-    <span class="k">del</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;connectivities&quot;</span><span class="p">]</span>
-    <span class="k">del</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;distances&quot;</span><span class="p">]</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">external</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">harmony_integrate</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;batches&quot;</span><span class="p">)</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;X_pca_harmony&quot;</span><span class="p">)</span>
+    <span class="c1"># if len(adata.obs[&quot;batches&quot;].unique()) &gt; 1:</span>
+    <span class="c1">#    sc.external.pp.harmony_integrate(adata, key=&quot;batches&quot;)</span>
+    <span class="c1">#    sc.pp.neighbors(adata, use_rep=&quot;X_pca_harmony&quot;)</span>
+    <span class="c1"># else:</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;X_pca&quot;</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_2&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_1&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_0.5&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;dataset_id&quot;</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span> <span class="k">else</span> <span class="s2">&quot;unknown_id&quot;</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
+        <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cell_type&quot;</span><span class="p">,</span> <span class="s2">&quot;batches&quot;</span><span class="p">],</span>
+        <span class="n">save</span><span class="o">=</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">mid</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">palantir</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">run_diffusion_maps</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-    <span class="n">palantir</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">determine_multiscale_space</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-    <span class="n">terminal_states</span> <span class="o">=</span> <span class="n">palantir</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">find_terminal_states</span><span class="p">(</span>
-        <span class="n">adata</span><span class="p">,</span>
-        <span class="n">celltypes</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">cell_type_ontology_term_id</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
-        <span class="n">celltype_column</span><span class="o">=</span><span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">,</span>
+    <span class="n">COL</span> <span class="o">=</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
+    <span class="n">NEWOBS</span> <span class="o">=</span> <span class="s2">&quot;clust_cell_type&quot;</span>
+    <span class="n">MINCELLS</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">MAXSIM</span> <span class="o">=</span> <span class="mf">0.94</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+    <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
+
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">COL</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden_1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">diffmap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;heat_diff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="n">terminal_state</span> <span class="ow">in</span> <span class="n">terminal_states</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
-        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;iroot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">terminal_state</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">dpt</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;heat_diff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
-            <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;heat_diff&quot;</span><span class="p">],</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;dpt_pseudotime&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+    <span class="n">coun</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">])</span>
+    <span class="n">relab</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">COL</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">coun</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">MINCELLS</span> <span class="ow">or</span> <span class="n">num</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">relab</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">relab</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+                <span class="n">num</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">relab</span><span class="p">)</span>
+
+    <span class="n">cluster_means</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="p">]</span>
+        <span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Calculate correlation matrix between clusters</span>
+    <span class="n">cluster_similarity</span> <span class="o">=</span> <span class="n">cluster_means</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+    <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">tril_indices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster_similarity</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Get pairs with similarity &gt; 0.95</span>
+    <span class="n">high_sim_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster_similarity</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluster_similarity</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">MAXSIM</span>
+                <span class="ow">and</span> <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">==</span> <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">high_sim_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">cluster_similarity</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+    <span class="c1"># Create mapping for merging similar clusters</span>
+    <span class="n">merge_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">high_sim_pairs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merge_mapping</span><span class="p">:</span>
+            <span class="n">merge_mapping</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">merge_mapping</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">merge_mapping</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="c1"># Apply merging</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">merge_mapping</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">])</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">coun</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+    <span class="n">merge_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">COL</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coun</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">merge_mapping</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">if</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">i</span>
+                <span class="n">num</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">merge_mapping</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">NEWOBS</span><span class="p">])</span>
+
+    <span class="kn">import</span> <span class="nn">bionty</span> <span class="k">as</span> <span class="nn">bt</span>
+
+    <span class="n">stages</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;development_stage_ontology_term_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">organism_ontology_term_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">]:</span>
+        <span class="n">relabel</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">:</span>
+            <span class="n">stage_obj</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">stage</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ontology_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">stage_obj</span><span class="o">.</span><span class="n">parents</span><span class="o">.</span><span class="n">filter</span><span class="p">()])</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="n">parents</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;HsapDv:0010000&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;HsapDv:0000204&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;HsapDv:0000227&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span><span class="p">:</span>
+                        <span class="n">relabel</span><span class="p">[</span><span class="n">stage</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;simplified_dev_stage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;development_stage_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">relabel</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">organism_ontology_term_id</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">]:</span>
+        <span class="n">rename_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">j</span>
+        <span class="p">}</span>
+        <span class="n">relabel</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">rename_mapping</span><span class="p">:</span>
+                <span class="n">relabel</span><span class="p">[</span><span class="n">stage</span><span class="p">]</span> <span class="o">=</span> <span class="n">rename_mapping</span><span class="p">[</span><span class="n">stage</span><span class="p">]</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;simplified_dev_stage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="s2">&quot;development_stage_ontology_term_id&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">relabel</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;organism not supported&quot;</span><span class="p">)</span>
+    <span class="c1"># palantir.utils.run_diffusion_maps(adata, n_components=20)</span>
+    <span class="c1"># palantir.utils.determine_multiscale_space(adata)</span>
+    <span class="c1"># terminal_states = palantir.utils.find_terminal_states(</span>
+    <span class="c1">#    adata,</span>
+    <span class="c1">#    celltypes=adata.obs.cell_type_ontology_term_id.unique(),</span>
+    <span class="c1">#    celltype_column=&quot;cell_type_ontology_term_id&quot;,</span>
+    <span class="c1"># )</span>
+    <span class="c1"># sc.tl.diffmap(adata)</span>
+    <span class="c1"># adata.obs[&quot;heat_diff&quot;] = 1</span>
+    <span class="c1"># for terminal_state in terminal_states.index.tolist():</span>
+    <span class="c1">#    adata.uns[&quot;iroot&quot;] = np.where(adata.obs.index == terminal_state)[0][0]</span>
+    <span class="c1">#    sc.tl.dpt(adata)</span>
+    <span class="c1">#    adata.obs[&quot;heat_diff&quot;] = np.minimum(</span>
+    <span class="c1">#        adata.obs[&quot;heat_diff&quot;], adata.obs[&quot;dpt_pseudotime&quot;]</span>
+    <span class="c1">#    )</span>
     <span class="k">return</span> <span class="n">adata</span>
 </code></pre></div></td></tr></table></div>
             </details>
