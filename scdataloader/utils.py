@@ -611,9 +611,9 @@ def populate_my_ontology(
         )
         source = bt.PublicSource.filter(name="ensembl", organism=organism_clade).last()
         records = [
-            i[0] if type(i) is list else i
-            for i in [
-                bt.Organism.from_source(ontology_id=i, source=source) for i in names
+            organism_or_organismlist if isinstance(organism_or_organismlist, bt.Organism) else organism_or_organismlist[0]
+            for organism_or_organismlist in [
+                bt.Organism.from_source(ontology_id=name, source=source) for name in names
             ]
         ]
         ln.save(records)
