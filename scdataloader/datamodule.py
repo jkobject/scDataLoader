@@ -268,7 +268,7 @@ class DataModule(L.LightningDataModule):
             )
         else:
             weights = np.ones(1)
-            labels = np.zeros(self.n_samples)
+            labels = np.zeros(self.n_samples, dtype=int)
         if isinstance(self.validation_split, int):
             len_valid = self.validation_split
         else:
@@ -419,6 +419,9 @@ class LabelWeightedSampler(Sampler[int]):
 
         super(LabelWeightedSampler, self).__init__(None)
         # reweight labels from counter otherwsie same weight to labels that have many elements vs a few
+        import pdb
+
+        pdb.set_trace()
         label_weights = np.array(label_weights) * np.bincount(labels)
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
