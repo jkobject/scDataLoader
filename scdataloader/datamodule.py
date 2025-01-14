@@ -253,16 +253,18 @@ class DataModule(L.LightningDataModule):
             It can be either 'fit' or 'test'. Defaults to None.
         """
         SCALE = 10
+        if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
+            self.nnz = self.dataset.mapped_dataset.get_merged_labels("nnz")
+            self.clss_to_weight.remove("nnz")
+            (
+                (self.nnz.max() / SCALE)
+                / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
+            ).min()
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
-            if "nnz" in self.clss_to_weight:
-                self.nnz = self.dataset.mapped_dataset.get_merged_labels("nnz")
-                self.clss_to_weight.remove("nnz")
-                (
-                    (self.nnz.max() / SCALE)
-                    / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
-                ).min()
             weights, labels = self.dataset.get_label_weights(
-                self.clss_to_weight, scaler=self.weight_scaler, return_categories=True
+                self.clss_to_weight,
+                scaler=self.weight_scaler,
+                return_categories=True,
             )
         else:
             weights = np.ones(1)
@@ -483,7 +485,6 @@ class LabelWeightedSampler(Sampler[int]):
             sample_indices[left_inds] = klass_index[right_inds]
         # torch shuffle
         sample_indices = sample_indices[torch.randperm(len(sample_indices))]
-        print(sample_indices.tolist()[:10], sample_labels[:10])
         # raise Exception("stop")
         yield from iter(sample_indices.tolist())
 
