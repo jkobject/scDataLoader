@@ -18,6 +18,13 @@ from scipy.stats import median_abs_deviation
 from torch import Tensor
 
 
+def slurm_restart_count(use_mine: bool = False):
+    if use_mine:
+        return int(os.getenv("MY_SLURM_RESTART_COUNT", 0))
+    else:
+        return int(os.getenv("SLURM_RESTART_COUNT", 0))
+
+
 def downsample_profile(mat: Tensor, dropout: float):
     """
     This function downsamples the expression profile of a given single cell RNA matrix.
@@ -611,9 +618,12 @@ def populate_my_ontology(
         )
         source = bt.PublicSource.filter(name="ensembl", organism=organism_clade).last()
         records = [
-            organism_or_organismlist if isinstance(organism_or_organismlist, bt.Organism) else organism_or_organismlist[0]
+            organism_or_organismlist
+            if isinstance(organism_or_organismlist, bt.Organism)
+            else organism_or_organismlist[0]
             for organism_or_organismlist in [
-                bt.Organism.from_source(ontology_id=name, source=source) for name in names
+                bt.Organism.from_source(ontology_id=name, source=source)
+                for name in names
             ]
         ]
         ln.save(records)

@@ -15,7 +15,7 @@ from torch.utils.data.sampler import (
 
 from .collator import Collator
 from .data import Dataset
-from .utils import getBiomartTable
+from .utils import getBiomartTable, slurm_restart_count
 import os
 
 
@@ -52,8 +52,8 @@ class DataModule(L.LightningDataModule):
             "EFO:0030007",  # ATACseq
             # "EFO:0030062", # slide-seq
         ],
-        restart_num: int = 0,
         metacell_mode: float = 0.0,
+        modify_seed_on_requeue: bool = True,
         **kwargs,
     ):
         """
@@ -88,8 +88,8 @@ class DataModule(L.LightningDataModule):
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
+            modify_seed_on_requeue (bool, optional): Whether to modify the seed on requeue. Defaults to True.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
-            restart_num (int, optional): The number of the restart if we are continuing a previous run -> /!\ NEEDS TO BE SET. Defaults to 0.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
         if collection_name is not None:
@@ -132,7 +132,7 @@ class DataModule(L.LightningDataModule):
                     c.append(i)
                     prev_position = r["start_position"]
                     prev_chromosome = r["chromosome_name"]
-                print(f"reduced the size to {len(set(c))/len(biomart)}")
+                print(f"reduced the size to {len(set(c)) / len(biomart)}")
                 biomart["pos"] = c
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
@@ -172,8 +172,9 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.modify_seed_on_requeue = modify_seed_on_requeue
         self.nnz = None
-        self.restart_num = restart_num
+        self.restart_num = 0
         self.test_datasets = []
         self.test_idx = []
         super().__init__()
@@ -274,9 +275,9 @@ class DataModule(L.LightningDataModule):
             len_test = self.test_split
         else:
             len_test = int(self.n_samples * self.test_split)
-        assert (
-            len_test + len_valid < self.n_samples
-        ), "test set + valid set size is configured to be larger than entire dataset."
+        assert len_test + len_valid < self.n_samples, (
+            "test set + valid set size is configured to be larger than entire dataset."
+        )
 
         idx_full = []
         if len(self.assays_to_drop) > 0:
@@ -341,6 +342,7 @@ class DataModule(L.LightningDataModule):
                 element_weights=self.nnz,
                 replacement=self.replacement,
                 restart_num=self.restart_num,
+                modify_seed_on_requeue=self.modify_seed_on_requeue,
             )
         except ValueError as e:
             raise ValueError(e + "have you run `datamodule.setup()`?")
@@ -391,6 +393,7 @@ class LabelWeightedSampler(Sampler[int]):
     nnz: Optional[Sequence[int]]
     replacement: bool
     restart_num: int
+    modify_seed_on_requeue: bool
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
 
@@ -401,7 +404,8 @@ class LabelWeightedSampler(Sampler[int]):
         num_samples: int,
         replacement: bool = True,
         element_weights: Sequence[float] = None,
-        restart_num=0,
+        restart_num: int = 0,
+        modify_seed_on_requeue: bool = True,
     ) -> None:
         """
 
@@ -424,7 +428,8 @@ class LabelWeightedSampler(Sampler[int]):
         )
         self.replacement = replacement
         self.num_samples = num_samples
-        self.restart_num = restart_num
+        self.restart_num = slurm_restart_count(use_mine=True) + restart_num
+        self.modify_seed_on_requeue = modify_seed_on_requeue
         # list of tensor.
         self.klass_indices = [
             (self.labels == i_klass).nonzero().squeeze(1)
@@ -438,7 +443,7 @@ class LabelWeightedSampler(Sampler[int]):
             num_samples=self.num_samples,
             replacement=True,
             generator=None
-            if self.restart_num == 0
+            if self.restart_num == 0 and not self.modify_seed_on_requeue
             else torch.Generator().manual_seed(self.restart_num),
         )
         sample_indices = torch.empty_like(sample_labels)
@@ -457,7 +462,7 @@ class LabelWeightedSampler(Sampler[int]):
                     else len(left_inds),
                     replacement=self.replacement,
                     generator=None
-                    if self.restart_num == 0
+                    if self.restart_num == 0 and not self.modify_seed_on_requeue
                     else torch.Generator().manual_seed(self.restart_num),
                 )
             elif self.replacement:
@@ -465,7 +470,7 @@ class LabelWeightedSampler(Sampler[int]):
                     len(klass_index),
                     size=(len(left_inds),),
                     generator=None
-                    if self.restart_num == 0
+                    if self.restart_num == 0 and not self.modify_seed_on_requeue
                     else torch.Generator().manual_seed(self.restart_num),
                 )
             else:
