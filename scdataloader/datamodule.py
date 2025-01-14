@@ -338,8 +338,8 @@ class DataModule(L.LightningDataModule):
         # )
         try:
             train_sampler = LabelWeightedSampler(
-                self.train_weights,
-                self.train_labels,
+                label_weights=self.train_weights,
+                labels=self.train_labels,
                 num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
                 element_weights=self.nnz,
                 replacement=self.replacement,
@@ -419,9 +419,6 @@ class LabelWeightedSampler(Sampler[int]):
 
         super(LabelWeightedSampler, self).__init__(None)
         # reweight labels from counter otherwsie same weight to labels that have many elements vs a few
-        import pdb
-
-        pdb.set_trace()
         label_weights = np.array(label_weights) * np.bincount(labels)
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
@@ -452,7 +449,6 @@ class LabelWeightedSampler(Sampler[int]):
             else torch.Generator().manual_seed(self.restart_num),
         )
         sample_indices = torch.empty_like(sample_labels)
-
         for i_klass, klass_index in enumerate(self.klass_indices):
             if klass_index.numel() == 0:
                 continue
@@ -485,9 +481,14 @@ class LabelWeightedSampler(Sampler[int]):
                     else len(klass_index)
                 )
                 right_inds = torch.randperm(len(klass_index))[:maxelem]
-            sample_indices[left_inds] = klass_index[right_inds]
+            sample_indices[left_inds[: len(right_inds)]] = klass_index[right_inds]
+            if len(right_inds) < len(left_inds):
+                sample_indices[left_inds[len(right_inds) :]] = -1
+        # drop all -1
+        sample_indices = sample_indices[sample_indices != -1]
         # torch shuffle
         sample_indices = sample_indices[torch.randperm(len(sample_indices))]
+        self.num_samples = len(sample_indices)
         # raise Exception("stop")
         yield from iter(sample_indices.tolist())
 
