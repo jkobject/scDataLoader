@@ -23,7 +23,7 @@ class Collator:
         class_names: list[str] = [],
         genelist: list[str] = [],
         downsample: Optional[float] = None,  # don't use it for training!
-        save_output: bool = False,
+        save_output: Optional[str] = None,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -59,7 +59,7 @@ class Collator:
                 If [] all genes will be considered
             downsample (float, optional): Downsample the profile to a certain number of cells. Defaults to None.
                 This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator
-            save_output (bool, optional): If True, saves the output to a file. Defaults to False.
+            save_output (str, optional): If not None, saves the output to a file. Defaults to None.
                 This is mainly for debugging purposes
         """
         self.organisms = organisms
@@ -237,8 +237,8 @@ class Collator:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:
             ret["x"] = downsample_profile(ret["x"], self.downsample)
-        if self.save_output:
-            with open("collator_output.txt", "a") as f:
+        if self.save_output is not None:
+            with open(self.save_output, "a") as f:
                 np.savetxt(f, ret["x"].numpy())
         return ret
 

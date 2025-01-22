@@ -59,6 +59,7 @@ class Preprocessor:
         do_postp: bool = True,
         organisms: list[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
         use_raw: bool = True,
+        keepdata: bool = False,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -99,6 +100,8 @@ class Preprocessor:
                 This arg is used in the highly variable gene selection step.
             skip_validate (bool, optional): Determines whether to skip the validation step.
                 Defaults to False.
+            keepdata (bool, optional): Determines whether to keep the data in the AnnData object.
+                Defaults to False.
         """
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
@@ -124,6 +127,7 @@ class Preprocessor:
         self.is_symbol = is_symbol
         self.do_postp = do_postp
         self.use_raw = use_raw
+        self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
         if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
@@ -144,12 +148,13 @@ class Preprocessor:
                     print("X was not raw counts, using 'counts' layer")
                     adata.X = adata.layers["counts"].copy()
             print("Dropping layers: ", adata.layers.keys())
-            del adata.layers
-        if len(adata.varm.keys()) > 0:
+            if not self.keepdata:
+                del adata.layers
+        if len(adata.varm.keys()) > 0 and not self.keepdata:
             del adata.varm
-        if len(adata.obsm.keys()) > 0 and self.do_postp:
+        if len(adata.obsm.keys()) > 0 and self.do_postp and not self.keepdata:
             del adata.obsm
-        if len(adata.obsp.keys()) > 0 and self.do_postp:
+        if len(adata.obsp.keys()) > 0 and self.do_postp and not self.keepdata:
             del adata.obsp
         # check that it is a count
         print("checking raw counts")
@@ -478,7 +483,7 @@ class LaminPreprocessor(Preprocessor):
                 try:
                     if file.size > MAXFILESIZE:
                         print(
-                            f"dividing the dataset as it is too large: {file.size//1_000_000_000}Gb"
+                            f"dividing the dataset as it is too large: {file.size // 1_000_000_000}Gb"
                         )
                         num_blocks = int(np.ceil(file.size / (MAXFILESIZE / 2)))
                         block_size = int(
