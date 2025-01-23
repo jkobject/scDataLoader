@@ -60,7 +60,7 @@ def mapped(
     parallel: bool = False,
     dtype: str | None = None,
     stream: bool = False,
-    is_run_input: bool | None = None,
+    metacell_mode: float = 0.0,
     meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
 ) -> MappedCollection:
     path_list = []
@@ -89,6 +89,8 @@ def mapped(
         cache_categories,
         parallel,
         dtype,
+        metacell_mode,
+        meta_assays
     )
     # track only if successful
     return ds
@@ -159,6 +161,8 @@ class MappedCollection:
         cache_categories: bool = True,
         parallel: bool = False,
         dtype: str | None = None,
+        metacell_mode: float = 0.0,
+        meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
     ):
         if join not in {None, "inner", "outer"}:  # pragma: nocover
             raise ValueError(
@@ -209,7 +213,9 @@ class MappedCollection:
         self.storages = []  # type: ignore
         self.conns = []  # type: ignore
         self.parallel = parallel
+        self.metacell_mode = metacell_mode
         self.path_list = path_list
+        self.meta_assays = meta_assays
         self._make_connections(path_list, parallel)
 
         self._cache_cats: dict = {}
@@ -438,6 +444,22 @@ class MappedCollection:
                     if label in self.encoders:
                         label_idx = self.encoders[label][label_idx]
                     out[label] = label_idx
+
+            out["is_meta"] = False
+            if len(self.meta_assays) > 0 and "assay_ontology_term_id" in self.obs_keys:
+                if out["assay_ontology_term_id"] in self.meta_assays:
+                    out["is_meta"] = True
+                    return out
+            if self.metacell_mode > 0:
+                if np.random.random() < self.metacell_mode:
+                    out["is_meta"] = True
+                    distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
+                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:3]
+                    for i in nn_idx:
+                        out[layers_key] += self._get_data_idx(
+                            lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
+                        )
+
         return out
 
     def _get_data_idx(
@@ -516,11 +538,9 @@ class MappedCollection:
         return_categories: bool = False,
     ):
         """Get all weights for the given label keys.
-
         This counts the number of labels for each label and returns
         weights for each obs label accoding to the formula `1 / num of this label in the data`.
         If `scaler` is provided, then `scaler / (scaler + num of this label in the data)`.
-
         Args:
             obs_keys: A key in the ``.obs`` slots or a list of keys. If a list is provided,
                 the labels from the obs keys will be concatenated with ``"__"`` delimeter
@@ -541,8 +561,12 @@ class MappedCollection:
         else:
             labels = labels_list[0]
         counter = Counter(labels)
+        MIN, MAX = counter.values().min(), counter.values().max()
         if return_categories:
             return {
+                k: 1.0 / v
+                if scaler is None
+                else (MAX / scaler) / ((1 + v - MIN) + MAX / scaler)
                 k: 1.0 / v if scaler is None else scaler / (v + scaler)
                 for k, v in counter.items()
             }
@@ -550,6 +574,7 @@ class MappedCollection:
         if scaler is None:
             weights = 1.0 / counts
         else:
+            weights = (MAX / scaler) / ((1 + counts - MIN) + MAX / scaler)
             weights = scaler / (counts + scaler)
         return weights
 
