@@ -538,9 +538,11 @@ class MappedCollection:
         return_categories: bool = False,
     ):
         """Get all weights for the given label keys.
+
         This counts the number of labels for each label and returns
         weights for each obs label accoding to the formula `1 / num of this label in the data`.
         If `scaler` is provided, then `scaler / (scaler + num of this label in the data)`.
+
         Args:
             obs_keys: A key in the ``.obs`` slots or a list of keys. If a list is provided,
                 the labels from the obs keys will be concatenated with ``"__"`` delimeter
@@ -567,7 +569,6 @@ class MappedCollection:
                 k: 1.0 / v
                 if scaler is None
                 else (MAX / scaler) / ((1 + v - MIN) + MAX / scaler)
-                k: 1.0 / v if scaler is None else scaler / (v + scaler)
                 for k, v in counter.items()
             }
         counts = np.array([counter[label] for label in labels])
@@ -575,7 +576,6 @@ class MappedCollection:
             weights = 1.0 / counts
         else:
             weights = (MAX / scaler) / ((1 + counts - MIN) + MAX / scaler)
-            weights = scaler / (counts + scaler)
         return weights
 
     def get_merged_labels(self, label_key: str):
