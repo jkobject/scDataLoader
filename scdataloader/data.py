@@ -10,7 +10,6 @@ import lamindb as ln
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-from .mapped import MappedCollection, _Connect
 from lamindb.core.storage._anndata_accessor import _safer_read_index
 from scipy.sparse import issparse
 from torch.utils.data import Dataset as torchDataset
@@ -18,6 +17,7 @@ from torch.utils.data import Dataset as torchDataset
 from scdataloader.utils import get_ancestry_mapping, load_genes
 
 from .config import LABELS_TOADD
+from .mapped import MappedCollection, _Connect
 
 
 @dataclass
