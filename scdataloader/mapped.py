@@ -170,7 +170,7 @@ class MappedCollection:
 
         self.filtered = obs_filter is not None
         if self.filtered and not isinstance(obs_filter, dict):
-            logger.warning(
+            print(
                 "Passing a tuple to `obs_filter` is deprecated, use a dictionary"
             )
             obs_filter = {obs_filter[0]: obs_filter[1]}
