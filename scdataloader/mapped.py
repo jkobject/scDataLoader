@@ -449,7 +449,7 @@ class MappedCollection:
                 if np.random.random() < self.metacell_mode:
                     out["is_meta"] = True
                     distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
-                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:3]
+                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
                     for i in nn_idx:
                         out[layers_key] += self._get_data_idx(
                             lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
