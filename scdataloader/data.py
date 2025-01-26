@@ -359,6 +359,8 @@ class SimpleAnnDataset(torchDataset):
 def mapped(
     dataset,
     obs_keys: list[str] | None = None,
+    obsm_keys: list[str] | None = None,
+    obs_filter: dict[str, str | tuple[str, ...]] | None = None,s
     join: Literal["inner", "outer"] | None = "inner",
     encode_labels: bool | list[str] = True,
     unknown_label: str | dict[str, str] | None = None,
@@ -368,6 +370,7 @@ def mapped(
     stream: bool = False,
     is_run_input: bool | None = None,
     metacell_mode: bool = False,
+    meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
 ) -> MappedCollection:
     path_list = []
     for artifact in dataset.artifacts.all():
@@ -384,12 +387,15 @@ def mapped(
     ds = MappedCollection(
         path_list=path_list,
         obs_keys=obs_keys,
+        obsm_keys=obsm_keys,
+        obs_filter=obs_filter,
         join=join,
         encode_labels=encode_labels,
         unknown_label=unknown_label,
         cache_categories=cache_categories,
         parallel=parallel,
         dtype=dtype,
+        meta_assays=meta_assays,
         metacell_mode=metacell_mode,
     )
     return ds

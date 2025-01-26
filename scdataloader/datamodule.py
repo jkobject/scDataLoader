@@ -146,6 +146,8 @@ class DataModule(L.LightningDataModule):
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
         if use_default_col:
+            if metacell_mode > 0:
+                clss_to_predict.append("is_meta")
             kwargs["collate_fn"] = Collator(
                 organisms=organisms,
                 how=how,

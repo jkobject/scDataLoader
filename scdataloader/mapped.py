@@ -45,56 +45,6 @@ class _Connect:
         if hasattr(self.conn, "close"):
             self.conn.close()
 
-
-def mapped(
-    self,
-    layers_keys: str | list[str] | None = None,
-    obs_keys: str | list[str] | None = None,
-    obsm_keys: str | list[str] | None = None,
-    obs_filter: dict[str, str | tuple[str, ...]] | None = None,
-    join: Literal["inner", "outer"] | None = "inner",
-    encode_labels: bool | list[str] = True,
-    unknown_label: str | dict[str, str] | None = None,
-    cache_categories: bool = True,
-    parallel: bool = False,
-    dtype: str | None = None,
-    stream: bool = False,
-    metacell_mode: float = 0.0,
-    meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
-) -> MappedCollection:
-    path_list = []
-    if self._state.adding:
-        artifacts = self._artifacts
-        print("The collection isn't saved, consider calling `.save()`")
-    else:
-        artifacts = self.ordered_artifacts.all()
-    for artifact in artifacts:
-        if artifact.suffix not in {".h5ad", ".zarr"}:
-            print(f"Ignoring artifact with suffix {artifact.suffix}")
-            continue
-        elif not stream:
-            path_list.append(artifact.cache())
-        else:
-            path_list.append(artifact.path)
-    ds = MappedCollection(
-        path_list,
-        layers_keys,
-        obs_keys,
-        obsm_keys,
-        obs_filter,
-        join,
-        encode_labels,
-        unknown_label,
-        cache_categories,
-        parallel,
-        dtype,
-        metacell_mode,
-        meta_assays,
-    )
-    # track only if successful
-    return ds
-
-
 _decode = np.frompyfunc(lambda x: x.decode("utf-8"), 1, 1)
 
 
@@ -145,6 +95,8 @@ class MappedCollection:
         cache_categories: Enable caching categories of ``obs_keys`` for faster access.
         parallel: Enable sampling with multiple processes.
         dtype: Convert numpy arrays from ``.X``, ``.layers`` and ``.obsm``
+        meta_assays: Assays to check for metacells.
+        metacell_mode: Mode for metacells.
     """
 
     def __init__(
@@ -453,7 +405,7 @@ class MappedCollection:
                 if np.random.random() < self.metacell_mode:
                     out["is_meta"] = True
                     distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
-                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:3]
+                    nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
                     for i in nn_idx:
                         out[layers_key] += self._get_data_idx(
                             lazy_data, i, self.join_vars, var_idxs_join, self.n_vars

@@ -11,11 +11,12 @@ requires-python = ">=3.10,<3.14"
 keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 dependencies = [
     "numpy==1.26.0",
-    "lamindb[bionty]==1.0.4",
+    "lamindb[bionty]>=1.0.4,<2",
     "cellxgene-census>=0.1.0",
     "torch==2.2.0",
     "lightning>=2.0.0",
     "anndata>=0.9.0",
+    "zarr>=2.10.0",
     "matplotlib>=3.5.0",
     "seaborn>=0.11.0",
     "ipykernel>=6.20.0",
@@ -44,16 +45,11 @@ dev = [
     "mkdocstrings-python>=0.10.0"
 ]
 
-[tool.ruff]
-# Set the maximum line length to 88.
-line-length = 88
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-ignore = ["E501", "E203", "E266", "E265", "F401", "F403", "E722", "E741", "E731", "E721"]
-
 [project.urls]
 repository = "https://github.com/jkobject/scDataLoader"
+
+[project.scripts]
+scdataloader = "scdataloader.__main__:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -69,11 +65,16 @@ only-include = [
     "/scdataloader",
 ]
 
+[tool.ruff]
+# Set the maximum line length to 88.
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501", "E203", "E266", "E265", "F401", "F403", "E722", "E741", "E731", "E721"]
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.uv.sources]
 scdataloader = { workspace = true }
-
-[scripts]
-scdataloader = 'scdataloader.__main__:main'

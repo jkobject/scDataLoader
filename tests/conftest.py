@@ -6,7 +6,7 @@ import pytest
 
 
 def pytest_sessionstart():
-    ln_setup.init(storage="./testdb", name="test", schema="bionty")
+    ln_setup.init(storage="./testdb", name="test", modules="bionty")
 
 
 def pytest_sessionfinish(session):
