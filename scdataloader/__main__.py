@@ -18,132 +18,136 @@ from scdataloader.preprocess import (
 # --start_at=0
 def main():
     """
-    main function to preprocess datasets in a given lamindb collection.
+    Main function to either preprocess datasets in a lamindb collection or populate ontologies.
     """
     parser = argparse.ArgumentParser(
-        description="Preprocess datasets in a given lamindb collection."
+        description="Preprocess datasets or populate ontologies."
     )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Preprocess command
+    preprocess_parser = subparsers.add_parser("preprocess", help="Preprocess datasets")
+    preprocess_parser.add_argument(
         "--name", type=str, required=True, help="Name of the input dataset"
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--new_name",
         type=str,
         default="preprocessed dataset",
         help="Name of the preprocessed dataset.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--description",
         type=str,
         default="preprocessed by scDataLoader",
         help="Description of the preprocessed dataset.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--start_at", type=int, default=0, help="Position to start preprocessing at."
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--new_version",
         type=str,
         default="2",
         help="Version of the output dataset and files.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--instance",
         type=str,
         default=None,
         help="Instance storing the input dataset, if not local",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--version", type=str, default=None, help="Version of the input dataset."
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--filter_gene_by_counts",
         type=int,
         default=0,
         help="Determines whether to filter genes by counts.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--filter_cell_by_counts",
         type=int,
         default=0,
         help="Determines whether to filter cells by counts.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--normalize_sum",
         type=float,
         default=1e4,
         help="Determines whether to normalize the total counts of each cell to a specific value.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--n_hvg_for_postp",
         type=int,
         default=0,
         help="Determines whether to subset highly variable genes.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--hvg_flavor",
         type=str,
         default="seurat_v3",
         help="Specifies the flavor of highly variable genes selection.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--binning",
         type=Optional[int],
         default=None,
         help="Determines whether to bin the data into discrete values of number of bins provided.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--result_binned_key",
         type=str,
         default="X_binned",
         help="Specifies the key of AnnData to store the binned data.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--length_normalize",
         type=bool,
         default=False,
         help="Determines whether to normalize the length.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--force_preprocess",
         type=bool,
         default=False,
         help="Determines whether to force preprocessing.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--min_dataset_size",
         type=int,
         default=100,
         help="Specifies the minimum dataset size.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--min_valid_genes_id",
         type=int,
         default=10_000,
         help="Specifies the minimum valid genes id.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--min_nnz_genes",
         type=int,
         default=200,
         help="Specifies the minimum non-zero genes.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--maxdropamount",
         type=int,
         default=50,
         help="Specifies the maximum drop amount.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--madoutlier", type=int, default=5, help="Specifies the MAD outlier."
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--pct_mt_outlier",
         type=int,
         default=8,
         help="Specifies the percentage of MT outlier.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--batch_keys",
         type=list[str],
         default=[
@@ -155,25 +159,25 @@ def main():
         ],
         help="Specifies the batch keys.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--skip_validate",
         type=bool,
         default=False,
         help="Determines whether to skip validation.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--do_postp",
         type=bool,
         default=True,
         help="Determines whether to do postprocessing.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--cache",
         type=bool,
         default=False,
         help="Determines whether to cache the dataset.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--organisms",
         type=list,
         default=[
@@ -182,13 +186,41 @@ def main():
         ],
         help="Determines the organisms to keep.",
     )
-    parser.add_argument(
+    preprocess_parser.add_argument(
         "--force_preloaded",
         type=bool,
         default=False,
         help="Determines whether the dataset is preloaded.",
     )
+    # Populate command
+    populate_parser = subparsers.add_parser("populate", help="Populate ontologies")
+    populate_parser.add_argument(
+        "what",
+        nargs="?",
+        default="all",
+        choices=[
+            "all",
+            "organisms",
+            "celltypes",
+            "diseases",
+            "tissues",
+            "assays",
+            "ethnicities",
+            "sex",
+            "dev_stages",
+        ],
+        help="What ontologies to populate",
+    )
     args = parser.parse_args()
+
+    if args.command == "populate":
+        from scdataloader.utils import populate_my_ontology
+
+        if args.what != "all":
+            raise ValueError("Only 'all' is supported for now")
+        else:
+            populate_my_ontology()
+        return
 
     # Load the collection
     # if not args.preprocess:
