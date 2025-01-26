@@ -46,53 +46,6 @@ class _Connect:
             self.conn.close()
 
 
-def mapped(
-    self,
-    layers_keys: str | list[str] | None = None,
-    obs_keys: str | list[str] | None = None,
-    obsm_keys: str | list[str] | None = None,
-    obs_filter: tuple[str, str | tuple[str, ...]] | None = None,
-    join: Literal["inner", "outer"] | None = "inner",
-    encode_labels: bool | list[str] = True,
-    unknown_label: str | dict[str, str] | None = None,
-    cache_categories: bool = True,
-    parallel: bool = False,
-    dtype: str | None = None,
-    stream: bool = False,
-    is_run_input: bool | None = None,
-    meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
-) -> MappedCollection:
-    path_list = []
-    if self._state.adding:
-        artifacts = self._artifacts
-        print("The collection isn't saved, consider calling `.save()`")
-    else:
-        artifacts = self.ordered_artifacts.all()
-    for artifact in artifacts:
-        if artifact.suffix not in {".h5ad", ".zarr"}:
-            print(f"Ignoring artifact with suffix {artifact.suffix}")
-            continue
-        elif not stream:
-            path_list.append(artifact.cache())
-        else:
-            path_list.append(artifact.path)
-    ds = MappedCollection(
-        path_list,
-        layers_keys,
-        obs_keys,
-        obsm_keys,
-        obs_filter,
-        join,
-        encode_labels,
-        unknown_label,
-        cache_categories,
-        parallel,
-        dtype,
-    )
-    # track only if successful
-    return ds
-
-
 _decode = np.frompyfunc(lambda x: x.decode("utf-8"), 1, 1)
 
 
@@ -131,8 +84,8 @@ class MappedCollection:
         obsm_keys: Keys from the ``.obsm`` slots.
         obs_keys: Keys from the ``.obs`` slots.
         obs_filter: Select only observations with these values for the given obs column.
-            Should be a tuple with an obs column name as the first element
-            and filtering values (a string or a tuple of strings) as the second element.
+            Should be a dictionary with an obs column name as the key
+            and filtering values (a string or a tuple of strings) as the value.
         join: `"inner"` or `"outer"` virtual joins. If ``None`` is passed,
             does not join.
         encode_labels: Encode labels into integers.
@@ -143,6 +96,8 @@ class MappedCollection:
         cache_categories: Enable caching categories of ``obs_keys`` for faster access.
         parallel: Enable sampling with multiple processes.
         dtype: Convert numpy arrays from ``.X``, ``.layers`` and ``.obsm``
+        meta_assays: Assays to check for metacells.
+        metacell_mode: Mode for metacells.
     """
 
     def __init__(
@@ -151,7 +106,7 @@ class MappedCollection:
         layers_keys: str | list[str] | None = None,
         obs_keys: str | list[str] | None = None,
         obsm_keys: str | list[str] | None = None,
-        obs_filter: tuple[str, str | tuple[str, ...]] | None = None,
+        obs_filter: dict[str, str | tuple[str, ...]] | None = None,
         join: Literal["inner", "outer"] | None = "inner",
         encode_labels: bool | list[str] = True,
         unknown_label: str | dict[str, str] | None = None,
@@ -167,11 +122,9 @@ class MappedCollection:
             )
 
         self.filtered = obs_filter is not None
-        if self.filtered and len(obs_filter) != 2:
-            raise ValueError(
-                "obs_filter should be a tuple with obs column name "
-                "as the first element and filtering values as the second element"
-            )
+        if self.filtered and not isinstance(obs_filter, dict):
+            print("Passing a tuple to `obs_filter` is deprecated, use a dictionary")
+            obs_filter = {obs_filter[0]: obs_filter[1]}
 
         if layers_keys is None:
             self.layers_keys = ["X"]
@@ -231,12 +184,16 @@ class MappedCollection:
                 store_path = self.path_list[i]
                 self._check_csc_raise_error(X, "X", store_path)
                 if self.filtered:
-                    obs_filter_key, obs_filter_values = obs_filter
-                    indices_storage = np.where(
-                        np.isin(
+                    indices_storage_mask = None
+                    for obs_filter_key, obs_filter_values in obs_filter.items():
+                        obs_filter_mask = np.isin(
                             self._get_labels(store, obs_filter_key), obs_filter_values
                         )
-                    )[0]
+                        if indices_storage_mask is None:
+                            indices_storage_mask = obs_filter_mask
+                        else:
+                            indices_storage_mask &= obs_filter_mask
+                    indices_storage = np.where(indices_storage_mask)[0]
                     n_obs_storage = len(indices_storage)
                 else:
                     if isinstance(X, ArrayTypes):  # type: ignore
@@ -396,7 +353,7 @@ class MappedCollection:
 
     @property
     def original_shapes(self) -> list[tuple[int, int]]:
-        """Shapes of the underlying AnnData objects."""
+        """Shapes of the underlying AnnData objects (with `obs_filter` applied)."""
         if self.n_vars_list is None:
             n_vars_list = [None] * len(self.n_obs_list)
         else:
