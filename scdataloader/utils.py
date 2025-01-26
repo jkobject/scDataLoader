@@ -371,6 +371,15 @@ def load_dataset_local(
 
 
 def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
+    """
+    Loads genes from the given organisms.
+
+    Args:
+        organisms (Union[str, list]): The organisms to load genes from.
+
+    Returns:
+        pd.DataFrame: The genes dataframe.
+    """
     organismdf = []
     if type(organisms) is str:
         organisms = [organisms]
@@ -396,6 +405,9 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         "updated_at",
         "stable_id",
         "created_at",
+        "_aux",
+        "_branch_code",
+        "space_id",
     ]:
         if col in organismdf.columns:
             organismdf.drop(columns=[col], inplace=True)

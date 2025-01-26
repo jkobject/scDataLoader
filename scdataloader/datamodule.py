@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Sequence, Union
 
 import lamindb as ln
@@ -16,8 +17,6 @@ from torch.utils.data.sampler import (
 from .collator import Collator
 from .data import Dataset
 from .utils import getBiomartTable, slurm_restart_count
-import os
-
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 

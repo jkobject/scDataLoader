@@ -6,11 +6,11 @@ import lamindb as ln
 import numpy as np
 import pandas as pd
 import scanpy as sc
-from anndata import AnnData
+from anndata import AnnData, read_h5ad
 from scipy.sparse import csr_matrix
-from anndata import read_h5ad
-from scdataloader import utils as data_utils
 from upath import UPath
+
+from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
     "EFO: 0700016",
@@ -339,7 +339,7 @@ class Preprocessor:
                         subset=False,
                         layer="norm",
                     )
-                except (ValueError, ZeroDivisionError) as e:
+                except (ValueError, ZeroDivisionError):
                     print("retrying with span")
                     sc.pp.highly_variable_genes(
                         adata,

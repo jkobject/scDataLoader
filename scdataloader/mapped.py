@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import pandas as pd
-from lamindb_setup.core.upath import UPath
-
 from lamindb.core.storage._anndata_accessor import (
     ArrayType,
     ArrayTypes,
@@ -18,6 +16,7 @@ from lamindb.core.storage._anndata_accessor import (
     get_spec,
     registry,
 )
+from lamindb_setup.core.upath import UPath
 
 if TYPE_CHECKING:
     from lamindb_setup.core.types import UPathStr
