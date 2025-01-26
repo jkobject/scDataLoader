@@ -360,7 +360,7 @@ def mapped(
     dataset,
     obs_keys: list[str] | None = None,
     obsm_keys: list[str] | None = None,
-    obs_filter: dict[str, str | tuple[str, ...]] | None = None,s
+    obs_filter: dict[str, str | tuple[str, ...]] | None = None,
     join: Literal["inner", "outer"] | None = "inner",
     encode_labels: bool | list[str] = True,
     unknown_label: str | dict[str, str] | None = None,
