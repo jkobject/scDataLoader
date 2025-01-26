@@ -100,6 +100,7 @@ class DataModule(L.LightningDataModule):
                 metacell_mode=metacell_mode,
             )
         # and location
+        self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
         if do_gene_pos:
@@ -146,8 +147,6 @@ class DataModule(L.LightningDataModule):
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
         if use_default_col:
-            if metacell_mode > 0:
-                clss_to_predict.append("is_meta")
             kwargs["collate_fn"] = Collator(
                 organisms=organisms,
                 how=how,
@@ -158,6 +157,7 @@ class DataModule(L.LightningDataModule):
                 tp_name=tp_name,
                 organism_name=organism_name,
                 class_names=clss_to_predict,
+                metacell_mode=bool(metacell_mode),
             )
         self.validation_split = validation_split
         self.test_split = test_split
@@ -278,9 +278,9 @@ class DataModule(L.LightningDataModule):
             len_test = self.test_split
         else:
             len_test = int(self.n_samples * self.test_split)
-        assert len_test + len_valid < self.n_samples, (
-            "test set + valid set size is configured to be larger than entire dataset."
-        )
+        assert (
+            len_test + len_valid < self.n_samples
+        ), "test set + valid set size is configured to be larger than entire dataset."
 
         idx_full = []
         if len(self.assays_to_drop) > 0:

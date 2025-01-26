@@ -24,6 +24,7 @@ class Collator:
         genelist: list[str] = [],
         downsample: Optional[float] = None,  # don't use it for training!
         save_output: Optional[str] = None,
+        metacell_mode: bool = False,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -61,6 +62,7 @@ class Collator:
                 This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator
             save_output (str, optional): If not None, saves the output to a file. Defaults to None.
                 This is mainly for debugging purposes
+            metacell_mode (bool, optional): Whether to sample a metacell. Defaults to False.
         """
         self.organisms = organisms
         self.genedf = load_genes(organisms)
@@ -80,6 +82,7 @@ class Collator:
         self.accepted_genes = {}
         self.downsample = downsample
         self.to_subset = {}
+        self.metacell_mode = metacell_mode
         self._setup(org_to_id, valid_genes, genelist)
 
     def _setup(self, org_to_id=None, valid_genes=[], genelist=[]):
@@ -131,6 +134,7 @@ class Collator:
         tp = []
         dataset = []
         nnz_loc = []
+        is_meta = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
@@ -193,6 +197,8 @@ class Collator:
                 tp.append(elem[self.tp_name])
             else:
                 tp.append(0)
+            if self.metacell_mode:
+                is_meta.append(elem["is_meta"])
             other_classes.append([elem[i] for i in self.class_names])
         expr = np.array(exprs)
         tp = np.array(tp)
@@ -200,7 +206,7 @@ class Collator:
         total_count = np.array(total_count)
         other_classes = np.array(other_classes)
         dataset = np.array(dataset)
-
+        is_meta = np.array(is_meta)
         # normalize counts
         if self.norm_to is not None:
             expr = (expr * self.norm_to) / total_count[:, None]
@@ -227,6 +233,9 @@ class Collator:
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
         }
+        print(is_meta, self.metacell_mode)
+        if self.metacell_mode:
+            ret.update({"is_meta": Tensor(is_meta).int()})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:

@@ -28,7 +28,7 @@ It allows you to:
 3. create a more complex single cell dataset
 4. extend it to your need
 
-built on top of `lamindb` and the `.mapped()` function by Sergey: https://github.com/Koncopd 
+built on top of `lamindb` and the `.mapped()` function by Sergei: https://github.com/Koncopd 
 
 The package has been designed together with the [scPRINT paper](https://doi.org/10.1101/2024.07.29.605556) and [model](https://github.com/cantinilab/scPRINT).
 
