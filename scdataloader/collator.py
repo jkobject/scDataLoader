@@ -233,7 +233,6 @@ class Collator:
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
         }
-        print(is_meta, self.metacell_mode)
         if self.metacell_mode:
             ret.update({"is_meta": Tensor(is_meta).int()})
         if len(dataset) > 0:
