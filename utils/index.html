@@ -75,6 +75,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_dataset_local">load_dataset_local</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.load_genes">load_genes</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.utils.translate">translate</a>
@@ -131,6 +133,116 @@
 
 
 
+
+
+
+
+
+
+<p><span class="doc-section-title">Functions:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.createFoldersFor" href="#scdataloader.utils.createFoldersFor">createFoldersFor</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>will recursively create folders if needed until having all the folders required to save the file in this filepath</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.downsample_profile" href="#scdataloader.utils.downsample_profile">downsample_profile</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>This function downsamples the expression profile of a given single cell RNA matrix.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.getBiomartTable" href="#scdataloader.utils.getBiomartTable">getBiomartTable</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>generate a genelist dataframe from ensembl's biomart</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.get_ancestry_mapping" href="#scdataloader.utils.get_ancestry_mapping">get_ancestry_mapping</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>This function generates a mapping of all elements to their ancestors in the ontology dataframe.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.is_outlier" href="#scdataloader.utils.is_outlier">is_outlier</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>is_outlier detects outliers in adata.obs[metric]</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.length_normalize" href="#scdataloader.utils.length_normalize">length_normalize</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>length_normalize normalizes the counts by the gene length</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.load_dataset_local" href="#scdataloader.utils.load_dataset_local">load_dataset_local</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>This function loads a remote lamindb dataset to local.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.load_genes" href="#scdataloader.utils.load_genes">load_genes</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Loads genes from the given organisms.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.populate_my_ontology" href="#scdataloader.utils.populate_my_ontology">populate_my_ontology</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>creates a local version of the lamin ontologies and add the required missing values in base ontologies</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.translate" href="#scdataloader.utils.translate">translate</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>translate translates the ontology term id to the name</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.utils.validate" href="#scdataloader.utils.validate">validate</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>validate checks if the adata object is valid for lamindb</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -156,15 +268,15 @@
 
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">createFoldersFor</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">createFoldersFor</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    will recursively create folders if needed until having all the folders required to save the file in this filepath</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -259,14 +371,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
@@ -290,7 +395,14 @@ returns the final matrix count.</p>
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
-<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">downsample_profile</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">downsample_profile</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function downsamples the expression profile of a given single cell RNA matrix.</span>
 
@@ -464,14 +576,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -519,7 +624,14 @@ returns the final matrix count.</p>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">getBiomartTable</span><span class="p">(</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">getBiomartTable</span><span class="p">(</span>
     <span class="n">ensemble_server</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://may2024.archive.ensembl.org/biomart&quot;</span><span class="p">,</span>
     <span class="n">useCache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">cache_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/tmp/biomart/&quot;</span><span class="p">,</span>
@@ -650,14 +762,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
@@ -681,7 +786,14 @@ returns the final matrix count.</p>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
-<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function generates a mapping of all elements to their ancestors in the ontology dataframe.</span>
 
@@ -796,23 +908,23 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">705</span>
-<span class="normal">706</span>
-<span class="normal">707</span>
-<span class="normal">708</span>
-<span class="normal">709</span>
-<span class="normal">710</span>
-<span class="normal">711</span>
-<span class="normal">712</span>
-<span class="normal">713</span>
-<span class="normal">714</span>
-<span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
-<span class="normal">718</span>
-<span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -904,19 +1016,19 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
-<span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span>
-<span class="normal">734</span>
-<span class="normal">735</span>
-<span class="normal">736</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -1048,14 +1160,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
@@ -1107,7 +1212,14 @@ returns the final matrix count.</p>
 <span class="normal">360</span>
 <span class="normal">361</span>
 <span class="normal">362</span>
-<span class="normal">363</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_dataset_local</span><span class="p">(</span>
     <span class="n">remote_dataset</span><span class="p">:</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span>
     <span class="n">download_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1167,6 +1279,484 @@ returns the final matrix count.</p>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="n">saved_files</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
     <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">dataset</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="scdataloader.utils.load_genes" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load_genes</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Loads genes from the given organisms.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>organisms</code></b>
+                  (<code><span title="typing.Union">Union</span>[str, list]</code>, default:
+                      <code>&#39;NCBITaxon:9606&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The organisms to load genes from.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>pd.DataFrame: The genes dataframe.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>scdataloader/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">):</span>  <span class="c1"># &quot;NCBITaxon:10090&quot;,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads genes from the given organisms.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        organisms (Union[str, list]): The organisms to load genes from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: The genes dataframe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">organismdf</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">organisms</span> <span class="o">=</span> <span class="p">[</span><span class="n">organisms</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">:</span>
+        <span class="n">genesdf</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">organism_id</span><span class="o">=</span><span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+        <span class="n">genesdf</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span>
+        <span class="n">genesdf</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="c1"># mitochondrial genes</span>
+        <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;mt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;MT-&quot;</span><span class="p">)</span>
+        <span class="c1"># ribosomal genes</span>
+        <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;ribo&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;RPS&quot;</span><span class="p">,</span> <span class="s2">&quot;RPL&quot;</span><span class="p">))</span>
+        <span class="c1"># hemoglobin genes.</span>
+        <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;hb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">((</span><span class="s2">&quot;^HB[^(P)]&quot;</span><span class="p">))</span>
+        <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;organism&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">organism</span>
+        <span class="n">organismdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genesdf</span><span class="p">)</span>
+    <span class="n">organismdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">organismdf</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;source_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;run_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;created_by_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;updated_at&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stable_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;created_at&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_aux&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_branch_code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;space_id&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">organismdf</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">organismdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># temp fix</span>
+    <span class="n">drop</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;ENSG00000112096&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000137808&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000161149&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000182230&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000203812&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000204092&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000205485&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000212951&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000215271&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000221995&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000224739&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000224745&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000225178&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000225932&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000226377&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000226380&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000226403&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000227021&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000227220&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000227902&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000228139&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000228206&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000228906&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000229352&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000231575&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000232196&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000232295&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000233776&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000236166&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000236673&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000236740&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000236886&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000236996&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000237133&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000237513&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000237548&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000237838&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000239446&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000239467&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000239665&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000244693&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000244952&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000249860&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000251044&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000253878&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000254561&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000254740&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000255633&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000255823&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256045&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256222&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256374&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256427&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256618&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256863&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000256892&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000258414&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000258808&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000258861&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000259444&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000259820&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000259834&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000259855&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000260461&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261068&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261438&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261490&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261534&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261737&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261773&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000261963&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000262668&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000263464&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000267637&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000268955&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000269028&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000269900&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000269933&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000269966&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000270188&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000270394&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000270672&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000271043&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000271409&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000271734&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000271870&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272040&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272196&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272267&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272354&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272370&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272551&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272567&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272880&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272904&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000272934&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273301&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273370&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273496&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273576&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273614&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273837&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273888&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000273923&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000276612&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000276814&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000277050&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000277077&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000277352&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000277666&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000277761&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000278198&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000278782&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000278927&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000278955&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000279226&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000279765&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000279769&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000279948&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280058&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280095&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280250&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280346&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280374&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000280710&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000282080&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000282246&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000282965&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000283486&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000284299&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000284741&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000285106&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000285162&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000285476&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000285762&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286065&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286228&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286601&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286699&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286949&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000286996&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000287116&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000287388&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000288541&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000288546&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000288630&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSG00000288639&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000069518&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000073682&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000075014&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000075015&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000078091&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000094958&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000095547&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000095891&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000096385&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000096519&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000096923&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENSMUSG00000097078&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">organismdf</span> <span class="o">=</span> <span class="n">organismdf</span><span class="p">[</span><span class="o">~</span><span class="n">organismdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">organismdf</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1297,26 +1887,7 @@ returns the final matrix count.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">580</span>
 <span class="normal">581</span>
 <span class="normal">582</span>
 <span class="normal">583</span>
@@ -1438,7 +2009,29 @@ returns the final matrix count.</p>
 <span class="normal">699</span>
 <span class="normal">700</span>
 <span class="normal">701</span>
-<span class="normal">702</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NCBITaxon:10090&quot;</span><span class="p">,</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">],</span>
     <span class="n">sex</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
     <span class="n">celltypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -1491,9 +2084,12 @@ returns the final matrix count.</p>
         <span class="p">)</span>
         <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">PublicSource</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ensembl&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">organism_or_organismlist</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">organism_or_organismlist</span><span class="p">,</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="p">)</span> <span class="k">else</span> <span class="n">organism_or_organismlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">organism_or_organismlist</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">organism_or_organismlist</span><span class="p">,</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">organism_or_organismlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">organism_or_organismlist</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span>
             <span class="p">]</span>
         <span class="p">]</span>
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
@@ -1659,29 +2255,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span>
-<span class="normal">742</span>
-<span class="normal">743</span>
-<span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span>
-<span class="normal">759</span>
-<span class="normal">760</span>
-<span class="normal">761</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">761</span>
 <span class="normal">762</span>
 <span class="normal">763</span>
 <span class="normal">764</span>
@@ -1697,7 +2271,29 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">774</span>
 <span class="normal">775</span>
 <span class="normal">776</span>
-<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span>
     <span class="n">val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">t</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1898,14 +2494,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
@@ -1993,7 +2582,14 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
-<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">need_all</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">need_all</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    validate checks if the adata object is valid for lamindb</span>
 

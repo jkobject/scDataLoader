@@ -339,20 +339,87 @@ any genes within this distance of each other will be considered at the same posi
               </div>
             </li>
             <li>
+              <b><code>modify_seed_on_requeue</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to modify the seed on requeue. Defaults to True.</p>
+              </div>
+            </li>
+            <li>
               <b><code>**kwargs</code></b>
               –
               <div class="doc-md-description">
                 <p>Additional keyword arguments passed to the pytorch DataLoader.</p>
               </div>
             </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.setup" href="#scdataloader.datamodule.DataModule.setup">setup</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>setup method is used to prepare the data for the training, validation, and test sets.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
             <li>
-              <b><code>restart_num</code></b>
-                  (<code>int</code>, default:
-                      <code>0</code>
-)
+              <b><code>decoders</code></b>
               –
               <div class="doc-md-description">
-                <p>The number of the restart if we are continuing a previous run -&gt; /!\ NEEDS TO BE SET. Defaults to 0.</p>
+                <p>decoders the decoders for any labels that would have been encoded</p>
+              </div>
+            </li>
+            <li>
+              <b><code>genes</code></b>
+              –
+              <div class="doc-md-description">
+                <p>genes the genes used in this datamodule</p>
+              </div>
+            </li>
+            <li>
+              <b><code>labels_hierarchy</code></b>
+              –
+              <div class="doc-md-description">
+                <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
               </div>
             </li>
         </ul>
@@ -362,7 +429,8 @@ any genes within this distance of each other will be considered at the same posi
 </table>
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
+<span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -515,7 +583,9 @@ any genes within this distance of each other will be considered at the same posi
 <span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
-<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">clss_to_weight</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
@@ -544,8 +614,8 @@ any genes within this distance of each other will be considered at the same posi
         <span class="s2">&quot;EFO:0030007&quot;</span><span class="p">,</span>  <span class="c1"># ATACseq</span>
         <span class="c1"># &quot;EFO:0030062&quot;, # slide-seq</span>
     <span class="p">],</span>
-    <span class="n">restart_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">metacell_mode</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">modify_seed_on_requeue</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -580,8 +650,8 @@ any genes within this distance of each other will be considered at the same posi
 <span class="sd">        hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].</span>
 <span class="sd">        metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.</span>
 <span class="sd">        clss_to_predict (list, optional): List of classes to predict. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
+<span class="sd">        modify_seed_on_requeue (bool, optional): Whether to modify the seed on requeue. Defaults to True.</span>
 <span class="sd">        **kwargs: Additional keyword arguments passed to the pytorch DataLoader.</span>
-<span class="sd">        restart_num (int, optional): The number of the restart if we are continuing a previous run -&gt; /!\ NEEDS TO BE SET. Defaults to 0.</span>
 <span class="sd">        see @file data.py and @file collator.py for more details about some of the parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">collection_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -593,6 +663,7 @@ any genes within this distance of each other will be considered at the same posi
             <span class="n">metacell_mode</span><span class="o">=</span><span class="n">metacell_mode</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="c1"># and location</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">metacell_mode</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">metacell_mode</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="k">if</span> <span class="n">do_gene_pos</span><span class="p">:</span>
@@ -624,7 +695,7 @@ any genes within this distance of each other will be considered at the same posi
                 <span class="n">c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="n">prev_position</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;start_position&quot;</span><span class="p">]</span>
                 <span class="n">prev_chromosome</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;chromosome_name&quot;</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reduced the size to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">biomart</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reduced the size to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">biomart</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">biomart</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
         <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">biomart</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gene_pos</span> <span class="o">=</span> <span class="n">mdataset</span><span class="o">.</span><span class="n">genedf</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -649,6 +720,7 @@ any genes within this distance of each other will be considered at the same posi
             <span class="n">tp_name</span><span class="o">=</span><span class="n">tp_name</span><span class="p">,</span>
             <span class="n">organism_name</span><span class="o">=</span><span class="n">organism_name</span><span class="p">,</span>
             <span class="n">class_names</span><span class="o">=</span><span class="n">clss_to_predict</span><span class="p">,</span>
+            <span class="n">metacell_mode</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">metacell_mode</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="n">test_split</span>
@@ -664,8 +736,9 @@ any genes within this distance of each other will be considered at the same posi
     <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span> <span class="o">=</span> <span class="n">clss_to_weight</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_weights</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">train_labels</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modify_seed_on_requeue</span> <span class="o">=</span> <span class="n">modify_seed_on_requeue</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">restart_num</span> <span class="o">=</span> <span class="n">restart_num</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">restart_num</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_datasets</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_idx</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -855,9 +928,7 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
@@ -938,7 +1009,11 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
-<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    setup method is used to prepare the data for the training, validation, and test sets.</span>
 <span class="sd">    It shuffles the data, calculates weights for each set, and creates samplers for each set.</span>
@@ -948,20 +1023,22 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="sd">        It can be either &#39;fit&#39; or &#39;test&#39;. Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">SCALE</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">if</span> <span class="s2">&quot;nnz&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">))</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;nnz&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;nnz&quot;</span><span class="p">)</span>
-            <span class="p">(</span>
-                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">)</span>
-                <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnz</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">SCALE</span><span class="p">))</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="n">weights</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">get_label_weights</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span><span class="p">,</span> <span class="n">return_categories</span><span class="o">=</span><span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_weight</span><span class="p">,</span>
+            <span class="n">scaler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_scaler</span><span class="p">,</span>
+            <span class="n">return_categories</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">len_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span>
     <span class="k">else</span><span class="p">:</span>
