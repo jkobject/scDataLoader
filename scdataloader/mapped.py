@@ -96,8 +96,9 @@ class MappedCollection:
         cache_categories: Enable caching categories of ``obs_keys`` for faster access.
         parallel: Enable sampling with multiple processes.
         dtype: Convert numpy arrays from ``.X``, ``.layers`` and ``.obsm``
-        meta_assays: Assays to check for metacells.
-        metacell_mode: Mode for metacells.
+        meta_assays: Assays that are already defined as metacells.
+        metacell_mode: frequency at which to sample a metacell (an average of k-nearest neighbors).
+        get_knn_cells: Whether to also dataload the k-nearest neighbors of each queried cells.
     """
 
     def __init__(
@@ -114,6 +115,7 @@ class MappedCollection:
         parallel: bool = False,
         dtype: str | None = None,
         metacell_mode: float = 0.0,
+        get_knn_cells: bool = False,
         meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
     ):
         if join not in {None, "inner", "outer"}:  # pragma: nocover
@@ -166,6 +168,7 @@ class MappedCollection:
         self.metacell_mode = metacell_mode
         self.path_list = path_list
         self.meta_assays = meta_assays
+        self.get_knn_cells = get_knn_cells
         self._make_connections(path_list, parallel)
 
         self._cache_cats: dict = {}
@@ -396,12 +399,15 @@ class MappedCollection:
                         label_idx = self.encoders[label][label_idx]
                     out[label] = label_idx
 
-            out["is_meta"] = False
-            if len(self.meta_assays) > 0 and "assay_ontology_term_id" in self.obs_keys:
-                if out["assay_ontology_term_id"] in self.meta_assays:
-                    out["is_meta"] = True
-                    return out
             if self.metacell_mode > 0:
+                if (
+                    len(self.meta_assays) > 0
+                    and "assay_ontology_term_id" in self.obs_keys
+                ):
+                    if out["assay_ontology_term_id"] in self.meta_assays:
+                        out["is_meta"] = True
+                        return out
+                out["is_meta"] = False
                 if np.random.random() < self.metacell_mode:
                     out["is_meta"] = True
                     distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
@@ -410,6 +416,18 @@ class MappedCollection:
                         out[layers_key] += self._get_data_idx(
                             lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
                         )
+            elif self.get_knn_cells:
+                distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
+                nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
+                out["knn_cells"] = np.array(
+                    [
+                        self._get_data_idx(
+                            lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
+                        )
+                        for i in nn_idx
+                    ],
+                    dtype=int,
+                )
 
         return out
 

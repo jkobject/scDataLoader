@@ -58,6 +58,7 @@ class Dataset(torchDataset):
     hierarchical_clss: Optional[list[str]] = field(default_factory=list)
     join_vars: Literal["inner", "outer"] | None = None
     metacell_mode: float = 0.0
+    get_knn_cells: bool = False
 
     def __post_init__(self):
         self.mapped_dataset = mapped(
@@ -69,6 +70,7 @@ class Dataset(torchDataset):
             stream=True,
             parallel=True,
             metacell_mode=self.metacell_mode,
+            get_knn_cells=self.get_knn_cells,
         )
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
@@ -371,6 +373,7 @@ def mapped(
     is_run_input: bool | None = None,
     metacell_mode: bool = False,
     meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
+    get_knn_cells: bool = False,
 ) -> MappedCollection:
     path_list = []
     for artifact in dataset.artifacts.all():
@@ -397,5 +400,6 @@ def mapped(
         dtype=dtype,
         meta_assays=meta_assays,
         metacell_mode=metacell_mode,
+        get_knn_cells=get_knn_cells,
     )
     return ds

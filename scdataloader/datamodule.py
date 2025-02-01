@@ -52,6 +52,7 @@ class DataModule(L.LightningDataModule):
             # "EFO:0030062", # slide-seq
         ],
         metacell_mode: float = 0.0,
+        get_knn_cells: bool = False,
         modify_seed_on_requeue: bool = True,
         **kwargs,
     ):
@@ -88,6 +89,7 @@ class DataModule(L.LightningDataModule):
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             modify_seed_on_requeue (bool, optional): Whether to modify the seed on requeue. Defaults to True.
+            get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
@@ -98,6 +100,7 @@ class DataModule(L.LightningDataModule):
                 clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
                 metacell_mode=metacell_mode,
+                get_knn_cells=get_knn_cells,
             )
         # and location
         self.metacell_mode = bool(metacell_mode)
@@ -157,7 +160,6 @@ class DataModule(L.LightningDataModule):
                 tp_name=tp_name,
                 organism_name=organism_name,
                 class_names=clss_to_predict,
-                metacell_mode=bool(metacell_mode),
             )
         self.validation_split = validation_split
         self.test_split = test_split

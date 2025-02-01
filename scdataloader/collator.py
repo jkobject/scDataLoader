@@ -24,7 +24,6 @@ class Collator:
         genelist: list[str] = [],
         downsample: Optional[float] = None,  # don't use it for training!
         save_output: Optional[str] = None,
-        metacell_mode: bool = False,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -62,7 +61,6 @@ class Collator:
                 This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator
             save_output (str, optional): If not None, saves the output to a file. Defaults to None.
                 This is mainly for debugging purposes
-            metacell_mode (bool, optional): Whether to sample a metacell. Defaults to False.
         """
         self.organisms = organisms
         self.genedf = load_genes(organisms)
@@ -82,7 +80,6 @@ class Collator:
         self.accepted_genes = {}
         self.downsample = downsample
         self.to_subset = {}
-        self.metacell_mode = metacell_mode
         self._setup(org_to_id, valid_genes, genelist)
 
     def _setup(self, org_to_id=None, valid_genes=[], genelist=[]):
@@ -135,6 +132,7 @@ class Collator:
         dataset = []
         nnz_loc = []
         is_meta = []
+        knn_cells = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
@@ -145,14 +143,24 @@ class Collator:
             total_count.append(expr.sum())
             if len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
+                if "knn_cells" in elem:
+                    elem["knn_cells"] = elem["knn_cells"][
+                        :, self.accepted_genes[organism_id]
+                    ]
             if self.how == "most expr":
-                nnz_loc = np.where(expr > 0)[0]
+                if "knn_cells" in elem:
+                    nnz_loc = np.where(expr + elem["knn_cells"].sum(0) > 0)[0]
+                else:
+                    nnz_loc = np.where(expr > 0)[0]
                 ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
                 loc = np.argsort(expr)[-(ma):][::-1]
                 # nnz_loc = [1] * 30_000
                 # loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
-                nnz_loc = np.where(expr > 0)[0]
+                if "knn_cells" in elem:
+                    nnz_loc = np.where(expr + elem["knn_cells"].sum(0) > 0)[0]
+                else:
+                    nnz_loc = np.where(expr > 0)[0]
                 loc = nnz_loc[
                     np.random.choice(
                         len(nnz_loc),
@@ -171,7 +179,10 @@ class Collator:
                 "all",
                 "some",
             ]:
-                zero_loc = np.where(expr == 0)[0]
+                if "knn_cells" in elem:
+                    zero_loc = np.where(expr + elem["knn_cells"].sum(0) == 0)[0]
+                else:
+                    zero_loc = np.where(expr == 0)[0]
                 zero_loc = zero_loc[
                     np.random.choice(
                         len(zero_loc),
@@ -185,19 +196,19 @@ class Collator:
                     )
                 ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
-            expr = expr[loc]
+            exprs.append(expr[loc])
+            if "knn_cells" in elem:
+                knn_cells.append(elem["knn_cells"][:, loc])
             loc = loc + self.start_idx[organism_id]
             if self.how == "some":
                 expr = expr[self.to_subset[organism_id]]
                 loc = loc[self.to_subset[organism_id]]
-            exprs.append(expr)
             gene_locs.append(loc)
-
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
             else:
                 tp.append(0)
-            if self.metacell_mode:
+            if "is_meta" in elem:
                 is_meta.append(elem["is_meta"])
             other_classes.append([elem[i] for i in self.class_names])
         expr = np.array(exprs)
@@ -207,6 +218,7 @@ class Collator:
         other_classes = np.array(other_classes)
         dataset = np.array(dataset)
         is_meta = np.array(is_meta)
+        knn_cells = np.array(knn_cells)
         # normalize counts
         if self.norm_to is not None:
             expr = (expr * self.norm_to) / total_count[:, None]
@@ -217,15 +229,6 @@ class Collator:
         if self.n_bins:
             pass
 
-        # find the associated gene ids (given the species)
-
-        # get the NN cells
-
-        # do encoding / selection a la scGPT
-
-        # do encoding of graph location
-        # encode all the edges in some sparse way
-        # normalizing total counts between 0,1
         ret = {
             "x": Tensor(expr),
             "genes": Tensor(gene_locs).int(),
@@ -233,8 +236,10 @@ class Collator:
             "tp": Tensor(tp),
             "depth": Tensor(total_count),
         }
-        if self.metacell_mode:
+        if len(is_meta) > 0:
             ret.update({"is_meta": Tensor(is_meta).int()})
+        if len(knn_cells) > 0:
+            ret.update({"knn_cells": Tensor(knn_cells).int()})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:
