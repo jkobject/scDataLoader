@@ -196,14 +196,18 @@ class Collator:
                     )
                 ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
-            exprs.append(expr[loc])
             if "knn_cells" in elem:
                 knn_cells.append(elem["knn_cells"][:, loc])
+            expr = expr[loc]
             loc = loc + self.start_idx[organism_id]
             if self.how == "some":
+                if "knn_cells" in elem:
+                    knn_cells[-1] = knn_cells[-1][self.to_subset[organism_id]]
                 expr = expr[self.to_subset[organism_id]]
                 loc = loc[self.to_subset[organism_id]]
+            exprs.append(expr)
             gene_locs.append(loc)
+
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
             else:

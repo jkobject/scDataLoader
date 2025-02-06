@@ -154,7 +154,7 @@ def getBiomartTable(
     return res
 
 
-def validate(adata: AnnData, organism: str, need_all=True):
+def validate(adata: AnnData, organism: str, need_all=False):
     """
     validate checks if the adata object is valid for lamindb
 
