@@ -602,9 +602,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tqdm</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">tqdm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">scdataloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataModule</span>
+<span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">DataModule</span>
 
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
@@ -805,7 +805,7 @@ name="preprocessed dataset"</div>
     <span class="n">test_split</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># we setup the datamodule (as exemplified in lightning's good practices, but there might be some things to improve here)</span>
-<span class="n">testfiles</span> <span class="o">=</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+<span class="n">testfiles</span> <span class="o">=</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span> 
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5">datamodule = DataModule(
     collection_name="preprocessed dataset",
@@ -1064,7 +1064,7 @@ reduced the size to 0.6722574020195106
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># (WIP) build a set of different collators that can be used to preprocess the minibatches before feeding them to the model</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># (WIP) build a set of different collators that can be used to preprocess the minibatches before feeding them to the model </span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-8"># (WIP) build a set of different collators that can be used to preprocess the minibatches before feeding them to the model </div>
 </div>

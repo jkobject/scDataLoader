@@ -289,16 +289,6 @@ This is usually done by the scPRINT model during training but this option allows
 This is mainly for debugging purposes</p>
               </div>
             </li>
-            <li>
-              <b><code>metacell_mode</code></b>
-                  (<code>bool</code>, default:
-                      <code>False</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>Whether to sample a metacell. Defaults to False.</p>
-              </div>
-            </li>
         </ul>
       </td>
     </tr>
@@ -409,10 +399,7 @@ This is mainly for debugging purposes</p>
 <span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">how</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
@@ -429,7 +416,6 @@ This is mainly for debugging purposes</p>
     <span class="n">genelist</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">downsample</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># don&#39;t use it for training!</span>
     <span class="n">save_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">metacell_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class is responsible for collating data for the scPRINT model. It handles the</span>
@@ -467,7 +453,6 @@ This is mainly for debugging purposes</p>
 <span class="sd">            This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator</span>
 <span class="sd">        save_output (str, optional): If not None, saves the output to a file. Defaults to None.</span>
 <span class="sd">            This is mainly for debugging purposes</span>
-<span class="sd">        metacell_mode (bool, optional): Whether to sample a metacell. Defaults to False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">organisms</span> <span class="o">=</span> <span class="n">organisms</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">genedf</span> <span class="o">=</span> <span class="n">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span>
@@ -487,7 +472,6 @@ This is mainly for debugging purposes</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span> <span class="o">=</span> <span class="n">downsample</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">metacell_mode</span> <span class="o">=</span> <span class="n">metacell_mode</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">(</span><span class="n">org_to_id</span><span class="p">,</span> <span class="n">valid_genes</span><span class="p">,</span> <span class="n">genelist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
@@ -571,7 +555,10 @@ elem["class_names.."]: other classes</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/collator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
@@ -704,7 +691,16 @@ elem["class_names.."]: other classes</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
-<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    __call__ applies the collator to a minibatch of data</span>
 
@@ -730,6 +726,7 @@ elem["class_names.."]: other classes</p>
     <span class="n">dataset</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">nnz_loc</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">is_meta</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">knn_cells</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
         <span class="n">organism_id</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">organism_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">organism_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organism_ids</span><span class="p">:</span>
@@ -740,14 +737,24 @@ elem["class_names.."]: other classes</p>
         <span class="n">total_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">][</span>
+                    <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">accepted_genes</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]</span>
+                <span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;most expr&quot;</span><span class="p">:</span>
-            <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">+</span> <span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">ma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">)</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">expr</span><span class="p">)[</span><span class="o">-</span><span class="p">(</span><span class="n">ma</span><span class="p">):][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="c1"># nnz_loc = [1] * 30_000</span>
             <span class="c1"># loc = np.argsort(expr)[-(self.max_len) :][::-1]</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;random expr&quot;</span><span class="p">:</span>
-            <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">+</span> <span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nnz_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">nnz_loc</span><span class="p">[</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
                     <span class="nb">len</span><span class="p">(</span><span class="n">nnz_loc</span><span class="p">),</span>
@@ -766,7 +773,10 @@ elem["class_names.."]: other classes</p>
             <span class="s2">&quot;all&quot;</span><span class="p">,</span>
             <span class="s2">&quot;some&quot;</span><span class="p">,</span>
         <span class="p">]:</span>
-            <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">+</span> <span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">expr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">zero_loc</span> <span class="o">=</span> <span class="n">zero_loc</span><span class="p">[</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
                     <span class="nb">len</span><span class="p">(</span><span class="n">zero_loc</span><span class="p">),</span>
@@ -780,9 +790,13 @@ elem["class_names.."]: other classes</p>
                 <span class="p">)</span>
             <span class="p">]</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">loc</span><span class="p">,</span> <span class="n">zero_loc</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+            <span class="n">knn_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">][:,</span> <span class="n">loc</span><span class="p">])</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
         <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_idx</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;some&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;knn_cells&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">knn_cells</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">knn_cells</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_subset</span><span class="p">[</span><span class="n">organism_id</span><span class="p">]]</span>
         <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
@@ -792,7 +806,7 @@ elem["class_names.."]: other classes</p>
             <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tp_name</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metacell_mode</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;is_meta&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
             <span class="n">is_meta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;is_meta&quot;</span><span class="p">])</span>
         <span class="n">other_classes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span><span class="p">])</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span>
@@ -802,6 +816,7 @@ elem["class_names.."]: other classes</p>
     <span class="n">other_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other_classes</span><span class="p">)</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
     <span class="n">is_meta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)</span>
+    <span class="n">knn_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">knn_cells</span><span class="p">)</span>
     <span class="c1"># normalize counts</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">expr</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_to</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_count</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
@@ -812,15 +827,6 @@ elem["class_names.."]: other classes</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="c1"># find the associated gene ids (given the species)</span>
-
-    <span class="c1"># get the NN cells</span>
-
-    <span class="c1"># do encoding / selection a la scGPT</span>
-
-    <span class="c1"># do encoding of graph location</span>
-    <span class="c1"># encode all the edges in some sparse way</span>
-    <span class="c1"># normalizing total counts between 0,1</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span>
         <span class="s2">&quot;genes&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">gene_locs</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
@@ -828,8 +834,10 @@ elem["class_names.."]: other classes</p>
         <span class="s2">&quot;tp&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span>
         <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">total_count</span><span class="p">),</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metacell_mode</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;is_meta&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">is_meta</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()})</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">knn_cells</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;knn_cells&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">knn_cells</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()})</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;dataset&quot;</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">long</span><span class="p">)})</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">downsample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

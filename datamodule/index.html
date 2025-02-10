@@ -349,6 +349,16 @@ any genes within this distance of each other will be considered at the same posi
               </div>
             </li>
             <li>
+              <b><code>get_knn_cells</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to get the k-nearest neighbors of each queried cells. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
               <b><code>**kwargs</code></b>
               –
               <div class="doc-md-description">
@@ -585,7 +595,9 @@ any genes within this distance of each other will be considered at the same posi
 <span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
-<span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">clss_to_weight</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
@@ -615,6 +627,7 @@ any genes within this distance of each other will be considered at the same posi
         <span class="c1"># &quot;EFO:0030062&quot;, # slide-seq</span>
     <span class="p">],</span>
     <span class="n">metacell_mode</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">get_knn_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">modify_seed_on_requeue</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
@@ -651,6 +664,7 @@ any genes within this distance of each other will be considered at the same posi
 <span class="sd">        metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.</span>
 <span class="sd">        clss_to_predict (list, optional): List of classes to predict. Defaults to [&quot;organism_ontology_term_id&quot;].</span>
 <span class="sd">        modify_seed_on_requeue (bool, optional): Whether to modify the seed on requeue. Defaults to True.</span>
+<span class="sd">        get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.</span>
 <span class="sd">        **kwargs: Additional keyword arguments passed to the pytorch DataLoader.</span>
 <span class="sd">        see @file data.py and @file collator.py for more details about some of the parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -661,6 +675,7 @@ any genes within this distance of each other will be considered at the same posi
             <span class="n">clss_to_predict</span><span class="o">=</span><span class="n">clss_to_predict</span><span class="p">,</span>
             <span class="n">hierarchical_clss</span><span class="o">=</span><span class="n">hierarchical_clss</span><span class="p">,</span>
             <span class="n">metacell_mode</span><span class="o">=</span><span class="n">metacell_mode</span><span class="p">,</span>
+            <span class="n">get_knn_cells</span><span class="o">=</span><span class="n">get_knn_cells</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="c1"># and location</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">metacell_mode</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">metacell_mode</span><span class="p">)</span>
@@ -720,7 +735,6 @@ any genes within this distance of each other will be considered at the same posi
             <span class="n">tp_name</span><span class="o">=</span><span class="n">tp_name</span><span class="p">,</span>
             <span class="n">organism_name</span><span class="o">=</span><span class="n">organism_name</span><span class="p">,</span>
             <span class="n">class_names</span><span class="o">=</span><span class="n">clss_to_predict</span><span class="p">,</span>
-            <span class="n">metacell_mode</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">metacell_mode</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="n">test_split</span>
@@ -928,9 +942,7 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 </table>
             <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">249</span>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
@@ -1013,7 +1025,9 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
-<span class="normal">332</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    setup method is used to prepare the data for the training, validation, and test sets.</span>
 <span class="sd">    It shuffles the data, calculates weights for each set, and creates samplers for each set.</span>
