@@ -64,6 +64,11 @@ class Preprocessor:
         """
         Initializes the preprocessor and configures the workflow steps.
 
+        Your dataset should contain at least the following obs:
+        - `organism_ontology_term_id` with the ontology id of the organism of your anndata
+        - gene names in the `var.index` field of your anndata that map to the ensembl_gene nomenclature
+        or the hugo gene symbols nomenclature (if the later, set `is_symbol` to True)
+
         Args:
             filter_gene_by_counts (int or bool, optional): Determines whether to filter genes by counts.
                 If int, filters genes with counts. Defaults to False.
@@ -130,6 +135,14 @@ class Preprocessor:
         self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
+        if "organism_ontology_term_id" not in adata[0].obs.columns:
+            raise ValueError(
+                "organism_ontology_term_id not found in adata.obs, you need to add an ontology term id for the organism of your anndata"
+            )
+        if not adata[0].var.index.str.contains("ENS").any() and not self.is_symbol:
+            raise ValueError(
+                "gene names in the `var.index` field of your anndata should map to the ensembl_gene nomenclature else set `is_symbol` to True if using hugo symbols"
+            )
         if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
