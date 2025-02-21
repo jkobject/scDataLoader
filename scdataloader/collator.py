@@ -243,7 +243,7 @@ class Collator:
         if len(is_meta) > 0:
             ret.update({"is_meta": Tensor(is_meta).int()})
         if len(knn_cells) > 0:
-            ret.update({"knn_cells": Tensor(knn_cells).int()})
+            ret.update({"knn_cells": Tensor(knn_cells)})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         if self.downsample is not None:
