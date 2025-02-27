@@ -165,9 +165,9 @@ class Preprocessor:
                 del adata.layers
         if len(adata.varm.keys()) > 0 and not self.keepdata:
             del adata.varm
-        if len(adata.obsm.keys()) > 0 and self.do_postp and not self.keepdata:
+        if len(adata.obsm.keys()) > 0 and not self.keepdata:
             del adata.obsm
-        if len(adata.obsp.keys()) > 0 and self.do_postp and not self.keepdata:
+        if len(adata.obsp.keys()) > 0 and not self.keepdata:
             del adata.obsp
         # check that it is a count
         print("checking raw counts")
