@@ -428,6 +428,7 @@ class MappedCollection:
                     ],
                     dtype=int,
                 )
+                out["distances"] = distances[nn_idx]
 
         return out
 

@@ -148,19 +148,19 @@ class Collator:
                         :, self.accepted_genes[organism_id]
                     ]
             if self.how == "most expr":
+                nnz_loc = np.where(expr > 0)[0]
                 if "knn_cells" in elem:
                     nnz_loc = np.where(expr + elem["knn_cells"].sum(0) > 0)[0]
+                    ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                    loc = np.argsort(expr + elem["knn_cells"].mean(0))[-(ma):][::-1]
                 else:
                     nnz_loc = np.where(expr > 0)[0]
-                ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
-                loc = np.argsort(expr)[-(ma):][::-1]
+                    ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                    loc = np.argsort(expr)[-(ma):][::-1]
                 # nnz_loc = [1] * 30_000
                 # loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
-                if "knn_cells" in elem:
-                    nnz_loc = np.where(expr + elem["knn_cells"].sum(0) > 0)[0]
-                else:
-                    nnz_loc = np.where(expr > 0)[0]
+                nnz_loc = np.where(expr > 0)[0]
                 loc = nnz_loc[
                     np.random.choice(
                         len(nnz_loc),
@@ -180,33 +180,41 @@ class Collator:
                 "some",
             ]:
                 if "knn_cells" in elem:
-                    zero_loc = np.where(expr + elem["knn_cells"].sum(0) == 0)[0]
+                    # we complete with genes expressed in the knn
+                    nnz_loc = np.where(elem["knn_cells"].sum(0) > 0)[0]
+                    ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
+                    # which is not a zero_loc in this context
+                    zero_loc = np.argsort(elem["knn_cells"].sum(0))[-(ma):][::-1]
                 else:
                     zero_loc = np.where(expr == 0)[0]
-                zero_loc = zero_loc[
-                    np.random.choice(
-                        len(zero_loc),
-                        self.add_zero_genes
-                        + (
-                            0
-                            if self.max_len < len(nnz_loc)
-                            else self.max_len - len(nnz_loc)
-                        ),
-                        replace=False,
-                    )
-                ]
+                    zero_loc = zero_loc[
+                        np.random.choice(
+                            len(zero_loc),
+                            self.add_zero_genes
+                            + (
+                                0
+                                if self.max_len < len(nnz_loc)
+                                else self.max_len - len(nnz_loc)
+                            ),
+                            replace=False,
+                        )
+                    ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
-            if "knn_cells" in elem:
-                knn_cells.append(elem["knn_cells"][:, loc])
             expr = expr[loc]
-            loc = loc + self.start_idx[organism_id]
+
             if self.how == "some":
                 if "knn_cells" in elem:
-                    knn_cells[-1] = knn_cells[-1][self.to_subset[organism_id]]
+                    elem["knn_cells"] = elem["knn_cells"][
+                        :, self.to_subset[organism_id]
+                    ]
                 expr = expr[self.to_subset[organism_id]]
                 loc = loc[self.to_subset[organism_id]]
             exprs.append(expr)
-            gene_locs.append(loc)
+            if "knn_cells" in elem:
+                knn_cells.append(elem["knn_cells"][:, loc])
+            # then we need to add the start_idx to the loc to give it the correct index
+            # according to the model
+            gene_locs.append(loc + self.start_idx[organism_id])
 
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
