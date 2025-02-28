@@ -135,6 +135,8 @@ class Preprocessor:
         self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
+        if self.additional_preprocess is not None:
+            adata = self.additional_preprocess(adata)
         if "organism_ontology_term_id" not in adata[0].obs.columns:
             raise ValueError(
                 "organism_ontology_term_id not found in adata.obs, you need to add an ontology term id for the organism of your anndata"
@@ -143,13 +145,11 @@ class Preprocessor:
             raise ValueError(
                 "gene names in the `var.index` field of your anndata should map to the ensembl_gene nomenclature else set `is_symbol` to True if using hugo symbols"
             )
-        if adata[0].obs.organism_ontology_term_id.iloc[0] not in self.organisms:
+        if adata.obs["organism_ontology_term_id"].iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
-                adata[0].obs.organism_ontology_term_id.iloc[0],
+                adata.obs["organism_ontology_term_id"],
             )
-        if self.additional_preprocess is not None:
-            adata = self.additional_preprocess(adata)
         if adata.raw is not None and self.use_raw:
             adata.X = adata.raw.X
             del adata.raw
@@ -230,23 +230,51 @@ class Preprocessor:
             )
         )
 
-        if self.is_symbol or not adata.var.index.str.contains("ENS").any():
-            if not adata.var.index.str.contains("ENS").any():
-                print("No ENS genes found, assuming gene symbols...")
-            genesdf["ensembl_gene_id"] = genesdf.index
-            var = (
-                adata.var.merge(
-                    genesdf.drop_duplicates("symbol").set_index("symbol", drop=False),
-                    left_index=True,
-                    right_index=True,
-                    how="inner",
-                )
-                .sort_values(by="ensembl_gene_id")
-                .set_index("ensembl_gene_id")
+        # Check if we have a mix of gene names and ensembl IDs
+        has_ens = adata.var.index.str.match(r"ENS.*\d{6,}$").any()
+        all_ens = adata.var.index.str.match(r"ENS.*\d{6,}$").all()
+
+        if not has_ens:
+            print("No ENS genes found, assuming gene symbols...")
+        elif not all_ens:
+            print("Mix of ENS and gene symbols found, converting all to ENS IDs...")
+
+        genesdf["ensembl_gene_id"] = genesdf.index
+
+        # For genes that are already ENS IDs, use them directly
+        ens_mask = adata.var.index.str.match(r"ENS.*\d{6,}$")
+        symbol_mask = ~ens_mask
+
+        # Handle symbol genes
+        if symbol_mask.any():
+            symbol_var = adata.var[symbol_mask].merge(
+                genesdf.drop_duplicates("symbol").set_index("symbol", drop=False),
+                left_index=True,
+                right_index=True,
+                how="inner",
             )
-            adata = adata[:, var["symbol"]]
-            adata.var = var
-            genesdf = genesdf.set_index("ensembl_gene_id")
+
+        # Handle ENS genes
+        if ens_mask.any():
+            ens_var = adata.var[ens_mask].merge(
+                genesdf, left_index=True, right_index=True, how="inner"
+            )
+
+        # Combine and sort
+        if symbol_mask.any() and ens_mask.any():
+            var = pd.concat([symbol_var, ens_var])
+        elif symbol_mask.any():
+            var = symbol_var
+        else:
+            var = ens_var
+
+        adata = adata[:, var.index]
+        var = var.sort_values(by="ensembl_gene_id").set_index("ensembl_gene_id")
+        # Update adata with combined genes
+        adata.var = var
+        genesdf = genesdf.set_index("ensembl_gene_id")
+        # Drop duplicate genes, keeping first occurrence
+        adata = adata[:, ~adata.var.index.duplicated(keep="first")]
 
         intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
         print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
@@ -476,12 +504,15 @@ class LaminPreprocessor(Preprocessor):
 
                 path = cache_path(file) if self.force_preloaded else file.cache()
                 backed = read_h5ad(path, backed="r")
-                if backed.obs.is_primary_data.sum() == 0:
-                    print(f"{file.key} only contains non primary cells.. dropping")
-                    # Save the stem_uid to a file to avoid loading it again
+                if "is_primary_data" in backed.obs.columns:
+                    if backed.obs.is_primary_data.sum() == 0:
+                        print(f"{file.key} only contains non primary cells.. dropping")
+                        # Save the stem_uid to a file to avoid loading it again
                     with open("nonprimary.txt", "a") as f:
                         f.write(f"{file.stem_uid}\n")
                     continue
+                else:
+                    print("Warning: couldn't check unicity from is_primary_data column")
                 if backed.shape[1] < 1000:
                     print(
                         f"{file.key} only contains less than 1000 genes and is likely not scRNAseq... dropping"
@@ -502,16 +533,22 @@ class LaminPreprocessor(Preprocessor):
                         block_size = int(
                             (np.ceil(badata.shape[0] / 30_000) * 30_000) // num_blocks
                         )
-                        print("num blocks ", num_blocks)
+                        print(
+                            "num blocks ",
+                            num_blocks,
+                            "block size ",
+                            block_size,
+                            "total elements ",
+                            badata.shape[0],
+                        )
                         for j in range(num_blocks):
-                            if j == 0 and i == 390:
-                                continue
                             start_index = j * block_size
                             end_index = min((j + 1) * block_size, badata.shape[0])
                             block = badata[start_index:end_index].to_memory()
                             print(block)
                             block = super().__call__(
-                                block, dataset_id=file.stem_uid + "_p" + str(j)
+                                block,
+                                dataset_id=file.stem_uid + "_p" + str(j),
                             )
                             myfile = ln.Artifact.from_anndata(
                                 block,

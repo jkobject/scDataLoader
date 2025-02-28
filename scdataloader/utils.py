@@ -578,7 +578,6 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
 
 
 def populate_my_ontology(
-    organisms: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
     sex: List[str] = ["PATO:0000384", "PATO:0000383"],
     celltypes: List[str] = [],
     ethnicities: List[str] = [],
@@ -586,7 +585,7 @@ def populate_my_ontology(
     tissues: List[str] = [],
     diseases: List[str] = [],
     dev_stages: List[str] = [],
-    organism_clade: str = "vertebrates",
+    organisms_clade: List[str] = ["vertebrates", "plants"],
 ):
     """
     creates a local version of the lamin ontologies and add the required missing values in base ontologies
@@ -622,23 +621,27 @@ def populate_my_ontology(
             ln.save(records)
         bt.CellType(name="unknown", ontology_id="unknown").save()
     # Organism
-    if organisms is not None:
-        names = (
-            bt.Organism.public(organism=organism_clade).df().index
-            if not organisms
-            else organisms
-        )
-        source = bt.PublicSource.filter(name="ensembl", organism=organism_clade).last()
-        records = [
-            organism_or_organismlist
-            if isinstance(organism_or_organismlist, bt.Organism)
-            else organism_or_organismlist[0]
-            for organism_or_organismlist in [
-                bt.Organism.from_source(ontology_id=name, source=source)
-                for name in names
+    if organisms_clade is not None:
+        records = []
+        for organism_clade in organisms_clade:
+            names = bt.Organism.public(organism=organism_clade).df().index
+            source = bt.PublicSource.filter(
+                name="ensembl", organism=organism_clade
+            ).last()
+            records += [
+                bt.Organism.from_source(name=name, source=source) for name in names
             ]
-        ]
-        ln.save(records)
+        nrecords = []
+        prevrec = set()
+        for rec in records:
+            if rec is None:
+                continue
+            if not isinstance(rec, bt.Organism):
+                rec = rec[0]
+            if rec.uid not in prevrec:
+                nrecords.append(rec)
+                prevrec.add(rec.uid)
+        ln.save(nrecords)
         bt.Organism(name="unknown", ontology_id="unknown").save()
     # Phenotype
     if sex is not None:

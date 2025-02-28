@@ -201,7 +201,8 @@ class Collator:
                     ]
                 loc = np.concatenate((loc, zero_loc), axis=None)
             expr = expr[loc]
-
+            if "knn_cells" in elem:
+                elem["knn_cells"] = elem["knn_cells"][:, loc]
             if self.how == "some":
                 if "knn_cells" in elem:
                     elem["knn_cells"] = elem["knn_cells"][
@@ -210,8 +211,7 @@ class Collator:
                 expr = expr[self.to_subset[organism_id]]
                 loc = loc[self.to_subset[organism_id]]
             exprs.append(expr)
-            if "knn_cells" in elem:
-                knn_cells.append(elem["knn_cells"][:, loc])
+            knn_cells.append(elem["knn_cells"])
             # then we need to add the start_idx to the loc to give it the correct index
             # according to the model
             gene_locs.append(loc + self.start_idx[organism_id])
