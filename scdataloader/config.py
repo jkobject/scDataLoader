@@ -118,7 +118,7 @@ MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
     ],
     "HsapDv:0000258": [  # mature stage
         "MmusDv:0000110",  # mature stage
-        "HsapDv:0000204",
+        "HsapDv:0000204", # 
     ],
     "HsapDv:0000227": [  # late adult stage
         "MmusDv:0000091",  # 20 month-old stage

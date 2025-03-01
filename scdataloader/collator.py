@@ -211,7 +211,8 @@ class Collator:
                 expr = expr[self.to_subset[organism_id]]
                 loc = loc[self.to_subset[organism_id]]
             exprs.append(expr)
-            knn_cells.append(elem["knn_cells"])
+            if "knn_cells" in elem:
+                knn_cells.append(elem["knn_cells"])
             # then we need to add the start_idx to the loc to give it the correct index
             # according to the model
             gene_locs.append(loc + self.start_idx[organism_id])
