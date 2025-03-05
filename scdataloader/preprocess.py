@@ -18,7 +18,7 @@ FULL_LENGTH_ASSAYS = [
     "EFO:0008931",
 ]
 
-MAXFILESIZE = 10_000_000_000
+MAXFILESIZE = 5_000_000_000
 
 
 class Preprocessor:
@@ -558,13 +558,14 @@ class LaminPreprocessor(Preprocessor):
                                 + " p"
                                 + str(j)
                                 + " ( revises file "
-                                + str(file.key)
+                                + str(file.stem_uid)
                                 + " )",
                                 version=version,
                             )
                             myfile.save()
                             if self.keep_files:
                                 files.append(myfile)
+                                del block
                             else:
                                 del myfile
                                 del block
@@ -580,6 +581,7 @@ class LaminPreprocessor(Preprocessor):
                         myfile.save()
                         if self.keep_files:
                             files.append(myfile)
+                            del adata
                         else:
                             del myfile
                             del adata
