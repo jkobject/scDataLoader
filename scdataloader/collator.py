@@ -259,6 +259,8 @@ class Collator:
         if self.save_output is not None:
             with open(self.save_output, "a") as f:
                 np.savetxt(f, ret["x"].numpy())
+            with open(self.save_output + "_loc", "a") as f:
+                np.savetxt(f, gene_locs)
         return ret
 
 
