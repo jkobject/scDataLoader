@@ -9,7 +9,7 @@ import scanpy as sc
 from anndata import AnnData, read_h5ad
 from scipy.sparse import csr_matrix
 from upath import UPath
-
+import gc
 from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
@@ -170,6 +170,7 @@ class Preprocessor:
         if len(adata.obsp.keys()) > 0 and not self.keepdata:
             del adata.obsp
         # check that it is a count
+
         print("checking raw counts")
         if np.abs(
             adata[:50_000].X.astype(int) - adata[:50_000].X
@@ -503,7 +504,8 @@ class LaminPreprocessor(Preprocessor):
                 print(file)
 
                 path = cache_path(file) if self.force_preloaded else file.cache()
-                backed = read_h5ad(path, backed="r")
+                backed = file.open()
+                # backed = read_h5ad(path, backed="r")
                 if "is_primary_data" in backed.obs.columns:
                     if backed.obs.is_primary_data.sum() == 0:
                         print(f"{file.key} only contains non primary cells.. dropping")
@@ -544,7 +546,8 @@ class LaminPreprocessor(Preprocessor):
                         for j in range(num_blocks):
                             start_index = j * block_size
                             end_index = min((j + 1) * block_size, badata.shape[0])
-                            block = badata[start_index:end_index].to_memory()
+                            block = badata[start_index:end_index]
+                            block = block.to_memory()
                             print(block)
                             block = super().__call__(
                                 block,
@@ -563,12 +566,14 @@ class LaminPreprocessor(Preprocessor):
                                 version=version,
                             )
                             myfile.save()
+
                             if self.keep_files:
                                 files.append(myfile)
                                 del block
                             else:
                                 del myfile
                                 del block
+                            gc.collect()
 
                     else:
                         adata = super().__call__(adata, dataset_id=file.stem_uid)
@@ -601,7 +606,12 @@ class LaminPreprocessor(Preprocessor):
 
                 # issues with KLlggfw6I6lvmbqiZm46
             if self.keep_files:
-                dataset = ln.Collection(files, name=name, description=description)
+                # Reconstruct collection using keys
+                dataset = ln.Collection(
+                    [ln.Artifact.filter(key=k).one() for k in files],
+                    name=name,
+                    description=description,
+                )
                 dataset.save()
                 return dataset
             else:
