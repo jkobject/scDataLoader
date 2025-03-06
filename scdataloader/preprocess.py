@@ -1,3 +1,4 @@
+import gc
 from typing import Callable, Optional, Union
 from uuid import uuid4
 
@@ -9,7 +10,7 @@ import scanpy as sc
 from anndata import AnnData, read_h5ad
 from scipy.sparse import csr_matrix
 from upath import UPath
-import gc
+
 from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
@@ -503,7 +504,7 @@ class LaminPreprocessor(Preprocessor):
                     continue
                 print(file)
 
-                path = cache_path(file) if self.force_preloaded else file.cache()
+                _ = cache_path(file) if self.force_preloaded else file.cache()
                 backed = file.open()
                 # backed = read_h5ad(path, backed="r")
                 if "is_primary_data" in backed.obs.columns:

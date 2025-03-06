@@ -20,7 +20,7 @@ def test_base():
     print("populating ontology...")
     start_time = time.time()
     utils.populate_my_ontology(
-        organisms=["NCBITaxon:10090", "NCBITaxon:9606"],
+        organisms_clade=["vertebrates"],
         sex=["PATO:0000384", "PATO:0000383"],
         # celltypes=None,
         # ethnicities=None,
