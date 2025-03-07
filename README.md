@@ -28,8 +28,16 @@ It allows you to:
 3. create a more complex single cell dataset
 4. extend it to your need
 
-built on top of `lamindb` and the `.mapped()` function by Sergei: https://github.com/Koncopd 
+built on top of `lamindb` and the `.mapped()` function by Sergei: https://github.com/Koncopd
 
+```
+Portions of the mapped.py file are derived from Lamin Labs
+Copyright 2024 Lamin Labs
+Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+The rest of the package is licensed under MIT License, see LICENSE for details
+Please see https://github.com/laminlabs/lamindb/blob/main/lamindb/core/_mapped_collection.py
+for the original implementation
+```
 The package has been designed together with the [scPRINT paper](https://doi.org/10.1101/2024.07.29.605556) and [model](https://github.com/cantinilab/scPRINT).
 
 ## More

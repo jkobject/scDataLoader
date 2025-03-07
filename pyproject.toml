@@ -11,7 +11,7 @@ requires-python = ">=3.10,<3.14"
 keywords = ["scRNAseq", "dataloader", "pytorch", "lamindb", "scPRINT"]
 dependencies = [
     "numpy==1.26.0",
-    "lamindb[bionty,ourprojects,jupyter,cellregistry,zarr]>=1.0.4,<2",
+    "lamindb[bionty,jupyter,cellregistry,zarr]>=1.0.4,<2",
     "cellxgene-census>=0.1.0",
     "torch==2.2.0",
     "pytorch-lightning>=2.3.0",

@@ -1,3 +1,10 @@
+# Portions of this file are derived from Lamin Labs
+# Copyright 2024 Lamin Labs
+# Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+# The rest of this file is licensed under MIT
+# Please see https://github.com/laminlabs/lamindb/blob/main/lamindb/core/_mapped_collection.py
+# for the original implementation
+
 from __future__ import annotations
 
 from collections import Counter
