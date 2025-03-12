@@ -148,7 +148,6 @@ class Collator:
                         :, self.accepted_genes[organism_id]
                     ]
             if self.how == "most expr":
-                nnz_loc = np.where(expr > 0)[0]
                 if "knn_cells" in elem:
                     nnz_loc = np.where(expr + elem["knn_cells"].sum(0) > 0)[0]
                     ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
@@ -161,14 +160,18 @@ class Collator:
                 # loc = np.argsort(expr)[-(self.max_len) :][::-1]
             elif self.how == "random expr":
                 nnz_loc = np.where(expr > 0)[0]
-                loc = nnz_loc[
-                    np.random.choice(
-                        len(nnz_loc),
-                        self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc),
-                        replace=False,
-                        # p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected
-                    )
-                ]
+                loc = (
+                    nnz_loc[
+                        np.random.choice(
+                            len(nnz_loc),
+                            self.max_len,
+                            replace=False,
+                            # p=(expr.max() + (expr[nnz_loc])*19) / expr.max(), # 20 at most times more likely to be selected
+                        )
+                    ]
+                    if self.max_len < len(nnz_loc)
+                    else nnz_loc
+                )
             elif self.how in ["all", "some"]:
                 loc = np.arange(len(expr))
             else:

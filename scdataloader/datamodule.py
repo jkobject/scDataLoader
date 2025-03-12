@@ -434,6 +434,8 @@ class LabelWeightedSampler(Sampler[int]):
         self.replacement = replacement
         self.num_samples = num_samples
         self.restart_num = slurm_restart_count(use_mine=True) + restart_num
+        if self.restart_num != 0:
+            print(f"seeing a restart number of {self.restart_num} for this sampler")
         self.modify_seed_on_requeue = modify_seed_on_requeue
         # list of tensor.
         self.klass_indices = [
@@ -466,7 +468,7 @@ class LabelWeightedSampler(Sampler[int]):
                     else len(left_inds),
                     replacement=self.replacement,
                     generator=None
-                    if self.restart_num == 0 and not self.modify_seed_on_requeue
+                    if self.restart_num == 0 or not self.modify_seed_on_requeue
                     else torch.Generator().manual_seed(self.restart_num),
                 )
             elif self.replacement:
@@ -474,7 +476,7 @@ class LabelWeightedSampler(Sampler[int]):
                     len(klass_index),
                     size=(len(left_inds),),
                     generator=None
-                    if self.restart_num == 0 and not self.modify_seed_on_requeue
+                    if self.restart_num == 0 or not self.modify_seed_on_requeue
                     else torch.Generator().manual_seed(self.restart_num),
                 )
             else:
@@ -485,6 +487,7 @@ class LabelWeightedSampler(Sampler[int]):
                 )
                 right_inds = torch.randperm(len(klass_index))[:maxelem]
             sample_indices[left_inds[: len(right_inds)]] = klass_index[right_inds]
+            # if there are more left_inds than right_inds, we need to drop the extra ones
             if len(right_inds) < len(left_inds):
                 sample_indices[left_inds[len(right_inds) :]] = -1
         # drop all -1
