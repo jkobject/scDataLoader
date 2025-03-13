@@ -270,9 +270,6 @@ class Preprocessor:
         else:
             var = ens_var
 
-        import pdb
-
-        pdb.set_trace()
         adata = adata[:, var.index]
         #        var = var.sort_values(by="ensembl_gene_id").set_index("ensembl_gene_id")
         # Update adata with combined genes
