@@ -38,6 +38,7 @@ The rest of the package is licensed under MIT License, see LICENSE for details
 Please see https://github.com/laminlabs/lamindb/blob/main/lamindb/core/_mapped_collection.py
 for the original implementation
 ```
+
 The package has been designed together with the [scPRINT paper](https://doi.org/10.1101/2024.07.29.605556) and [model](https://github.com/cantinilab/scPRINT).
 
 ## More
