@@ -182,23 +182,19 @@ class Collator:
                 "all",
                 "some",
             ]:
+                ma = self.add_zero_genes + (
+                    0 if self.max_len < len(nnz_loc) else self.max_len - len(nnz_loc)
+                )
                 if "knn_cells" in elem:
                     # we complete with genes expressed in the knn
-                    nnz_loc = np.where(elem["knn_cells"].sum(0) > 0)[0]
-                    ma = self.max_len if self.max_len < len(nnz_loc) else len(nnz_loc)
                     # which is not a zero_loc in this context
-                    zero_loc = np.argsort(elem["knn_cells"].sum(0))[-(ma):][::-1]
+                    zero_loc = np.argsort(elem["knn_cells"].sum(0))[-ma:][::-1]
                 else:
                     zero_loc = np.where(expr == 0)[0]
                     zero_loc = zero_loc[
                         np.random.choice(
                             len(zero_loc),
-                            self.add_zero_genes
-                            + (
-                                0
-                                if self.max_len < len(nnz_loc)
-                                else self.max_len - len(nnz_loc)
-                            ),
+                            ma,
                             replace=False,
                         )
                     ]

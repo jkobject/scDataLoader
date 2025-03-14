@@ -270,13 +270,13 @@ class Preprocessor:
         else:
             var = ens_var
 
-        import pdb
-
-        pdb.set_trace()
         adata = adata[:, var.index]
         #        var = var.sort_values(by="ensembl_gene_id").set_index("ensembl_gene_id")
         # Update adata with combined genes
-        adata.var = var
+        if "ensembl_gene_id" in var.columns:
+            adata.var = var.set_index("ensembl_gene_id")
+        else:
+            adata.var = var
         # Drop duplicate genes, keeping first occurrence
         adata = adata[:, ~adata.var.index.duplicated(keep="first")]
 

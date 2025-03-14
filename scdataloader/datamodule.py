@@ -16,7 +16,7 @@ from torch.utils.data.sampler import (
 
 from .collator import Collator
 from .data import Dataset
-from .utils import getBiomartTable, slurm_restart_count
+from .utils import getBiomartTable
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,7 +28,7 @@ class DataModule(L.LightningDataModule):
         clss_to_weight: list = ["organism_ontology_term_id"],
         organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 10,
-        train_oversampling_per_epoch: float = 0.1,
+        n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
         test_split: float = 0,
         gene_embeddings: str = "",
@@ -53,7 +53,6 @@ class DataModule(L.LightningDataModule):
         ],
         metacell_mode: float = 0.0,
         get_knn_cells: bool = False,
-        modify_seed_on_requeue: bool = True,
         **kwargs,
     ):
         """
@@ -67,7 +66,7 @@ class DataModule(L.LightningDataModule):
             collection_name (str): The lamindb collection to be used.
             organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
             weight_scaler (int, optional): how much more you will see the most present vs less present category.
-            train_oversampling_per_epoch (float, optional): The proportion of the dataset to include in the training set for each epoch. Defaults to 0.1.
+            n_samples_per_epoch (int, optional): The number of samples to include in the training set for each epoch. Defaults to 2_000_000.
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
                 it will use a full dataset and will round to the nearest dataset's cell count.
@@ -88,7 +87,6 @@ class DataModule(L.LightningDataModule):
             hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
-            modify_seed_on_requeue (bool, optional): Whether to modify the seed on requeue. Defaults to True.
             get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
@@ -171,13 +169,11 @@ class DataModule(L.LightningDataModule):
         self.assays_to_drop = assays_to_drop
         self.n_samples = len(mdataset)
         self.weight_scaler = weight_scaler
-        self.train_oversampling_per_epoch = train_oversampling_per_epoch
+        self.n_samples_per_epoch = n_samples_per_epoch
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
-        self.modify_seed_on_requeue = modify_seed_on_requeue
         self.nnz = None
-        self.restart_num = 0
         self.test_datasets = []
         self.test_idx = []
         super().__init__()
@@ -190,7 +186,7 @@ class DataModule(L.LightningDataModule):
             f"\ttest_split={self.test_split},\n"
             f"\tn_samples={self.n_samples},\n"
             f"\tweight_scaler={self.weight_scaler},\n"
-            f"\ttrain_oversampling_per_epoch={self.train_oversampling_per_epoch},\n"
+            f"\tn_samples_per_epoch={self.n_samples_per_epoch},\n"
             f"\tassays_to_drop={self.assays_to_drop},\n"
             f"\tnum_datasets={len(self.dataset.mapped_dataset.storages)},\n"
             f"\ttest datasets={str(self.test_datasets)},\n"
@@ -336,18 +332,16 @@ class DataModule(L.LightningDataModule):
     def train_dataloader(self, **kwargs):
         # train_sampler = WeightedRandomSampler(
         #    self.train_weights[self.train_labels],
-        #    int(self.n_samples*self.train_oversampling_per_epoch),
+        #    int(self.n_samples*self.n_samples_per_epoch),
         #    replacement=True,
         # )
         try:
             train_sampler = LabelWeightedSampler(
                 label_weights=self.train_weights,
                 labels=self.train_labels,
-                num_samples=int(self.n_samples * self.train_oversampling_per_epoch),
+                num_samples=int(self.n_samples_per_epoch),
                 element_weights=self.nnz,
                 replacement=self.replacement,
-                restart_num=self.restart_num,
-                modify_seed_on_requeue=self.modify_seed_on_requeue,
             )
         except ValueError as e:
             raise ValueError(e + "have you run `datamodule.setup()`?")
@@ -397,8 +391,6 @@ class LabelWeightedSampler(Sampler[int]):
     num_samples: int
     nnz: Optional[Sequence[int]]
     replacement: bool
-    restart_num: int
-    modify_seed_on_requeue: bool
     # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
     # this will result a class-balanced sampling, no matter how imbalance the labels are.
 
@@ -409,15 +401,12 @@ class LabelWeightedSampler(Sampler[int]):
         num_samples: int,
         replacement: bool = True,
         element_weights: Sequence[float] = None,
-        restart_num: int = 0,
-        modify_seed_on_requeue: bool = True,
     ) -> None:
         """
 
         :param label_weights: list(len=num_classes)[float], weights for each class.
         :param labels: list(len=dataset_len)[int], labels of a dataset.
         :param num_samples: number of samples.
-        :param restart_num: if we are continuing a previous run, we need to restart the sampler from the same point.
         """
 
         super(LabelWeightedSampler, self).__init__(None)
@@ -433,10 +422,6 @@ class LabelWeightedSampler(Sampler[int]):
         )
         self.replacement = replacement
         self.num_samples = num_samples
-        self.restart_num = slurm_restart_count(use_mine=True) + restart_num
-        if self.restart_num != 0:
-            print(f"seeing a restart number of {self.restart_num} for this sampler")
-        self.modify_seed_on_requeue = modify_seed_on_requeue
         # list of tensor.
         self.klass_indices = [
             (self.labels == i_klass).nonzero().squeeze(1)
@@ -449,9 +434,6 @@ class LabelWeightedSampler(Sampler[int]):
             self.label_weights,
             num_samples=self.num_samples,
             replacement=True,
-            generator=None
-            if self.restart_num == 0 and not self.modify_seed_on_requeue
-            else torch.Generator().manual_seed(self.restart_num),
         )
         sample_indices = torch.empty_like(sample_labels)
         for i_klass, klass_index in enumerate(self.klass_indices):
@@ -467,17 +449,11 @@ class LabelWeightedSampler(Sampler[int]):
                     if not self.replacement and len(klass_index) < len(left_inds)
                     else len(left_inds),
                     replacement=self.replacement,
-                    generator=None
-                    if self.restart_num == 0 or not self.modify_seed_on_requeue
-                    else torch.Generator().manual_seed(self.restart_num),
                 )
             elif self.replacement:
                 right_inds = torch.randint(
                     len(klass_index),
                     size=(len(left_inds),),
-                    generator=None
-                    if self.restart_num == 0 or not self.modify_seed_on_requeue
-                    else torch.Generator().manual_seed(self.restart_num),
                 )
             else:
                 maxelem = (
@@ -495,7 +471,6 @@ class LabelWeightedSampler(Sampler[int]):
         # torch shuffle
         sample_indices = sample_indices[torch.randperm(len(sample_indices))]
         self.num_samples = len(sample_indices)
-        # raise Exception("stop")
         yield from iter(sample_indices.tolist())
 
     def __len__(self):
