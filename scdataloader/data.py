@@ -153,26 +153,20 @@ class Dataset(torchDataset):
         """Get all weights for the given label keys."""
         if isinstance(obs_keys, str):
             obs_keys = [obs_keys]
-        labels_list = []
+        labels = None
         for label_key in obs_keys:
-            labels_to_str = (
-                self.mapped_dataset.get_merged_labels(label_key).astype(str).astype("O")
-            )
-            labels_list.append(labels_to_str)
-        if len(labels_list) > 1:
-            labels = ["___".join(labels_obs) for labels_obs in zip(*labels_list)]
-        else:
-            labels = labels_list[0]
-
-        counter = Counter(labels)  # type: ignore
+            labels_to_str = self.mapped_dataset.get_merged_labels(label_key)
+            if labels is None:
+                labels = labels_to_str
+            else:
+                labels = concat_categorical_codes([labels, labels_to_str])
+        counter = Counter(labels.codes)  # type: ignore
         if return_categories:
-            rn = {n: i for i, n in enumerate(counter.keys())}
-            labels = np.array([rn[label] for label in labels])
             counter = np.array(list(counter.values()))
             weights = scaler / (counter + scaler)
-            return weights, labels
+            return weights, np.array(labels.codes)
         else:
-            counts = np.array([counter[label] for label in labels])
+            counts = np.array([counter[label] for label in labels.codes])
             if scaler is None:
                 weights = 1.0 / counts
             else:
@@ -421,3 +415,41 @@ def mapped(
         get_knn_cells=get_knn_cells,
     )
     return ds
+
+
+def concat_categorical_codes(series_list: list[pd.Categorical]) -> pd.Categorical:
+    """Efficiently combine multiple categorical data using their codes,
+    only creating categories for combinations that exist in the data.
+
+    Args:
+        series_list: List of pandas Categorical data
+
+    Returns:
+        Combined Categorical with only existing combinations
+    """
+    # Get the codes for each categorical
+    codes_list = [s.codes.astype(np.int32) for s in series_list]
+    n_cats = [len(s.categories) for s in series_list]
+
+    # Calculate combined codes
+    combined_codes = codes_list[0]
+    multiplier = n_cats[0]
+    for codes, n_cat in zip(codes_list[1:], n_cats[1:]):
+        combined_codes = (combined_codes * n_cat) + codes
+        multiplier *= n_cat
+
+    # Find unique combinations that actually exist in the data
+    unique_existing_codes = np.unique(combined_codes)
+
+    # Create a mapping from old codes to new compressed codes
+    code_mapping = {old: new for new, old in enumerate(unique_existing_codes)}
+
+    # Map the combined codes to their new compressed values
+    combined_codes = np.array([code_mapping[code] for code in combined_codes])
+
+    # Create final categorical with only existing combinations
+    return pd.Categorical.from_codes(
+        codes=combined_codes,
+        categories=np.arange(len(unique_existing_codes)),
+        ordered=False,
+    )

@@ -17,6 +17,7 @@ from torch.utils.data.sampler import (
 from .collator import Collator
 from .data import Dataset
 from .utils import getBiomartTable
+import random
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -253,7 +254,9 @@ class DataModule(L.LightningDataModule):
         """
         SCALE = 10
         if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
-            self.nnz = self.dataset.mapped_dataset.get_merged_labels("nnz")
+            self.nnz = self.dataset.mapped_dataset.get_merged_labels(
+                "nnz", is_cat=False
+            )
             self.clss_to_weight.remove("nnz")
             (
                 (self.nnz.max() / SCALE)
@@ -298,7 +301,9 @@ class DataModule(L.LightningDataModule):
                 else self.dataset.mapped_dataset.n_obs_list[0]
             )
             cs = 0
-            for i, c in enumerate(self.dataset.mapped_dataset.n_obs_list):
+            d_size = list(enumerate(self.dataset.mapped_dataset.n_obs_list))
+            random.Random(42).shuffle(d_size)  # always same order
+            for i, c in d_size:
                 if cs + c > len_test:
                     break
                 else:
@@ -414,7 +419,7 @@ class LabelWeightedSampler(Sampler[int]):
         label_weights = np.array(label_weights) * np.bincount(labels)
 
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
-        self.labels = torch.as_tensor(labels, dtype=torch.int)
+        self.labels = torch.as_tensor(labels, dtype=torch.int32)
         self.element_weights = (
             torch.as_tensor(element_weights, dtype=torch.float32)
             if element_weights is not None

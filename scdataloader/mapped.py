@@ -28,6 +28,8 @@ from lamindb_setup.core.upath import UPath
 if TYPE_CHECKING:
     from lamindb_setup.core.types import UPathStr
 
+from pandas.api.types import union_categoricals
+
 
 class _Connect:
     def __init__(self, storage):
@@ -555,16 +557,22 @@ class MappedCollection:
             weights = (MAX / scaler) / ((1 + counts - MIN) + MAX / scaler)
         return weights
 
-    def get_merged_labels(self, label_key: str):
+    def get_merged_labels(self, label_key: str, is_cat: bool = True):
         """Get merged labels for `label_key` from all `.obs`."""
         labels_merge = []
         for i, storage in enumerate(self.storages):
             with _Connect(storage) as store:
-                labels = self._get_labels(store, label_key, storage_idx=i)
+                labels = self._get_labels(
+                    store, label_key, storage_idx=i, is_cat=is_cat
+                )
                 if self.filtered:
                     labels = labels[self.indices_list[i]]
                 labels_merge.append(labels)
-        return np.hstack(labels_merge)
+        if is_cat:
+            return union_categoricals(labels_merge)
+        else:
+            print("concatenating labels")
+            return np.concatenate(labels_merge)
 
     def get_merged_categories(self, label_key: str):
         """Get merged categories for `label_key` from all `.obs`."""
@@ -626,7 +634,11 @@ class MappedCollection:
                 return label["codes"][...]
 
     def _get_labels(
-        self, storage: StorageType, label_key: str, storage_idx: int | None = None
+        self,
+        storage: StorageType,
+        label_key: str,
+        storage_idx: int | None = None,
+        is_cat: bool = True,
     ):
         """Get labels."""
         codes = self._get_codes(storage, label_key)
@@ -638,6 +650,8 @@ class MappedCollection:
         if cats is not None:
             cats = _decode(cats) if isinstance(cats[0], bytes) else cats
             labels = cats[labels]
+        if is_cat:
+            labels = pd.Categorical(labels)
         return labels
 
     def close(self):
