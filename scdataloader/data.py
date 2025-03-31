@@ -148,7 +148,6 @@ class Dataset(torchDataset):
         obs_keys: str | list[str],
         scaler: int = 10,
         return_categories=False,
-        bypass_label=["neuron"],
     ):
         """Get all weights for the given label keys."""
         if isinstance(obs_keys, str):

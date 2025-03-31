@@ -1,5 +1,8 @@
 import os
 from typing import Optional, Sequence, Union
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from functools import partial
 
 import lamindb as ln
 import lightning as L
@@ -18,6 +21,7 @@ from .collator import Collator
 from .data import Dataset
 from .utils import getBiomartTable
 import random
+from tqdm import tqdm
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -253,6 +257,7 @@ class DataModule(L.LightningDataModule):
             It can be either 'fit' or 'test'. Defaults to None.
         """
         SCALE = 10
+        print("setting up the datamodule")
         if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
             self.nnz = self.dataset.mapped_dataset.get_merged_labels(
                 "nnz", is_cat=False
@@ -332,24 +337,36 @@ class DataModule(L.LightningDataModule):
         self.train_weights = weights
         self.train_labels = labels
         self.idx_full = idx_full
+        print("done setup")
         return self.test_datasets
 
     def train_dataloader(self, **kwargs):
-        # train_sampler = WeightedRandomSampler(
-        #    self.train_weights[self.train_labels],
-        #    int(self.n_samples*self.n_samples_per_epoch),
-        #    replacement=True,
-        # )
         try:
+            print("Setting up the parallel train sampler...")
+
+            # Get number of workers from kwargs, environment variable, or use a reasonable default
+            n_workers = kwargs.pop(
+                "sampler_workers",
+                int(os.environ.get("SAMPLER_WORKERS", max(1, mp.cpu_count() - 1))),
+            )
+
+            # Let the sampler auto-determine chunk size
+            chunk_size = kwargs.pop("sampler_chunk_size", None)
+
+            # Create the optimized parallel sampler
+            print(f"Using {n_workers} workers for class indexing")
             train_sampler = LabelWeightedSampler(
                 label_weights=self.train_weights,
                 labels=self.train_labels,
                 num_samples=int(self.n_samples_per_epoch),
                 element_weights=self.nnz,
                 replacement=self.replacement,
+                n_workers=n_workers,
+                chunk_size=chunk_size,
             )
         except ValueError as e:
-            raise ValueError(e + "have you run `datamodule.setup()`?")
+            raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
+
         return DataLoader(
             self.dataset,
             sampler=train_sampler,
@@ -389,94 +406,340 @@ class DataModule(L.LightningDataModule):
     # called on every process in DDP
     # pass
 
+    @staticmethod
+    def _estimate_optimal_chunk_size(labels_size, n_workers, max_memory_fraction=0.5):
+        """Estimate optimal chunk size based on system memory.
+
+        Args:
+            labels_size: Size of the labels array
+            n_workers: Number of worker processes
+            max_memory_fraction: Maximum fraction of system memory to use
+
+        Returns:
+            Recommended chunk size
+        """
+        try:
+            import psutil
+
+            # Get available system memory in bytes
+            available_memory = psutil.virtual_memory().available
+
+            # Calculate bytes per element (int32 = 4 bytes)
+            bytes_per_element = 4
+
+            # Estimate indices memory (worst case: each chunk is all one class)
+            # Each index requires 8 bytes (int64)
+            estimated_indices_memory = 8 * labels_size
+
+            # Calculate memory per worker
+            memory_per_worker = available_memory * max_memory_fraction / n_workers
+
+            # Limit chunk size based on memory per worker
+            # We need memory for:
+            # 1. The chunk itself
+            # 2. The indices created
+            # 3. Other overhead (sorting, etc.) - factor of 3
+            memory_per_chunk = memory_per_worker / 3
+            max_elements_per_chunk = int(memory_per_chunk / (bytes_per_element + 8))
+
+            # Ensure a minimum chunk size
+            min_chunk_size = 1_000_000
+            chunk_size = max(min_chunk_size, max_elements_per_chunk)
+
+            # Ensure chunk size is reasonable for the dataset
+            chunk_size = min(chunk_size, labels_size // n_workers + 1)
+
+            print(f"Automatically determined chunk size: {chunk_size:,} elements")
+            return chunk_size
+
+        except ImportError:
+            # If psutil is not available, use a reasonable default
+            default_size = 10_000_000
+            print(f"psutil not available, using default chunk size: {default_size:,}")
+            return default_size
+
 
 class LabelWeightedSampler(Sampler[int]):
-    label_weights: Sequence[float]
-    klass_indices: Sequence[Sequence[int]]
+    """
+    A weighted random sampler that samples from a dataset with respect to both class weights and element weights.
+
+    This sampler is designed to handle very large datasets efficiently, with optimizations for:
+    1. Parallel building of class indices
+    2. Chunked processing for large arrays
+    3. Efficient memory management
+    4. Proper handling of replacement and non-replacement sampling
+    """
+
+    label_weights: torch.Tensor
+    klass_indices: dict[int, torch.Tensor]
     num_samples: int
-    nnz: Optional[Sequence[int]]
+    element_weights: Optional[torch.Tensor]
     replacement: bool
-    # when we use, just set weights for each classes(here is: np.ones(num_classes)), and labels of a dataset.
-    # this will result a class-balanced sampling, no matter how imbalance the labels are.
 
     def __init__(
         self,
         label_weights: Sequence[float],
-        labels: Sequence[int],
+        labels: np.ndarray,
         num_samples: int,
         replacement: bool = True,
-        element_weights: Sequence[float] = None,
+        element_weights: Optional[Sequence[float]] = None,
+        n_workers: int = None,
+        chunk_size: int = 10_000_000,  # Process 10M elements per chunk
     ) -> None:
         """
+        Initialize the sampler with parallel processing for large datasets.
 
-        :param label_weights: list(len=num_classes)[float], weights for each class.
-        :param labels: list(len=dataset_len)[int], labels of a dataset.
-        :param num_samples: number of samples.
+        Args:
+            label_weights: Weights for each class (length = number of classes)
+            labels: Class label for each dataset element (length = dataset size)
+            num_samples: Number of samples to draw
+            replacement: Whether to sample with replacement
+            element_weights: Optional weights for each element within classes
+            n_workers: Number of parallel workers to use (default: number of CPUs-1)
+            chunk_size: Size of chunks to process in parallel (default: 10M elements)
         """
-
+        print("Initializing optimized parallel weighted sampler...")
         super(LabelWeightedSampler, self).__init__(None)
-        # reweight labels from counter otherwsie same weight to labels that have many elements vs a few
-        label_weights = np.array(label_weights) * np.bincount(labels)
 
+        # Compute label weights (incorporating class frequencies)
+        # Directly use labels as numpy array without conversion
+        label_weights = np.asarray(label_weights) * np.bincount(labels)
         self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
-        self.labels = torch.as_tensor(labels, dtype=torch.int32)
-        self.element_weights = (
-            torch.as_tensor(element_weights, dtype=torch.float32)
-            if element_weights is not None
-            else None
-        )
+
+        # Store element weights if provided
+        if element_weights is not None:
+            self.element_weights = torch.as_tensor(element_weights, dtype=torch.float32)
+        else:
+            self.element_weights = None
+
         self.replacement = replacement
         self.num_samples = num_samples
-        # list of tensor.
-        self.klass_indices = [
-            (self.labels == i_klass).nonzero().squeeze(1)
-            for i_klass in range(len(label_weights))
-        ]
-        self.klass_sizes = [len(klass_indices) for klass_indices in self.klass_indices]
+
+        # Set number of workers (default to CPU count - 1, but at least 1)
+        if n_workers is None:
+            # Check if running on SLURM
+            n_workers = min(20, max(1, mp.cpu_count() - 1))
+            if "SLURM_CPUS_PER_TASK" in os.environ:
+                n_workers = min(20, max(1, int(os.environ["SLURM_CPUS_PER_TASK"]) - 1))
+
+        # Try to auto-determine optimal chunk size based on memory
+        if chunk_size is None:
+            try:
+                import psutil
+
+                # Check if running on SLURM
+                available_memory = psutil.virtual_memory().available
+                for name in [
+                    "SLURM_MEM_PER_NODE",
+                    "SLURM_MEM_PER_CPU",
+                    "SLURM_MEM_PER_GPU",
+                    "SLURM_MEM_PER_TASK",
+                ]:
+                    if name in os.environ:
+                        available_memory = (
+                            int(os.environ[name]) * 1024 * 1024
+                        )  # Convert MB to bytes
+                        break
+
+                # Use at most 50% of available memory across all workers
+                memory_per_worker = 0.5 * available_memory / n_workers
+                # Rough estimate: each label takes 4 bytes, each index 8 bytes
+                bytes_per_element = 12
+                chunk_size = min(
+                    max(1_000_000, int(memory_per_worker / bytes_per_element / 3)),
+                    10_000_000,
+                )
+                print(f"Auto-determined chunk size: {chunk_size:,} elements")
+            except (ImportError, KeyError):
+                chunk_size = 10_000_000
+                print(f"Using default chunk size: {chunk_size:,} elements")
+
+        # Parallelize the class indices building
+        print(f"Building class indices in parallel with {n_workers} workers...")
+        self.klass_indices = self._build_class_indices_parallel(
+            labels, n_workers, chunk_size
+        )
+
+        # Calculate class sizes
+        self.klass_sizes = {k: len(v) for k, v in self.klass_indices.items()}
+
+        print(f"Done initializing sampler with {len(self.klass_indices)} classes")
+
+    def _merge_chunk_results(self, results_list):
+        """Merge results from multiple chunks into a single dictionary.
+
+        Args:
+            results_list: list of dictionaries mapping class labels to index arrays
+
+        Returns:
+            merged dictionary with PyTorch tensors
+        """
+        merged = {}
+
+        # Collect all labels across all chunks
+        all_labels = set()
+        for chunk_result in results_list:
+            all_labels.update(chunk_result.keys())
+
+        # For each unique label
+        for label in all_labels:
+            # Collect indices from all chunks where this label appears
+            indices_lists = [
+                chunk_result[label]
+                for chunk_result in results_list
+                if label in chunk_result
+            ]
+
+            if indices_lists:
+                # Concatenate all indices for this label
+                merged[label] = torch.tensor(
+                    np.concatenate(indices_lists), dtype=torch.long
+                )
+            else:
+                merged[label] = torch.tensor([], dtype=torch.long)
+
+        return merged
+
+    def _build_class_indices_parallel(self, labels, n_workers, chunk_size):
+        """Build class indices in parallel across multiple workers.
+
+        Args:
+            labels: array of class labels
+            n_workers: number of parallel workers
+            chunk_size: size of chunks to process
+
+        Returns:
+            dictionary mapping class labels to tensors of indices
+        """
+        n = len(labels)
+        results = []
+
+        # Create chunks of the labels array with proper sizing
+        n_chunks = (n + chunk_size - 1) // chunk_size  # Ceiling division
+        print(f"Processing {n:,} elements in {n_chunks} chunks...")
+
+        # Process in chunks to limit memory usage
+        with ProcessPoolExecutor(max_workers=n_workers) as executor:
+            # Submit chunks for processing
+            futures = []
+            for i in range(n_chunks):
+                start_idx = i * chunk_size
+                end_idx = min((i + 1) * chunk_size, n)
+                # We pass only chunk boundaries, not the data itself
+                # This avoids unnecessary copies during process creation
+                futures.append(
+                    executor.submit(
+                        self._process_chunk_with_slice,
+                        (start_idx, end_idx, labels),
+                    )
+                )
+
+            # Collect results as they complete with progress reporting
+            for future in tqdm(
+                as_completed(futures), total=len(futures), desc="Processing chunks"
+            ):
+                results.append(future.result())
+
+        # Merge results from all chunks
+        print("Merging results from all chunks...")
+        merged_results = self._merge_chunk_results(results)
+
+        return merged_results
+
+    def _process_chunk_with_slice(self, slice_info):
+        """Process a slice of the labels array by indices.
+
+        Args:
+            slice_info: tuple of (start_idx, end_idx, labels_array) where
+                       start_idx and end_idx define the slice to process
+
+        Returns:
+            dict mapping class labels to arrays of indices
+        """
+        start_idx, end_idx, labels_array = slice_info
+
+        # We're processing a slice of the original array
+        labels_slice = labels_array[start_idx:end_idx]
+        chunk_indices = {}
+
+        # Create a direct map of indices
+        indices = np.arange(start_idx, end_idx)
+
+        # Get unique labels in this slice for more efficient processing
+        unique_labels = np.unique(labels_slice)
+
+        # For each valid label, find its indices
+        for label in unique_labels:
+            # Find positions where this label appears (using direct boolean indexing)
+            label_mask = labels_slice == label
+            chunk_indices[int(label)] = indices[label_mask]
+
+        return chunk_indices
 
     def __iter__(self):
+        # Sample classes according to their weights
         sample_labels = torch.multinomial(
             self.label_weights,
             num_samples=self.num_samples,
             replacement=True,
         )
-        sample_indices = torch.empty_like(sample_labels)
-        for i_klass, klass_index in enumerate(self.klass_indices):
+
+        # Get counts of each class in sample_labels
+        unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
+
+        # Initialize result tensor
+        result_indices = []
+
+        # Process only the classes that were actually sampled
+        for label, count in zip(unique_samples.tolist(), sample_counts.tolist()):
+            if label not in self.klass_indices:
+                continue
+
+            klass_index = self.klass_indices[label]
             if klass_index.numel() == 0:
                 continue
-            left_inds = (sample_labels == i_klass).nonzero().squeeze(1)
-            if len(left_inds) == 0:
-                continue
+
+            # Sample elements from this class
             if self.element_weights is not None:
-                right_inds = torch.multinomial(
-                    self.element_weights[klass_index],
-                    num_samples=len(klass_index)
-                    if not self.replacement and len(klass_index) < len(left_inds)
-                    else len(left_inds),
-                    replacement=self.replacement,
-                )
+                # Use element weights for this class
+                if self.replacement:
+                    # With replacement - can sample as many as needed
+                    right_inds = torch.multinomial(
+                        self.element_weights[klass_index],
+                        num_samples=count,
+                        replacement=True,
+                    )
+                else:
+                    # Without replacement - can only sample up to class size
+                    num_to_sample = min(count, len(klass_index))
+                    right_inds = torch.multinomial(
+                        self.element_weights[klass_index],
+                        num_samples=num_to_sample,
+                        replacement=False,
+                    )
             elif self.replacement:
-                right_inds = torch.randint(
-                    len(klass_index),
-                    size=(len(left_inds),),
-                )
+                # Random sampling with replacement
+                right_inds = torch.randint(len(klass_index), size=(count,))
             else:
-                maxelem = (
-                    len(left_inds)
-                    if len(left_inds) < len(klass_index)
-                    else len(klass_index)
-                )
-                right_inds = torch.randperm(len(klass_index))[:maxelem]
-            sample_indices[left_inds[: len(right_inds)]] = klass_index[right_inds]
-            # if there are more left_inds than right_inds, we need to drop the extra ones
-            if len(right_inds) < len(left_inds):
-                sample_indices[left_inds[len(right_inds) :]] = -1
-        # drop all -1
-        sample_indices = sample_indices[sample_indices != -1]
-        # torch shuffle
-        sample_indices = sample_indices[torch.randperm(len(sample_indices))]
-        self.num_samples = len(sample_indices)
-        yield from iter(sample_indices.tolist())
+                # Without replacement - can only sample up to class size
+                num_to_sample = min(count, len(klass_index))
+                right_inds = torch.randperm(len(klass_index))[:num_to_sample]
+
+            # Get actual indices
+            sampled_indices = klass_index[right_inds]
+            result_indices.append(sampled_indices)
+
+        # Combine all indices
+        if result_indices:
+            combined_indices = torch.cat(result_indices)
+
+            # Shuffle the combined indices
+            shuffled_indices = combined_indices[torch.randperm(len(combined_indices))]
+            self.num_samples = len(shuffled_indices)
+            yield from shuffled_indices.tolist()
+        else:
+            self.num_samples = 0
+            yield from iter([])
 
     def __len__(self):
         return self.num_samples
