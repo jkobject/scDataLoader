@@ -271,7 +271,6 @@ class Preprocessor:
             var = ens_var
 
         adata = adata[:, var.index]
-        #        var = var.sort_values(by="ensembl_gene_id").set_index("ensembl_gene_id")
         # Update adata with combined genes
         if "ensembl_gene_id" in var.columns:
             adata.var = var.set_index("ensembl_gene_id")
