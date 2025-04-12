@@ -10,7 +10,9 @@ import scanpy as sc
 from anndata import AnnData, read_h5ad
 from scipy.sparse import csr_matrix
 from upath import UPath
-
+import gc
+from django.db.utils import OperationalError
+import time
 from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
@@ -142,10 +144,6 @@ class Preprocessor:
             raise ValueError(
                 "organism_ontology_term_id not found in adata.obs, you need to add an ontology term id for the organism of your anndata"
             )
-        if not adata[0].var.index.str.contains("ENS").any() and not self.is_symbol:
-            raise ValueError(
-                "gene names in the `var.index` field of your anndata should map to the ensembl_gene nomenclature else set `is_symbol` to True if using hugo symbols"
-            )
         if adata.obs["organism_ontology_term_id"].iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
@@ -161,8 +159,8 @@ class Preprocessor:
                 if np.abs(adata[:50_000].X.astype(int) - adata[:50_000].X).sum():
                     print("X was not raw counts, using 'counts' layer")
                     adata.X = adata.layers["counts"].copy()
-            print("Dropping layers: ", adata.layers.keys())
             if not self.keepdata:
+                print("Dropping layers: ", adata.layers.keys())
                 del adata.layers
         if len(adata.varm.keys()) > 0 and not self.keepdata:
             del adata.varm
@@ -213,13 +211,10 @@ class Preprocessor:
                 min_genes=self.min_nnz_genes,
             )
         # if lost > 50% of the dataset, drop dataset
-        # load the genes
-        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
-
-        if prevsize / adata.shape[0] > self.maxdropamount:
+        if prevsize / (adata.shape[0] + 1) > self.maxdropamount:
             raise Exception(
                 "Dataset dropped due to low expressed genes and unexpressed cells: factor of "
-                + str(prevsize / adata.shape[0])
+                + str(prevsize / (adata.shape[0] + 1))
             )
         if adata.shape[0] < self.min_dataset_size:
             raise Exception(
@@ -232,65 +227,48 @@ class Preprocessor:
             )
         )
 
-        # Check if we have a mix of gene names and ensembl IDs
-        has_ens = adata.var.index.str.match(r"ENS.*\d{6,}$").any()
-        all_ens = adata.var.index.str.match(r"ENS.*\d{6,}$").all()
-
-        if not has_ens:
-            print("No ENS genes found, assuming gene symbols...")
-        elif not all_ens:
-            print("Mix of ENS and gene symbols found, converting all to ENS IDs...")
-
+        # load the genes
+        genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
         genesdf["ensembl_gene_id"] = genesdf.index
 
         # For genes that are already ENS IDs, use them directly
-        ens_mask = adata.var.index.str.match(r"ENS.*\d{6,}$")
-        symbol_mask = ~ens_mask
-
+        prev_size = adata.shape[1]
         # Handle symbol genes
-        if symbol_mask.any():
-            symbol_var = adata.var[symbol_mask].merge(
+        if self.is_symbol:
+            new_var = adata.var.merge(
                 genesdf.drop_duplicates("symbol").set_index("symbol", drop=False),
                 left_index=True,
                 right_index=True,
                 how="inner",
             )
-
-        # Handle ENS genes
-        if ens_mask.any():
-            ens_var = adata.var[ens_mask].merge(
+            new_var["symbol"] = new_var.index
+            adata = adata[:, new_var.index]
+            new_var.index = new_var["ensembl_gene_id"]
+        else:
+            new_var = adata.var.merge(
                 genesdf, left_index=True, right_index=True, how="inner"
             )
+            adata = adata[:, new_var.index]
+        print(f"Removed {prev_size - adata.shape[1]} genes not known to the ontology")
+        prev_size = adata.shape[1]
 
-        # Combine and sort
-        if symbol_mask.any() and ens_mask.any():
-            var = pd.concat([symbol_var, ens_var])
-        elif symbol_mask.any():
-            var = symbol_var
-        else:
-            var = ens_var
-
-        adata = adata[:, var.index]
-        # Update adata with combined genes
-        if "ensembl_gene_id" in var.columns:
-            adata.var = var.set_index("ensembl_gene_id")
-        else:
-            adata.var = var
+        adata.var = new_var
         # Drop duplicate genes, keeping first occurrence
         adata = adata[:, ~adata.var.index.duplicated(keep="first")]
+        print(f"Removed {prev_size - adata.shape[1]} duplicate genes")
 
-        intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
-        print(f"Removed {len(adata.var.index) - len(intersect_genes)} genes.")
-        if len(intersect_genes) < self.min_valid_genes_id:
+        if adata.shape[1] < self.min_valid_genes_id:
             raise Exception("Dataset dropped due to too many genes not mapping to it")
-        adata = adata[:, list(intersect_genes)]
-        # marking unseen genes
+
         unseen = set(genesdf.index) - set(adata.var.index)
         # adding them to adata
         emptyda = ad.AnnData(
             csr_matrix((adata.shape[0], len(unseen)), dtype=np.float32),
             var=pd.DataFrame(index=list(unseen)),
             obs=pd.DataFrame(index=adata.obs.index),
+        )
+        print(
+            f"Added {len(unseen)} genes in the ontology but not present in the dataset"
         )
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
@@ -329,7 +307,7 @@ class Preprocessor:
         # QC
 
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
-        print("startin QC")
+        print("starting QC")
         sc.pp.calculate_qc_metrics(
             adata, qc_vars=["mt", "ribo", "hb"], inplace=True, percent_top=[20]
         )
@@ -347,7 +325,7 @@ class Preprocessor:
         )
         total_outliers = (adata.obs["outlier"] | adata.obs["mt_outlier"]).sum()
         total_cells = adata.shape[0]
-        percentage_outliers = (total_outliers / total_cells) * 100
+        percentage_outliers = (total_outliers / (total_cells + 1)) * 100
         print(
             f"Seeing {total_outliers} outliers ({percentage_outliers:.2f}% of total dataset):"
         )
@@ -394,7 +372,7 @@ class Preprocessor:
                         subset=False,
                         layer="norm",
                     )
-
+            print("starting PCA")
             adata.obsm["X_pca"] = sc.pp.pca(
                 adata.layers["norm"][:, adata.var.highly_variable]
                 if "highly_variable" in adata.var.columns
@@ -463,13 +441,13 @@ class LaminPreprocessor(Preprocessor):
         *args,
         cache: bool = True,
         keep_files: bool = True,
-        force_preloaded: bool = False,
+        force_lamin_cache: bool = False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.cache = cache
         self.keep_files = keep_files
-        self.force_preloaded = force_preloaded
+        self.force_lamin_cache = force_lamin_cache
 
     def __call__(
         self,
@@ -504,10 +482,13 @@ class LaminPreprocessor(Preprocessor):
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
                 print(file)
+                if self.force_lamin_cache:
+                    path = cache_path(file)
+                    backed = read_h5ad(path, backed="r")
+                else:
+                    # file.cache()
+                    backed = file.open()
 
-                _ = cache_path(file) if self.force_preloaded else file.cache()
-                backed = file.open()
-                # backed = read_h5ad(path, backed="r")
                 if "is_primary_data" in backed.obs.columns:
                     if backed.obs.is_primary_data.sum() == 0:
                         print(f"{file.key} only contains non primary cells.. dropping")
@@ -555,37 +536,52 @@ class LaminPreprocessor(Preprocessor):
                                 block,
                                 dataset_id=file.stem_uid + "_p" + str(j),
                             )
-                            myfile = ln.Artifact.from_anndata(
-                                block,
-                                description=description
-                                + " n"
-                                + str(i)
-                                + " p"
-                                + str(j)
-                                + " ( revises file "
-                                + str(file.stem_uid)
-                                + " )",
-                                version=version,
-                            )
-                            myfile.save()
-
+                            saved = False
+                            while not saved:
+                                try:
+                                    myfile = ln.Artifact.from_anndata(
+                                        block,
+                                        description=description
+                                        + " n"
+                                        + str(i)
+                                        + " p"
+                                        + str(j)
+                                        + " ( revises file "
+                                        + str(file.stem_uid)
+                                        + " )",
+                                        version=version,
+                                    )
+                                    myfile.save()
+                                    saved = True
+                                except OperationalError:
+                                    print(
+                                        "Database locked, waiting 30 seconds and retrying..."
+                                    )
+                                    time.sleep(10)
                             if self.keep_files:
                                 files.append(myfile)
                                 del block
                             else:
                                 del myfile
                                 del block
-                            gc.collect()
-
                     else:
                         adata = super().__call__(adata, dataset_id=file.stem_uid)
-                        myfile = ln.Artifact.from_anndata(
-                            adata,
-                            revises=file,
-                            description=description + " p" + str(i),
-                            version=version,
-                        )
-                        myfile.save()
+                        saved = False
+                        while not saved:
+                            try:
+                                myfile = ln.Artifact.from_anndata(
+                                    adata,
+                                    revises=file,
+                                    description=description + " p" + str(i),
+                                    version=version,
+                                )
+                                myfile.save()
+                                saved = True
+                            except OperationalError:
+                                print(
+                                    "Database locked, waiting 10 seconds and retrying..."
+                                )
+                                time.sleep(10)
                         if self.keep_files:
                             files.append(myfile)
                             del adata
@@ -605,7 +601,7 @@ class LaminPreprocessor(Preprocessor):
                         continue
                     else:
                         raise e
-
+                gc.collect()
                 # issues with KLlggfw6I6lvmbqiZm46
             if self.keep_files:
                 # Reconstruct collection using keys
@@ -772,6 +768,7 @@ def additional_postprocess(adata):
     #    sc.external.pp.harmony_integrate(adata, key="batches")
     #    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
     # else:
+    print("starting post processing")
     sc.pp.neighbors(adata, use_rep="X_pca")
     sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
     sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
@@ -893,7 +890,8 @@ def additional_postprocess(adata):
             "development_stage_ontology_term_id"
         ].map(relabel)
     else:
-        raise ValueError("organism not supported")
+        # raise ValueError("organism not supported")
+        print("organism not supported for age labels")
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
     # terminal_states = palantir.utils.find_terminal_states(

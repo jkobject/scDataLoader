@@ -16,7 +16,6 @@ from torch.utils.data import Dataset as torchDataset
 
 from scdataloader.utils import get_ancestry_mapping, load_genes
 
-from .config import LABELS_TOADD
 from .mapped import MappedCollection, _Connect
 
 
@@ -261,11 +260,13 @@ class Dataset(torchDataset):
                     )
                 )
             cats = set(self.mapped_dataset.get_merged_categories(clss))
-            addition = set(LABELS_TOADD.get(clss, {}).values())
-            cats |= addition
             groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
             for i, j in groupings.items():
                 if len(j) == 0:
+                    # that should not happen
+                    import pdb
+
+                    pdb.set_trace()
                     groupings.pop(i)
             self.labels_groupings[clss] = groupings
             if clss in self.clss_to_predict:
@@ -280,11 +281,12 @@ class Dataset(torchDataset):
                 )
 
                 for i, v in enumerate(
-                    addition - set(self.mapped_dataset.encoders[clss].keys())
+                    set(groupings.keys())
+                    - set(self.mapped_dataset.encoders[clss].keys())
                 ):
                     self.mapped_dataset.encoders[clss].update({v: mlength + i})
+                
                 # we need to change the ordering so that the things that can't be predicted appear afterward
-
                 self.class_topred[clss] = leaf_labels
                 c = 0
                 update = {}
