@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 from torch import Tensor, long
 
-from .utils import downsample_profile, load_genes
+from .utils import load_genes
 
 
 class Collator:
@@ -22,8 +22,6 @@ class Collator:
         organism_name: str = "organism_ontology_term_id",
         class_names: list[str] = [],
         genelist: list[str] = [],
-        downsample: Optional[float] = None,  # don't use it for training!
-        save_output: Optional[str] = None,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -57,10 +55,6 @@ class Collator:
             class_names (list, optional): List of other classes to be considered. Defaults to [].
             genelist (list, optional): List of genes to be considered. Defaults to [].
                 If [] all genes will be considered
-            downsample (float, optional): Downsample the profile to a certain number of cells. Defaults to None.
-                This is usually done by the scPRINT model during training but this option allows you to do it directly from the collator
-            save_output (str, optional): If not None, saves the output to a file. Defaults to None.
-                This is mainly for debugging purposes
         """
         self.organisms = organisms
         self.genedf = load_genes(organisms)
@@ -75,10 +69,8 @@ class Collator:
         self.organism_name = organism_name
         self.tp_name = tp_name
         self.class_names = class_names
-        self.save_output = save_output
         self.start_idx = {}
         self.accepted_genes = {}
-        self.downsample = downsample
         self.to_subset = {}
         self._setup(org_to_id, valid_genes, genelist)
 
@@ -256,13 +248,6 @@ class Collator:
             ret.update({"knn_cells": Tensor(knn_cells)})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
-        if self.downsample is not None:
-            ret["x"] = downsample_profile(ret["x"], self.downsample)
-        if self.save_output is not None:
-            with open(self.save_output, "a") as f:
-                np.savetxt(f, ret["x"].numpy())
-            with open(self.save_output + "_loc", "a") as f:
-                np.savetxt(f, gene_locs)
         return ret
 
 
