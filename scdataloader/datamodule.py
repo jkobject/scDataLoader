@@ -98,7 +98,7 @@ class DataModule(L.LightningDataModule):
         """
         if collection_name is not None:
             mdataset = Dataset(
-                ln.Collection.filter(name=collection_name).first(),
+                ln.Collection.filter(name=collection_name, is_latest=True).first(),
                 organisms=organisms,
                 clss_to_predict=clss_to_predict,
                 hierarchical_clss=hierarchical_clss,
@@ -142,7 +142,6 @@ class DataModule(L.LightningDataModule):
                 biomart["pos"] = c
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
-
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
                 pd.read_parquet(gene_embeddings), how="inner"
@@ -547,11 +546,11 @@ class LabelWeightedSampler(Sampler[int]):
                 bytes_per_element = 12
                 chunk_size = min(
                     max(1_000_000, int(memory_per_worker / bytes_per_element / 3)),
-                    10_000_000,
+                    5_000_000,
                 )
                 print(f"Auto-determined chunk size: {chunk_size:,} elements")
             except (ImportError, KeyError):
-                chunk_size = 10_000_000
+                chunk_size = 5_000_000
                 print(f"Using default chunk size: {chunk_size:,} elements")
 
         # Parallelize the class indices building

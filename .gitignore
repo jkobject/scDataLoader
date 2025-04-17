@@ -137,3 +137,4 @@ figures/add_postp_clust.py
 figures/age_relabel.py
 notebooks/figures/umap_*.png
 notebooks/data/
+data/gene_names/

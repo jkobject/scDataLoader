@@ -113,6 +113,7 @@ COARSE_ASSAY = {
 
 
 MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
+    # under-1-year-old stage
     "HsapDv:0010000": [
         "MmusDv:0000092",  # postnatal stage
     ],

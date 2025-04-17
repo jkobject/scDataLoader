@@ -98,7 +98,7 @@ class Dataset(torchDataset):
             self.genedf = load_genes(self.organisms)
 
         self.genedf.columns = self.genedf.columns.astype(str)
-        self.check_aligned_vars()
+        # self.check_aligned_vars()
 
     def check_aligned_vars(self):
         vars = self.genedf.index.tolist()
@@ -285,7 +285,7 @@ class Dataset(torchDataset):
                     - set(self.mapped_dataset.encoders[clss].keys())
                 ):
                     self.mapped_dataset.encoders[clss].update({v: mlength + i})
-                
+
                 # we need to change the ordering so that the things that can't be predicted appear afterward
                 self.class_topred[clss] = leaf_labels
                 c = 0

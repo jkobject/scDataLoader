@@ -24,6 +24,7 @@ from lamindb.core.storage._anndata_accessor import (
     registry,
 )
 from lamindb_setup.core.upath import UPath
+from tqdm import tqdm
 
 if TYPE_CHECKING:
     from lamindb_setup.core.types import UPathStr
@@ -190,7 +191,7 @@ class MappedCollection:
 
         self.n_obs_list = []
         self.indices_list = []
-        for i, storage in enumerate(self.storages):
+        for i, storage in tqdm(enumerate(self.storages)):
             with _Connect(storage) as store:
                 X = store["X"]
                 store_path = self.path_list[i]
@@ -265,9 +266,14 @@ class MappedCollection:
         self._cache_cats = {}
         for label in obs_keys:
             self._cache_cats[label] = []
-            for storage in self.storages:
+            for storage in tqdm(self.storages):
                 with _Connect(storage) as store:
-                    cats = self._get_categories(store, label)
+                    try:
+                        cats = self._get_categories(store, label)
+                    except KeyError:
+                        cats = np.array(["unknown"])
+                    if cats is None:
+                        cats = np.array(["unknown"])
                     if cats is not None:
                         cats = (
                             _decode(cats) if isinstance(cats[0], bytes) else cats[...]
@@ -577,7 +583,11 @@ class MappedCollection:
     def get_merged_categories(self, label_key: str):
         """Get merged categories for `label_key` from all `.obs`."""
         cats_merge = set()
-        for i, storage in enumerate(self.storages):
+        for i, storage in tqdm(
+            enumerate(self.storages),
+            total=len(self.storages),
+            desc="merging all " + label_key + " categories",
+        ):
             with _Connect(storage) as store:
                 if label_key in self._cache_cats:
                     cats = self._cache_cats[label_key][i]

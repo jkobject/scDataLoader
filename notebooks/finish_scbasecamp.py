@@ -2,7 +2,8 @@ from scdataloader import Preprocessor
 from scdataloader.preprocess import additional_postprocess, LaminPreprocessor
 import pandas as pd
 import lamindb as ln
-
+from upath import UPath
+from anndata import AnnData, read_h5ad
 
 col = ln.Collection.filter(key__contains="scbasecamp").first()
 
@@ -38,20 +39,46 @@ def preprocess(adata):
     return adata
 
 
-preprocessor = LaminPreprocessor(
+def cache_path(artifact):
+    cloud_path = UPath(artifact.storage.root) / artifact.key
+    cache_path = ln.setup.settings.paths.cloud_to_local_no_update(cloud_path)
+    return cache_path
+
+
+preprocessor = Preprocessor(
     is_symbol=False,
     keepdata=True,  # velocyto stuff to keep
     organisms=list(set(mdf.organism_ontology_term_id.unique())),
     additional_preprocess=preprocess,
     additional_postprocess=additional_postprocess,
-    force_lamin_cache=True,  # we have loaded them already (see comments above)
-    keep_files=False,  # we will reach a memory issue otherwise (only works for small sets of data)
 )
 
-preprocessor(
-    col,
-    name="preprocessed dataset",
-    description="scbasecamp preprocessed dataset",
-    start_at=25900,  # to continue from the previous stopped point
-    version="2",
-)
+f = [
+    int(i.split(" p")[-1])
+    for i in ln.Artifact.filter(description__contains="scbasecamp", version="2")
+    .df()
+    .description
+]
+print(len(f))
+unprocessed = list(set(list(range(27253))) - set(f))
+unprocessed.sort()
+print(len(unprocessed))
+elems = col.artifacts.filter()
+for n, i in enumerate(unprocessed[1700:1800]):
+    print(n, i)
+    path = cache_path(elems[i])
+    adata = read_h5ad(path)
+    print(adata)
+    try:
+        adata = preprocessor(adata, dataset_id=elems[i].stem_uid)
+        print("done preprocess")
+        myfile = ln.Artifact.from_anndata(
+            adata,
+            description="scbasecamp preprocessed p" + str(i),
+            version="2",
+        )
+        myfile.save()
+        del myfile
+        del adata
+    except Exception as e:
+        print(e)
