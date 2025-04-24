@@ -653,6 +653,8 @@ class MappedCollection:
         """Get labels."""
         codes = self._get_codes(storage, label_key)
         labels = _decode(codes) if isinstance(codes[0], bytes) else codes
+        if labels.dtype == bool:
+            labels = labels.astype(int)
         if storage_idx is not None and label_key in self._cache_cats:
             cats = self._cache_cats[label_key][storage_idx]
         else:

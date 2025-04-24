@@ -31,7 +31,6 @@ class DataModule(L.LightningDataModule):
         self,
         collection_name: str,
         clss_to_weight: list = ["organism_ontology_term_id"],
-        organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 10,
         n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
@@ -96,16 +95,19 @@ class DataModule(L.LightningDataModule):
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
-        if collection_name is not None:
-            mdataset = Dataset(
-                ln.Collection.filter(name=collection_name, is_latest=True).first(),
-                organisms=organisms,
-                clss_to_predict=clss_to_predict,
-                hierarchical_clss=hierarchical_clss,
-                metacell_mode=metacell_mode,
-                get_knn_cells=get_knn_cells,
+        if "organism_ontology_term_id" not in clss_to_predict:
+            raise ValueError(
+                "need 'organism_ontology_term_id' in the set of classes at least"
             )
+        mdataset = Dataset(
+            ln.Collection.filter(name=collection_name, is_latest=True).first(),
+            clss_to_predict=clss_to_predict,
+            hierarchical_clss=hierarchical_clss,
+            metacell_mode=metacell_mode,
+            get_knn_cells=get_knn_cells,
+        )
         # and location
+        organisms = mdataset.class_topred["organism_ontology_term_id"]
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
@@ -144,7 +146,7 @@ class DataModule(L.LightningDataModule):
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
-                pd.read_parquet(gene_embeddings), how="inner"
+                pd.read_parquet(gene_embeddings).loc[:, :2], how="inner"
             )
             if do_gene_pos:
                 self.gene_pos = mdataset.genedf["pos"].tolist()
@@ -163,6 +165,7 @@ class DataModule(L.LightningDataModule):
                 organism_name=organism_name,
                 class_names=clss_to_predict,
             )
+        self.organisms = organisms
         self.validation_split = validation_split
         self.test_split = test_split
         self.dataset = mdataset
@@ -426,10 +429,6 @@ class DataModule(L.LightningDataModule):
             # Calculate bytes per element (int32 = 4 bytes)
             bytes_per_element = 4
 
-            # Estimate indices memory (worst case: each chunk is all one class)
-            # Each index requires 8 bytes (int64)
-            estimated_indices_memory = 8 * labels_size
-
             # Calculate memory per worker
             memory_per_worker = available_memory * max_memory_fraction / n_workers
 
@@ -556,7 +555,7 @@ class LabelWeightedSampler(Sampler[int]):
         # Parallelize the class indices building
         print(f"Building class indices in parallel with {n_workers} workers...")
         self.klass_indices = self._build_class_indices_parallel(
-            labels, n_workers, chunk_size
+            labels, chunk_size, n_workers
         )
 
         # Calculate class sizes
@@ -599,7 +598,7 @@ class LabelWeightedSampler(Sampler[int]):
 
         return merged
 
-    def _build_class_indices_parallel(self, labels, n_workers, chunk_size):
+    def _build_class_indices_parallel(self, labels, chunk_size, n_workers=None):
         """Build class indices in parallel across multiple workers.
 
         Args:
@@ -682,7 +681,7 @@ class LabelWeightedSampler(Sampler[int]):
             num_samples=self.num_samples,
             replacement=True,
         )
-
+        print("sampling a new batch of size", self.num_samples)
         # Get counts of each class in sample_labels
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
 
