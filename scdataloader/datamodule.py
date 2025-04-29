@@ -68,7 +68,6 @@ class DataModule(L.LightningDataModule):
 
         Args:
             collection_name (str): The lamindb collection to be used.
-            organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
             weight_scaler (int, optional): how much more you will see the most present vs less present category.
             n_samples_per_epoch (int, optional): The number of samples to include in the training set for each epoch. Defaults to 2_000_000.
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
@@ -347,10 +346,7 @@ class DataModule(L.LightningDataModule):
             print("Setting up the parallel train sampler...")
 
             # Get number of workers from kwargs, environment variable, or use a reasonable default
-            n_workers = kwargs.pop(
-                "sampler_workers",
-                int(os.environ.get("SAMPLER_WORKERS", max(1, mp.cpu_count() - 1))),
-            )
+            n_workers = kwargs.pop("sampler_workers", None)
 
             # Let the sampler auto-determine chunk size
             chunk_size = kwargs.pop("sampler_chunk_size", None)
