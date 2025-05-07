@@ -86,7 +86,7 @@ class Collator:
         )
         if len(valid_genes) > 0:
             if len(set(valid_genes) - set(self.genedf.index)) > 0:
-                raise ValueError(f"Some valid genes are not in the genedf!!!")
+                print(f"Some valid genes are not in the genedf!!!")
             tot = self.genedf[self.genedf.index.isin(valid_genes)]
         else:
             tot = self.genedf
