@@ -38,8 +38,6 @@ class Dataset(torchDataset):
     ----
         lamin_dataset (lamindb.Dataset): lamin dataset to load
         genedf (pd.Dataframe): dataframe containing the genes to load
-        organisms (list[str]): list of organisms to load
-            (for now only validates the the genes map to this organism)
         obs (list[str]): list of observations to load from the Collection
         clss_to_predict (list[str]): list of observations to encode
         join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
@@ -95,7 +93,8 @@ class Dataset(torchDataset):
                 raise ValueError(
                     "need 'organism_ontology_term_id' in the set of classes if you don't provide a genedf"
                 )
-            self.organisms = self.class_topred["organism_ontology_term_id"]
+            self.organisms = list(self.class_topred["organism_ontology_term_id"])
+            self.organisms.sort()
             self.genedf = load_genes(self.organisms)
         else:
             self.organisms = None
@@ -118,6 +117,10 @@ class Dataset(torchDataset):
     @property
     def encoder(self):
         return self.mapped_dataset.encoders
+
+    @encoder.setter
+    def encoder(self, encoder):
+        self.mapped_dataset.encoders = encoder
 
     def __getitem__(self, *args, **kwargs):
         item = self.mapped_dataset.__getitem__(*args, **kwargs)

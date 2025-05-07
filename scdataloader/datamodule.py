@@ -106,7 +106,6 @@ class DataModule(L.LightningDataModule):
             get_knn_cells=get_knn_cells,
         )
         # and location
-        organisms = mdataset.class_topred["organism_ontology_term_id"]
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
@@ -116,7 +115,7 @@ class DataModule(L.LightningDataModule):
                 biomart = pd.read_parquet(do_gene_pos)
             else:
                 # and annotations
-                if organisms != ["NCBITaxon:9606"]:
+                if mdataset.organisms != ["NCBITaxon:9606"]:
                     raise ValueError(
                         "need to provide your own table as this automated function only works for humans for now"
                     )
@@ -154,7 +153,7 @@ class DataModule(L.LightningDataModule):
         # we might want to not introduce zeros and
         if use_default_col:
             kwargs["collate_fn"] = Collator(
-                organisms=organisms,
+                organisms=mdataset.organisms,
                 how=how,
                 valid_genes=mdataset.genedf.index.tolist(),
                 max_len=max_len,
@@ -164,7 +163,6 @@ class DataModule(L.LightningDataModule):
                 organism_name=organism_name,
                 class_names=clss_to_predict,
             )
-        self.organisms = organisms
         self.validation_split = validation_split
         self.test_split = test_split
         self.dataset = mdataset
@@ -243,6 +241,43 @@ class DataModule(L.LightningDataModule):
             list
         """
         return self.dataset.genedf.index.tolist()
+
+    @genes.setter
+    def genes(self, genes):
+        self.dataset.genedf = self.dataset.genedf.loc[genes]
+        self.kwargs["collate_fn"].genes = genes
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=genes,
+        )
+
+    @property
+    def encoders(self):
+        return self.dataset.encoder
+
+    @encoders.setter
+    def encoders(self, encoders):
+        self.dataset.encoder = encoders
+        self.kwargs["collate_fn"].org_to_id = encoders[
+            self.kwargs["collate_fn"].organism_name
+        ]
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=self.genes,
+        )
+
+    @property
+    def organisms(self):
+        return self.dataset.organisms
+
+    @organisms.setter
+    def organisms(self, organisms):
+        self.dataset.organisms = organisms
+        self.kwargs["collate_fn"].organisms = organisms
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=self.genes,
+        )
 
     @property
     def num_datasets(self):
