@@ -63,6 +63,7 @@ class Preprocessor:
         organisms: list[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
         use_raw: bool = True,
         keepdata: bool = False,
+        drop_non_primary: bool = False,
     ) -> None:
         """
         Initializes the preprocessor and configures the workflow steps.
@@ -110,6 +111,8 @@ class Preprocessor:
                 Defaults to False.
             keepdata (bool, optional): Determines whether to keep the data in the AnnData object.
                 Defaults to False.
+            drop_non_primary (bool, optional): Determines whether to drop non-primary cells.
+                Defaults to False.
         """
         self.filter_gene_by_counts = filter_gene_by_counts
         self.filter_cell_by_counts = filter_cell_by_counts
@@ -125,6 +128,7 @@ class Preprocessor:
         self.min_valid_genes_id = min_valid_genes_id
         self.min_nnz_genes = min_nnz_genes
         self.maxdropamount = maxdropamount
+        self.drop_non_primary = drop_non_primary
         self.madoutlier = madoutlier
         self.n_hvg_for_postp = n_hvg_for_postp
         self.pct_mt_outlier = pct_mt_outlier
@@ -138,6 +142,9 @@ class Preprocessor:
         self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
+        import pdb
+
+        pdb.set_trace()
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if "organism_ontology_term_id" not in adata[0].obs.columns:
@@ -186,7 +193,7 @@ class Preprocessor:
             # if not available count drop
         prevsize = adata.shape[0]
         # dropping non primary
-        if "is_primary_data" in adata.obs.columns:
+        if "is_primary_data" in adata.obs.columns and self.drop_non_primary:
             adata = adata[adata.obs.is_primary_data]
         if adata.shape[0] < self.min_dataset_size:
             raise Exception("Dataset dropped due to too many secondary cells")
