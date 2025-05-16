@@ -31,7 +31,6 @@ class DataModule(L.LightningDataModule):
         self,
         collection_name: str,
         clss_to_weight: list = ["organism_ontology_term_id"],
-        organisms: list = ["NCBITaxon:9606"],
         weight_scaler: int = 10,
         n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
@@ -69,7 +68,6 @@ class DataModule(L.LightningDataModule):
 
         Args:
             collection_name (str): The lamindb collection to be used.
-            organisms (list, optional): The organisms to include in the dataset. Defaults to ["NCBITaxon:9606"].
             weight_scaler (int, optional): how much more you will see the most present vs less present category.
             n_samples_per_epoch (int, optional): The number of samples to include in the training set for each epoch. Defaults to 2_000_000.
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
@@ -96,15 +94,17 @@ class DataModule(L.LightningDataModule):
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
-        if collection_name is not None:
-            mdataset = Dataset(
-                ln.Collection.filter(name=collection_name).first(),
-                organisms=organisms,
-                clss_to_predict=clss_to_predict,
-                hierarchical_clss=hierarchical_clss,
-                metacell_mode=metacell_mode,
-                get_knn_cells=get_knn_cells,
+        if "organism_ontology_term_id" not in clss_to_predict:
+            raise ValueError(
+                "need 'organism_ontology_term_id' in the set of classes at least"
             )
+        mdataset = Dataset(
+            ln.Collection.filter(name=collection_name, is_latest=True).first(),
+            clss_to_predict=clss_to_predict,
+            hierarchical_clss=hierarchical_clss,
+            metacell_mode=metacell_mode,
+            get_knn_cells=get_knn_cells,
+        )
         # and location
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
@@ -115,7 +115,7 @@ class DataModule(L.LightningDataModule):
                 biomart = pd.read_parquet(do_gene_pos)
             else:
                 # and annotations
-                if organisms != ["NCBITaxon:9606"]:
+                if mdataset.organisms != ["NCBITaxon:9606"]:
                     raise ValueError(
                         "need to provide your own table as this automated function only works for humans for now"
                     )
@@ -142,10 +142,9 @@ class DataModule(L.LightningDataModule):
                 biomart["pos"] = c
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
-
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
-                pd.read_parquet(gene_embeddings), how="inner"
+                pd.read_parquet(gene_embeddings).loc[:, :2], how="inner"
             )
             if do_gene_pos:
                 self.gene_pos = mdataset.genedf["pos"].tolist()
@@ -154,7 +153,7 @@ class DataModule(L.LightningDataModule):
         # we might want to not introduce zeros and
         if use_default_col:
             kwargs["collate_fn"] = Collator(
-                organisms=organisms,
+                organisms=mdataset.organisms,
                 how=how,
                 valid_genes=mdataset.genedf.index.tolist(),
                 max_len=max_len,
@@ -242,6 +241,43 @@ class DataModule(L.LightningDataModule):
             list
         """
         return self.dataset.genedf.index.tolist()
+
+    @genes.setter
+    def genes(self, genes):
+        self.dataset.genedf = self.dataset.genedf.loc[genes]
+        self.kwargs["collate_fn"].genes = genes
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=genes,
+        )
+
+    @property
+    def encoders(self):
+        return self.dataset.encoder
+
+    @encoders.setter
+    def encoders(self, encoders):
+        self.dataset.encoder = encoders
+        self.kwargs["collate_fn"].org_to_id = encoders[
+            self.kwargs["collate_fn"].organism_name
+        ]
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=self.genes,
+        )
+
+    @property
+    def organisms(self):
+        return self.dataset.organisms
+
+    @organisms.setter
+    def organisms(self, organisms):
+        self.dataset.organisms = organisms
+        self.kwargs["collate_fn"].organisms = organisms
+        self.kwargs["collate_fn"]._setup(
+            org_to_id=self.kwargs["collate_fn"].org_to_id,
+            valid_genes=self.genes,
+        )
 
     @property
     def num_datasets(self):
@@ -345,10 +381,7 @@ class DataModule(L.LightningDataModule):
             print("Setting up the parallel train sampler...")
 
             # Get number of workers from kwargs, environment variable, or use a reasonable default
-            n_workers = kwargs.pop(
-                "sampler_workers",
-                int(os.environ.get("SAMPLER_WORKERS", max(1, mp.cpu_count() - 1))),
-            )
+            n_workers = kwargs.pop("sampler_workers", None)
 
             # Let the sampler auto-determine chunk size
             chunk_size = kwargs.pop("sampler_chunk_size", None)
@@ -426,10 +459,6 @@ class DataModule(L.LightningDataModule):
 
             # Calculate bytes per element (int32 = 4 bytes)
             bytes_per_element = 4
-
-            # Estimate indices memory (worst case: each chunk is all one class)
-            # Each index requires 8 bytes (int64)
-            estimated_indices_memory = 8 * labels_size
 
             # Calculate memory per worker
             memory_per_worker = available_memory * max_memory_fraction / n_workers
@@ -547,17 +576,17 @@ class LabelWeightedSampler(Sampler[int]):
                 bytes_per_element = 12
                 chunk_size = min(
                     max(1_000_000, int(memory_per_worker / bytes_per_element / 3)),
-                    10_000_000,
+                    5_000_000,
                 )
                 print(f"Auto-determined chunk size: {chunk_size:,} elements")
             except (ImportError, KeyError):
-                chunk_size = 10_000_000
+                chunk_size = 5_000_000
                 print(f"Using default chunk size: {chunk_size:,} elements")
 
         # Parallelize the class indices building
         print(f"Building class indices in parallel with {n_workers} workers...")
         self.klass_indices = self._build_class_indices_parallel(
-            labels, n_workers, chunk_size
+            labels, chunk_size, n_workers
         )
 
         # Calculate class sizes
@@ -600,7 +629,7 @@ class LabelWeightedSampler(Sampler[int]):
 
         return merged
 
-    def _build_class_indices_parallel(self, labels, n_workers, chunk_size):
+    def _build_class_indices_parallel(self, labels, chunk_size, n_workers=None):
         """Build class indices in parallel across multiple workers.
 
         Args:
@@ -683,7 +712,7 @@ class LabelWeightedSampler(Sampler[int]):
             num_samples=self.num_samples,
             replacement=True,
         )
-
+        print("sampling a new batch of size", self.num_samples)
         # Get counts of each class in sample_labels
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
 

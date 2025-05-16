@@ -38,8 +38,6 @@ class Dataset(torchDataset):
     ----
         lamin_dataset (lamindb.Dataset): lamin dataset to load
         genedf (pd.Dataframe): dataframe containing the genes to load
-        organisms (list[str]): list of organisms to load
-            (for now only validates the the genes map to this organism)
         obs (list[str]): list of observations to load from the Collection
         clss_to_predict (list[str]): list of observations to encode
         join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
@@ -48,9 +46,6 @@ class Dataset(torchDataset):
 
     lamin_dataset: ln.Collection
     genedf: Optional[pd.DataFrame] = None
-    organisms: Optional[Union[list[str], str]] = field(
-        default_factory=["NCBITaxon:9606", "NCBITaxon:10090"]
-    )
     # set of obs to prepare for prediction (encode)
     clss_to_predict: Optional[list[str]] = field(default_factory=list)
     # set of obs that need to be hierarchically prepared
@@ -93,12 +88,19 @@ class Dataset(torchDataset):
                         self.class_topred[clss] -= set(
                             [self.mapped_dataset.unknown_label]
                         )
-
         if self.genedf is None:
+            if "organism_ontology_term_id" not in self.clss_to_predict:
+                raise ValueError(
+                    "need 'organism_ontology_term_id' in the set of classes if you don't provide a genedf"
+                )
+            self.organisms = list(self.class_topred["organism_ontology_term_id"])
+            self.organisms.sort()
             self.genedf = load_genes(self.organisms)
+        else:
+            self.organisms = None
 
         self.genedf.columns = self.genedf.columns.astype(str)
-        self.check_aligned_vars()
+        # self.check_aligned_vars()
 
     def check_aligned_vars(self):
         vars = self.genedf.index.tolist()
@@ -116,6 +118,10 @@ class Dataset(torchDataset):
     def encoder(self):
         return self.mapped_dataset.encoders
 
+    @encoder.setter
+    def encoder(self, encoder):
+        self.mapped_dataset.encoders = encoder
+
     def __getitem__(self, *args, **kwargs):
         item = self.mapped_dataset.__getitem__(*args, **kwargs)
         return item
@@ -131,7 +137,11 @@ class Dataset(torchDataset):
             + "     {} genes\n".format(self.genedf.shape[0])
             + "     {} clss_to_predict\n".format(len(self.clss_to_predict))
             + "     {} hierarchical_clss\n".format(len(self.hierarchical_clss))
-            + "     {} organisms\n".format(len(self.organisms))
+            + (
+                "     {} organisms\n".format(len(self.organisms))
+                if self.organisms is not None
+                else ""
+            )
             + (
                 "dataset contains {} classes to predict\n".format(
                     sum([len(self.class_topred[i]) for i in self.class_topred])
@@ -285,7 +295,7 @@ class Dataset(torchDataset):
                     - set(self.mapped_dataset.encoders[clss].keys())
                 ):
                     self.mapped_dataset.encoders[clss].update({v: mlength + i})
-                
+
                 # we need to change the ordering so that the things that can't be predicted appear afterward
                 self.class_topred[clss] = leaf_labels
                 c = 0

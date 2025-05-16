@@ -84,16 +84,17 @@ class Collator:
             if org_to_id is not None
             else set(self.organisms)
         )
+        if len(valid_genes) > 0:
+            if len(set(valid_genes) - set(self.genedf.index)) > 0:
+                print(f"Some valid genes are not in the genedf!!!")
+            tot = self.genedf[self.genedf.index.isin(valid_genes)]
+        else:
+            tot = self.genedf
         for organism in self.organisms:
-            ogenedf = self.genedf[self.genedf.organism == organism]
-            if len(valid_genes) > 0:
-                # if len(set(valid_genes) - set(self.genedf.index)) > 0:
-                #     raise ValueError(f"Some valid genes are not in the genedf!!!")
-                tot = self.genedf[self.genedf.index.isin(valid_genes)]
-            else:
-                tot = self.genedf
             org = org_to_id[organism] if org_to_id is not None else organism
             self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
+
+            ogenedf = self.genedf[self.genedf.organism == organism]
             if len(valid_genes) > 0:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
             if len(genelist) > 0:
