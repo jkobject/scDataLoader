@@ -26,11 +26,12 @@ def preprocess(adata):
     adata.obs["sex"] = "unknown"
     adata.obs["sex_ontology_term_id"] = "unknown"
     adata.obs["age"] = "unknown"
+    adata.obs["age_group"] = "unknown"
     adata.obs["development_stage_ontology_term_id"] = "unknown"
     adata.obs["self_reported_ethnicity_ontology_term_id"] = "unknown"
     adata.obs["ethnicity"] = "unknown"
     adata.obs["is_primary_data"] = True
-    adata.obs["cell_culture"] = True
+    adata.obs["cell_culture"] = "True"
     if "gene_ids" in adata.var.columns:
         adata.var.symbol = adata.var.index
         adata.var["ensembl_ontology_term_id"] = adata.var["gene_ids"]

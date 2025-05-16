@@ -181,6 +181,7 @@ class DataModule(L.LightningDataModule):
         self.test_datasets = []
         self.test_idx = []
         super().__init__()
+        print("finished init")
 
     def __repr__(self):
         return (
@@ -377,28 +378,31 @@ class DataModule(L.LightningDataModule):
         return self.test_datasets
 
     def train_dataloader(self, **kwargs):
-        try:
-            print("Setting up the parallel train sampler...")
+        if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
+            try:
+                print("Setting up the parallel train sampler...")
 
-            # Get number of workers from kwargs, environment variable, or use a reasonable default
-            n_workers = kwargs.pop("sampler_workers", None)
+                # Get number of workers from kwargs, environment variable, or use a reasonable default
+                n_workers = kwargs.pop("sampler_workers", None)
 
-            # Let the sampler auto-determine chunk size
-            chunk_size = kwargs.pop("sampler_chunk_size", None)
+                # Let the sampler auto-determine chunk size
+                chunk_size = kwargs.pop("sampler_chunk_size", None)
 
-            # Create the optimized parallel sampler
-            print(f"Using {n_workers} workers for class indexing")
-            train_sampler = LabelWeightedSampler(
-                label_weights=self.train_weights,
-                labels=self.train_labels,
-                num_samples=int(self.n_samples_per_epoch),
-                element_weights=self.nnz,
-                replacement=self.replacement,
-                n_workers=n_workers,
-                chunk_size=chunk_size,
-            )
-        except ValueError as e:
-            raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
+                # Create the optimized parallel sampler
+                print(f"Using {n_workers} workers for class indexing")
+                train_sampler = LabelWeightedSampler(
+                    label_weights=self.train_weights,
+                    labels=self.train_labels,
+                    num_samples=int(self.n_samples_per_epoch),
+                    element_weights=self.nnz,
+                    replacement=self.replacement,
+                    n_workers=n_workers,
+                    chunk_size=chunk_size,
+                )
+            except ValueError as e:
+                raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
+        else:
+            train_sampler = SubsetRandomSampler(self.idx_full)
 
         return DataLoader(
             self.dataset,

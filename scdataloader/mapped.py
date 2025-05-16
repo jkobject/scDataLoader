@@ -268,16 +268,8 @@ class MappedCollection:
             self._cache_cats[label] = []
             for storage in tqdm(self.storages):
                 with _Connect(storage) as store:
-                    try:
-                        cats = self._get_categories(store, label)
-                    except KeyError:
-                        cats = np.array(["unknown"])
-                    if cats is None:
-                        cats = np.array(["unknown"])
-                    if cats is not None:
-                        cats = (
-                            _decode(cats) if isinstance(cats[0], bytes) else cats[...]
-                        )
+                    cats = self._get_categories(store, label)
+                    cats = _decode(cats) if isinstance(cats[0], bytes) else cats[...]
                     self._cache_cats[label].append(cats)
 
     def _make_encoders(self, encode_labels: list):
@@ -411,8 +403,21 @@ class MappedCollection:
                         cats = None
                     label_idx = self._get_obs_idx(store, obs_idx, label, cats)
                     if label in self.encoders:
-                        label_idx = self.encoders[label][label_idx]
-                    out[label] = label_idx
+                        try:
+                            label_idx = self.encoders[label][label_idx]
+                        except:
+                            print(self.storages[storage_idx])
+                            print(label, label_idx)
+                            print(idx)
+                            print(cats)
+                            raise
+                    try:
+                        out[label] = label_idx
+                    except:
+                        print(self.storages[storage_idx])
+                        print(label, label_idx)
+                        print(out)
+                        raise
 
             if self.metacell_mode > 0:
                 if (
@@ -566,6 +571,7 @@ class MappedCollection:
     def get_merged_labels(self, label_key: str, is_cat: bool = True):
         """Get merged labels for `label_key` from all `.obs`."""
         labels_merge = []
+        print(label_key)
         for i, storage in enumerate(self.storages):
             with _Connect(storage) as store:
                 labels = self._get_labels(
@@ -575,7 +581,15 @@ class MappedCollection:
                     labels = labels[self.indices_list[i]]
                 labels_merge.append(labels)
         if is_cat:
-            return union_categoricals(labels_merge)
+            try:
+                return union_categoricals(labels_merge)
+            except TypeError:
+                typ = type(int)
+                for i in range(len(labels_merge)):
+                    if typ != type(labels_merge[i][0]):
+                        self.storages[i]
+                    typ = type(labels_merge[i][0])
+                return []
         else:
             print("concatenating labels")
             return np.concatenate(labels_merge)
@@ -627,8 +641,8 @@ class MappedCollection:
             else:
                 if "categories" in labels.attrs:
                     return labels.attrs["categories"]
-                else:
-                    return None
+                elif labels.dtype == "bool":
+                    return np.array(["True", "False"])
         return None
 
     def _get_codes(self, storage: StorageType, label_key: str):
@@ -663,7 +677,7 @@ class MappedCollection:
             cats = _decode(cats) if isinstance(cats[0], bytes) else cats
             labels = cats[labels]
         if is_cat:
-            labels = pd.Categorical(labels)
+            labels = pd.Categorical(labels.astype(str))
         return labels
 
     def close(self):

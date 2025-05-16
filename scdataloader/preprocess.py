@@ -711,7 +711,7 @@ def additional_preprocess(adata):
             }
         }
     )  # multi ethnic will have to get renamed
-    adata.obs["cell_culture"] = False
+    adata.obs["cell_culture"] = "False"
     # if cell_type contains the word "(cell culture)" then it is a cell culture and we mark it as so and remove this from the cell type
     loc = adata.obs["cell_type_ontology_term_id"].str.contains(
         "(cell culture)", regex=False
@@ -720,7 +720,7 @@ def additional_preprocess(adata):
         adata.obs["cell_type_ontology_term_id"] = adata.obs[
             "cell_type_ontology_term_id"
         ].astype(str)
-        adata.obs.loc[loc, "cell_culture"] = True
+        adata.obs.loc[loc, "cell_culture"] = "True"
         adata.obs.loc[loc, "cell_type_ontology_term_id"] = adata.obs.loc[
             loc, "cell_type_ontology_term_id"
         ].str.replace(" (cell culture)", "")
@@ -729,7 +729,7 @@ def additional_preprocess(adata):
         "(cell culture)", regex=False
     )
     if loc.sum() > 0:
-        adata.obs.loc[loc, "cell_culture"] = True
+        adata.obs.loc[loc, "cell_culture"] = "True"
         adata.obs["tissue_ontology_term_id"] = adata.obs[
             "tissue_ontology_term_id"
         ].astype(str)
@@ -739,7 +739,7 @@ def additional_preprocess(adata):
 
     loc = adata.obs["tissue_ontology_term_id"].str.contains("(organoid)", regex=False)
     if loc.sum() > 0:
-        adata.obs.loc[loc, "cell_culture"] = True
+        adata.obs.loc[loc, "cell_culture"] = "True"
         adata.obs["tissue_ontology_term_id"] = adata.obs[
             "tissue_ontology_term_id"
         ].astype(str)
@@ -875,9 +875,9 @@ def additional_postprocess(adata):
                 for p in parents:
                     if p in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP:
                         relabel[stage] = p
-        adata.obs["simplified_dev_stage"] = adata.obs[
-            "development_stage_ontology_term_id"
-        ].map(relabel)
+        adata.obs["age_group"] = adata.obs["development_stage_ontology_term_id"].map(
+            relabel
+        )
     elif adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:10090"]:
         rename_mapping = {
             k: v for v, j in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for k in j
@@ -886,9 +886,9 @@ def additional_postprocess(adata):
         for stage in stages:
             if stage in rename_mapping:
                 relabel[stage] = rename_mapping[stage]
-        adata.obs["simplified_dev_stage"] = adata.obs[
-            "development_stage_ontology_term_id"
-        ].map(relabel)
+        adata.obs["age_group"] = adata.obs["development_stage_ontology_term_id"].map(
+            relabel
+        )
     else:
         # raise ValueError("organism not supported")
         print("organism not supported for age labels")
