@@ -142,9 +142,6 @@ class Preprocessor:
         self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
-        import pdb
-
-        pdb.set_trace()
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if "organism_ontology_term_id" not in adata[0].obs.columns:
@@ -175,6 +172,8 @@ class Preprocessor:
             del adata.obsm
         if len(adata.obsp.keys()) > 0 and not self.keepdata:
             del adata.obsp
+        if len(adata.varp.keys()) > 0 and not self.keepdata:
+            del adata.varp
         # check that it is a count
 
         print("checking raw counts")
