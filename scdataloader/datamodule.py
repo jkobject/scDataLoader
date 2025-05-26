@@ -485,9 +485,6 @@ class DataModule(L.LightningDataModule):
             train_sampler = SubsetRandomSampler(self.idx_full)
         current_loader_kwargs = kwargs.copy()
         current_loader_kwargs.update(self.kwargs)
-        import pdb
-
-        pdb.set_trace()
         return DataLoader(
             self.dataset,
             sampler=train_sampler,
@@ -524,7 +521,7 @@ class DataModule(L.LightningDataModule):
 
 class LabelWeightedSampler(Sampler[int]):
     """
-    A weighted random sampler that samples from a dataset with respect to both class weights and element weights.
+    A weighted random sampler that samples from a dataset with respect t o both class weights and element weights.
 
     This sampler is designed to handle very large datasets efficiently, with optimizations for:
     1. Parallel building of class indices
@@ -569,11 +566,15 @@ class LabelWeightedSampler(Sampler[int]):
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion
         label_weights = np.asarray(label_weights) * np.bincount(labels)
-        self.label_weights = torch.as_tensor(label_weights, dtype=torch.float32)
+        self.label_weights = torch.as_tensor(
+            label_weights, dtype=torch.float32
+        ).share_memory_()
 
         # Store element weights if provided
         if element_weights is not None:
-            self.element_weights = torch.as_tensor(element_weights, dtype=torch.float32)
+            self.element_weights = torch.as_tensor(
+                element_weights, dtype=torch.float32
+            ).share_memory_()
         else:
             self.element_weights = None
 
@@ -618,31 +619,126 @@ class LabelWeightedSampler(Sampler[int]):
                     bytes_per_element = 12
                     chunk_size = min(
                         max(100_000, int(memory_per_worker / bytes_per_element / 3)),
-                        1_000_000,
+                        2_000_000,
                     )
                     print(f"Auto-determined chunk size: {chunk_size:,} elements")
                 except (ImportError, KeyError):
-                    chunk_size = 1_000_000
+                    chunk_size = 2_000_000
                     print(f"Using default chunk size: {chunk_size:,} elements")
 
             # Parallelize the class indices building
             print(f"Building class indices in parallel with {n_workers} workers...")
-            self.klass_indices = self._build_class_indices_parallel(
+            klass_indices = self._build_class_indices_parallel(
                 labels, chunk_size, n_workers
             )
+
+            # Convert klass_indices to a single tensor and offset vector
+            all_indices = []
+            offsets = []
+            current_offset = 0
+
+            # Sort keys to ensure consistent ordering
+            keys = klass_indices.keys()
+
+            # Build concatenated tensor and track offsets
+            for i in range(max(keys) + 1):
+                offsets.append(current_offset)
+                if i in keys:
+                    indices = klass_indices[i]
+                    all_indices.append(indices)
+                    current_offset += len(indices)
+
+            # Convert to tensors
+            self.klass_indices = torch.cat(all_indices).to(torch.int32).share_memory_()
+            self.klass_offsets = torch.tensor(offsets, dtype=torch.long).share_memory_()
         if store_location is not None:
             store_path = os.path.join(store_location, "klass_indices.pt")
             if os.path.exists(store_path) and not force_recompute_indices:
-                self.klass_indices = torch.load(store_path)
+                self.klass_indices = torch.load(store_path).share_memory_()
+                self.klass_offsets = torch.load(
+                    store_path.replace(".pt", "_offsets.pt")
+                ).share_memory_()
                 print(f"Loaded sampler indices from {store_path}")
             else:
                 torch.save(self.klass_indices, store_path)
+                torch.save(self.klass_offsets, store_path.replace(".pt", "_offsets.pt"))
                 print(f"Saved sampler indices to {store_path}")
+        print(f"Done initializing sampler with {len(self.klass_offsets)} classes")
 
-        # Calculate class sizes
-        self.klass_sizes = {k: len(v) for k, v in self.klass_indices.items()}
+    def __iter__(self):
+        # Sample classes according to their weights
+        print("sampling a new batch of size", self.num_samples)
 
-        print(f"Done initializing sampler with {len(self.klass_indices)} classes")
+        sample_labels = torch.multinomial(
+            self.label_weights,
+            num_samples=self.num_samples,
+            replacement=True,
+        )
+        # Get counts of each class in sample_labels
+        unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
+
+        # Initialize result tensor
+        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
+
+        # Process only the classes that were actually sampled
+        for i, (label, count) in tqdm(
+            enumerate(zip(unique_samples.tolist(), sample_counts.tolist())),
+            total=len(unique_samples),
+            desc="Processing classes in sampler",
+        ):
+            klass_index = self.klass_indices[
+                self.klass_offsets[label] : self.klass_offsets[label + 1]
+            ]
+
+            if klass_index.numel() == 0:
+                continue
+
+            # Sample elements from this class
+            if self.element_weights is not None:
+                # This is a critical point for memory
+                current_element_weights_slice = self.element_weights[klass_index]
+
+                if self.replacement:
+                    right_inds = torch.multinomial(
+                        current_element_weights_slice,
+                        num_samples=count,
+                        replacement=True,
+                    )
+                else:
+                    num_to_sample = min(count, len(klass_index))
+                    right_inds = torch.multinomial(
+                        current_element_weights_slice,
+                        num_samples=num_to_sample,
+                        replacement=False,
+                    )
+            elif self.replacement:
+                right_inds = torch.randint(len(klass_index), size=(count,))
+            else:
+                num_to_sample = min(count, len(klass_index))
+                right_inds = torch.randperm(len(klass_index))[:num_to_sample]
+
+            # Get actual indices
+            sampled_indices = klass_index[right_inds]
+            result_indices_list.append(sampled_indices)
+
+        # Combine all indices
+        if result_indices_list:  # Check if the list is not empty
+            final_result_indices = torch.cat(
+                result_indices_list
+            )  # Use the list with the appended new name
+
+            # Shuffle the combined indices
+            shuffled_indices = final_result_indices[
+                torch.randperm(len(final_result_indices))
+            ]
+            self.num_samples = len(shuffled_indices)
+            yield from shuffled_indices.tolist()
+        else:
+            self.num_samples = 0
+            yield from iter([])
+
+    def __len__(self):
+        return self.num_samples
 
     def _merge_chunk_results(self, results_list):
         """Merge results from multiple chunks into a single dictionary.
@@ -753,104 +849,3 @@ class LabelWeightedSampler(Sampler[int]):
             chunk_indices[int(label)] = indices[label_mask]
 
         return chunk_indices
-
-    def __iter__(self):
-        # Sample classes according to their weights
-        print("sampling a new batch of size", self.num_samples)
-
-        import os
-        import psutil
-        import pdb
-
-        pdb.set_trace()
-
-        process = psutil.Process(os.getpid())
-
-        def log_mem(stage_name):
-            print(
-                f"[MemProfile SamplerWorker {os.getpid()}] Stage: {stage_name} | RSS: {process.memory_info().rss / 1024**2:.2f} MB"
-            )
-
-        # --- End Memory Profiling Imports ---
-
-        log_mem("Iter Start")
-
-        sample_labels = torch.multinomial(
-            self.label_weights,
-            num_samples=self.num_samples,
-            replacement=True,
-        )
-        log_mem("After sample_labels multinomial")
-
-        # Get counts of each class in sample_labels
-        unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
-        log_mem("After unique_samples and sample_counts")
-
-        # Initialize result tensor
-        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
-
-        # Process only the classes that were actually sampled
-        for i, (label, count) in tqdm(
-            enumerate(zip(unique_samples.tolist(), sample_counts.tolist())),
-            total=len(unique_samples),
-            desc="Processing classes in sampler",
-        ):
-            if label not in self.klass_indices:
-                continue
-
-            klass_index = self.klass_indices[label]
-
-            if klass_index.numel() == 0:
-                continue
-
-            # Sample elements from this class
-            if self.element_weights is not None:
-                # This is a critical point for memory
-                current_element_weights_slice = self.element_weights[klass_index]
-
-                if self.replacement:
-                    right_inds = torch.multinomial(
-                        current_element_weights_slice,
-                        num_samples=count,
-                        replacement=True,
-                    )
-                else:
-                    num_to_sample = min(count, len(klass_index))
-                    right_inds = torch.multinomial(
-                        current_element_weights_slice,
-                        num_samples=num_to_sample,
-                        replacement=False,
-                    )
-            elif self.replacement:
-                right_inds = torch.randint(len(klass_index), size=(count,))
-            else:
-                num_to_sample = min(count, len(klass_index))
-                right_inds = torch.randperm(len(klass_index))[:num_to_sample]
-
-            # Get actual indices
-            sampled_indices = klass_index[right_inds]
-            log_mem(
-                f"Loop iter {i}, Class {label} - After slicing klass_index with right_inds"
-            )
-            result_indices_list.append(sampled_indices)
-
-        log_mem("After processing all classes loop")
-        # Combine all indices
-        if result_indices_list:  # Check if the list is not empty
-            final_result_indices = torch.cat(
-                result_indices_list
-            )  # Use the list with the appended new name
-
-            # Shuffle the combined indices
-            shuffled_indices = final_result_indices[
-                torch.randperm(len(final_result_indices))
-            ]
-            log_mem("After shuffling final_result_indices")
-            self.num_samples = len(shuffled_indices)
-            yield from shuffled_indices.tolist()
-        else:
-            self.num_samples = 0
-            yield from iter([])
-
-    def __len__(self):
-        return self.num_samples

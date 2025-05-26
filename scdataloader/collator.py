@@ -57,7 +57,7 @@ class Collator:
                 If [] all genes will be considered
         """
         self.organisms = organisms
-        self.genedf = load_genes(organisms)
+        genedf = load_genes(organisms)
         self.max_len = max_len
         self.n_bins = n_bins
         self.add_zero_genes = add_zero_genes
@@ -72,9 +72,9 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.to_subset = {}
-        self._setup(org_to_id, valid_genes, genelist)
+        self._setup(genedf, org_to_id, valid_genes, genelist)
 
-    def _setup(self, org_to_id=None, valid_genes=[], genelist=[]):
+    def _setup(self, genedf, org_to_id=None, valid_genes=[], genelist=[]):
         self.org_to_id = org_to_id
         self.to_subset = {}
         self.accepted_genes = {}
@@ -85,16 +85,16 @@ class Collator:
             else set(self.organisms)
         )
         if len(valid_genes) > 0:
-            if len(set(valid_genes) - set(self.genedf.index)) > 0:
+            if len(set(valid_genes) - set(genedf.index)) > 0:
                 print(f"Some valid genes are not in the genedf!!!")
-            tot = self.genedf[self.genedf.index.isin(valid_genes)]
+            tot = genedf[genedf.index.isin(valid_genes)]
         else:
-            tot = self.genedf
+            tot = genedf
         for organism in self.organisms:
             org = org_to_id[organism] if org_to_id is not None else organism
             self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
 
-            ogenedf = self.genedf[self.genedf.organism == organism]
+            ogenedf = genedf[genedf.organism == organism]
             if len(valid_genes) > 0:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
             if len(genelist) > 0:
