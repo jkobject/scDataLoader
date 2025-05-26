@@ -113,27 +113,34 @@ COARSE_ASSAY = {
 
 
 MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
-    # under-1-year-old stage
-    "HsapDv:0010000": [
+    "HsapDv:0010000": [  # postnatal stage
         "MmusDv:0000092",  # postnatal stage
     ],
-    "HsapDv:0000258": [  # mature stage
+    "HsapDv:0000258": [  # mature stage >15
         "MmusDv:0000110",  # mature stage
-        "HsapDv:0000204", # 
+        "HsapDv:0000204",  #
     ],
-    "HsapDv:0000227": [  # late adult stage
+    "HsapDv:0000087": [],  # adult stage >19
+    "HsapDv:0000227": [  # late adult stage > 40
         "MmusDv:0000091",  # 20 month-old stage
         "MmusDv:0000089",  # 18 month-old stage
+        "HsapDv:0000091",  # > 45
+        "HsapDv:0000093",  # > 65
     ],
-    "HsapDv:0000272": [],  # 60-79 year-old stage
+    "HsapDv:0000272": [  # 60-79 year-old stage
+        "HsapDv:0000094",  # 60-79 year-old stage
+    ],
     "HsapDv:0000095": [],  # 80 year-old and over stage
-    "HsapDv:0000267": [  # middle aged stage
+    "HsapDv:0000267": [  # middle aged stage >40 <60
         "MmusDv:0000087",  # 16 month-old stage
         "UBERON:0018241",  # prime adult stage
         "MmusDv:0000083",  # 12 month-old stage
         "HsapDv:0000092",  # same
     ],
-    "HsapDv:0000266": [  # young adult stage
+    "HsapDv:0000266": [  # young adult stage <40
+        "HsapDv:0000088",  # mature stage
+        "HsapDv:0000090",  # 25 - 44
+        "HsapDv:0000086",  # adolescent stage
         "MmusDv:0000050",  # 6 weeks
         "HsapDv:0000089",  # same
         "MmusDv:0000051",  # 7 weeks
@@ -164,22 +171,30 @@ MAIN_HUMAN_MOUSE_DEV_STAGE_MAP = {
         "MmusDv:0000099",  # 26 weeks
         "MmusDv:0000102",  # 29 weeks
     ],
-    "HsapDv:0000265": [],  # child stage (1-4 yo)
+    "HsapDv:0000265": [  # child stage (1-4 yo)
+        "HsapDv:0000084",  # 2-5 yo
+    ],
     "HsapDv:0000271": [  # juvenile stage (5-14 yo)
         "MmusDv:0000048",  # 4 weeks
         "MmusDv:0000049",  # 5 weeks
+        "HsapDv:0000081",  # child
+        "HsapDv:0000085",  # 6-11 yo
     ],
-    "HsapDv:0000260": [  # infant stage
+    "HsapDv:0000260": [  # infant stage <2
         "MmusDv:0000046",  # 2 weeks
         "MmusDv:0000045",  # 1 week
         "MmusDv:0000047",  # 3 weeks
         "HsapDv:0000083",
+        "HsapDv:0000256",  # under 1 yo
     ],
     "HsapDv:0000262": [  # newborn stage (0-28 days)
         "MmusDv:0000036",  # Theiler stage 27
         "MmusDv:0000037",  # Theiler stage 28
         "MmusDv:0000113",  # 4-7 days
+        "HsapDv:0000174",  # 1 month-old stage
+        "HsapDv:0000082",  # newborn stage
     ],
+    "HsapDv:0000002": [],  # embryonic stage
     "HsapDv:0000007": [],  # Carnegie stage 03
     "HsapDv:0000008": [],  # Carnegie stage 04
     "HsapDv:0000009": [],  # Carnegie stage 05

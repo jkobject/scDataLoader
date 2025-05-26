@@ -792,8 +792,11 @@ def additional_postprocess(adata):
     MINCELLS = 10
     MAXSIM = 0.94
     from collections import Counter
+    import bionty as bt
 
     from .config import MAIN_HUMAN_MOUSE_DEV_STAGE_MAP
+
+    remap_stages = {u: k for k, v in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for u in v}
 
     adata.obs[NEWOBS] = (
         adata.obs[COL].astype(str) + "_" + adata.obs["leiden_1"].astype(str)
@@ -862,18 +865,17 @@ def additional_postprocess(adata):
                 num += 1
     adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
 
-    import bionty as bt
-
     stages = adata.obs["development_stage_ontology_term_id"].unique()
     if adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:9606"]:
         relabel = {i: i for i in stages}
         for stage in stages:
+            if stage in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.keys():
+                continue
             stage_obj = bt.DevelopmentalStage.filter(ontology_id=stage).first()
             parents = set([i.ontology_id for i in stage_obj.parents.filter()])
             parents = parents - set(
                 [
                     "HsapDv:0010000",
-                    "HsapDv:0000204",
                     "HsapDv:0000227",
                 ]
             )
@@ -884,6 +886,11 @@ def additional_postprocess(adata):
         adata.obs["age_group"] = adata.obs["development_stage_ontology_term_id"].map(
             relabel
         )
+        for stage in adata.obs["age_group"].unique():
+            if stage in remap_stages.keys():
+                adata.obs["age_group"] = adata.obs["age_group"].map(
+                    lambda x: remap_stages[x] if x == stage else x
+                )
     elif adata.obs.organism_ontology_term_id.unique() == ["NCBITaxon:10090"]:
         rename_mapping = {
             k: v for v, j in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for k in j

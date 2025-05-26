@@ -8,6 +8,7 @@ import lamindb as ln
 import lightning as L
 import numpy as np
 import pandas as pd
+from .utils import fileToList, listToFile
 import torch
 from torch.utils.data import DataLoader, Sampler
 from torch.utils.data.sampler import (
@@ -22,6 +23,7 @@ from .data import Dataset
 from .utils import getBiomartTable
 import random
 from tqdm import tqdm
+import time
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -57,6 +59,8 @@ class DataModule(L.LightningDataModule):
         ],
         metacell_mode: float = 0.0,
         get_knn_cells: bool = False,
+        store_location: str = None,
+        force_recompute_indices: bool = False,
         **kwargs,
     ):
         """
@@ -91,6 +95,8 @@ class DataModule(L.LightningDataModule):
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
             clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
+            store_location (str, optional): The location to store the sampler indices. Defaults to None.
+            force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
@@ -104,6 +110,8 @@ class DataModule(L.LightningDataModule):
             hierarchical_clss=hierarchical_clss,
             metacell_mode=metacell_mode,
             get_knn_cells=get_knn_cells,
+            store_location=store_location,
+            force_recompute_indices=force_recompute_indices,
         )
         # and location
         self.metacell_mode = bool(metacell_mode)
@@ -177,8 +185,10 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.store_location = store_location
         self.nnz = None
         self.test_datasets = []
+        self.force_recompute_indices = force_recompute_indices
         self.test_idx = []
         super().__init__()
         print("finished init")
@@ -295,86 +305,154 @@ class DataModule(L.LightningDataModule):
         """
         SCALE = 10
         print("setting up the datamodule")
-        if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
-            self.nnz = self.dataset.mapped_dataset.get_merged_labels(
-                "nnz", is_cat=False
-            )
-            self.clss_to_weight.remove("nnz")
-            (
-                (self.nnz.max() / SCALE)
-                / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
-            ).min()
-        if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
-            weights, labels = self.dataset.get_label_weights(
-                self.clss_to_weight,
-                scaler=self.weight_scaler,
-                return_categories=True,
-            )
-        else:
-            weights = np.ones(1)
-            labels = np.zeros(self.n_samples, dtype=int)
-        if isinstance(self.validation_split, int):
-            len_valid = self.validation_split
-        else:
-            len_valid = int(self.n_samples * self.validation_split)
-        if isinstance(self.test_split, int):
-            len_test = self.test_split
-        else:
-            len_test = int(self.n_samples * self.test_split)
-        assert (
-            len_test + len_valid < self.n_samples
-        ), "test set + valid set size is configured to be larger than entire dataset."
+        start_time = time.time()
+        if (
+            self.store_location is None
+            or not os.path.exists(self.store_location)
+            or self.force_recompute_indices
+        ):
+            if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
+                self.nnz = self.dataset.mapped_dataset.get_merged_labels(
+                    "nnz", is_cat=False
+                )
+                self.clss_to_weight.remove("nnz")
+                (
+                    (self.nnz.max() / SCALE)
+                    / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
+                ).min()
+            if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
+                weights, labels = self.dataset.get_label_weights(
+                    self.clss_to_weight,
+                    scaler=self.weight_scaler,
+                    return_categories=True,
+                )
+            else:
+                weights = np.ones(1)
+                labels = np.zeros(self.n_samples, dtype=int)
+            if isinstance(self.validation_split, int):
+                len_valid = self.validation_split
+            else:
+                len_valid = int(self.n_samples * self.validation_split)
+            if isinstance(self.test_split, int):
+                len_test = self.test_split
+            else:
+                len_test = int(self.n_samples * self.test_split)
+            assert (
+                len_test + len_valid < self.n_samples
+            ), "test set + valid set size is configured to be larger than entire dataset."
 
-        idx_full = []
-        if len(self.assays_to_drop) > 0:
-            badloc = np.isin(
-                self.dataset.mapped_dataset.get_merged_labels("assay_ontology_term_id"),
-                self.assays_to_drop,
-            )
-            idx_full = np.arange(len(labels))[~badloc]
-        else:
-            idx_full = np.arange(self.n_samples)
-        if len_test > 0:
-            # this way we work on some never seen datasets
-            # keeping at least one
-            len_test = (
-                len_test
-                if len_test > self.dataset.mapped_dataset.n_obs_list[0]
-                else self.dataset.mapped_dataset.n_obs_list[0]
-            )
-            cs = 0
-            d_size = list(enumerate(self.dataset.mapped_dataset.n_obs_list))
-            random.Random(42).shuffle(d_size)  # always same order
-            for i, c in d_size:
-                if cs + c > len_test:
-                    break
-                else:
-                    self.test_datasets.append(
-                        self.dataset.mapped_dataset.path_list[i].path
+            idx_full = []
+            if len(self.assays_to_drop) > 0:
+                badloc = np.isin(
+                    self.dataset.mapped_dataset.get_merged_labels(
+                        "assay_ontology_term_id"
+                    ),
+                    self.assays_to_drop,
+                )
+                idx_full = np.arange(len(labels))[~badloc]
+            else:
+                idx_full = np.arange(self.n_samples)
+            if len_test > 0:
+                # this way we work on some never seen datasets
+                # keeping at least one
+                len_test = (
+                    len_test
+                    if len_test > self.dataset.mapped_dataset.n_obs_list[0]
+                    else self.dataset.mapped_dataset.n_obs_list[0]
+                )
+                cs = 0
+                d_size = list(enumerate(self.dataset.mapped_dataset.n_obs_list))
+                random.Random(42).shuffle(d_size)  # always same order
+                for i, c in d_size:
+                    if cs + c > len_test:
+                        break
+                    else:
+                        self.test_datasets.append(
+                            self.dataset.mapped_dataset.path_list[i].path
+                        )
+                        cs += c
+                len_test = cs
+                self.test_idx = idx_full[:len_test]
+                idx_full = idx_full[len_test:]
+            else:
+                self.test_idx = None
+
+            np.random.shuffle(idx_full)
+            if len_valid > 0:
+                self.valid_idx = idx_full[:len_valid].copy()
+                # store it for later
+                idx_full = idx_full[len_valid:]
+            else:
+                self.valid_idx = None
+            weights = np.concatenate([weights, np.zeros(1)])
+            labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
+            # some labels will now not exist anymore as replaced by len(weights) - 1.
+            # this means that the associated weights should be 0.
+            # by doing np.bincount(labels)*weights this will be taken into account
+            self.train_weights = weights
+            self.train_labels = labels
+            self.idx_full = idx_full
+        if self.store_location is not None:
+            if not os.path.exists(self.store_location) or self.force_recompute_indices:
+                os.makedirs(self.store_location)
+                if self.nnz is not None:
+                    np.save(os.path.join(self.store_location, "nnz.npy"), self.nnz)
+                np.save(
+                    os.path.join(self.store_location, "train_weights.npy"),
+                    self.train_weights,
+                )
+                np.save(
+                    os.path.join(self.store_location, "train_labels.npy"),
+                    self.train_labels,
+                )
+                np.save(
+                    os.path.join(self.store_location, "idx_full.npy"), self.idx_full
+                )
+                if self.test_idx is not None:
+                    np.save(
+                        os.path.join(self.store_location, "test_idx.npy"), self.test_idx
                     )
-                    cs += c
-            len_test = cs
-            self.test_idx = idx_full[:len_test]
-            idx_full = idx_full[len_test:]
-        else:
-            self.test_idx = None
-
-        np.random.shuffle(idx_full)
-        if len_valid > 0:
-            self.valid_idx = idx_full[:len_valid].copy()
-            # store it for later
-            idx_full = idx_full[len_valid:]
-        else:
-            self.valid_idx = None
-        weights = np.concatenate([weights, np.zeros(1)])
-        labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
-        # some labels will now not exist anymore as replaced by len(weights) - 1.
-        # this means that the associated weights should be 0.
-        # by doing np.bincount(labels)*weights this will be taken into account
-        self.train_weights = weights
-        self.train_labels = labels
-        self.idx_full = idx_full
-        print("done setup")
+                if self.valid_idx is not None:
+                    np.save(
+                        os.path.join(self.store_location, "valid_idx.npy"),
+                        self.valid_idx,
+                    )
+                listToFile(
+                    self.test_datasets,
+                    os.path.join(self.store_location, "test_datasets.txt"),
+                )
+            else:
+                self.nnz = (
+                    np.load(os.path.join(self.store_location, "nnz.npy"), mmap_mode="r")
+                    if os.path.exists(os.path.join(self.store_location, "nnz.npy"))
+                    else None
+                )
+                self.train_weights = np.load(
+                    os.path.join(self.store_location, "train_weights.npy")
+                )
+                self.train_labels = np.load(
+                    os.path.join(self.store_location, "train_labels.npy")
+                )
+                self.idx_full = np.load(
+                    os.path.join(self.store_location, "idx_full.npy"), mmap_mode="r"
+                )
+                self.test_idx = (
+                    np.load(os.path.join(self.store_location, "test_idx.npy"))
+                    if os.path.exists(os.path.join(self.store_location, "test_idx.npy"))
+                    else None
+                )
+                self.valid_idx = (
+                    np.load(os.path.join(self.store_location, "valid_idx.npy"))
+                    if os.path.exists(
+                        os.path.join(self.store_location, "valid_idx.npy")
+                    )
+                    else None
+                )
+                self.test_datasets = fileToList(
+                    os.path.join(self.store_location, "test_datasets.txt")
+                )
+                print("loaded from store")
+        print(f"done setup, took {time.time() - start_time:.2f} seconds")
         return self.test_datasets
 
     def train_dataloader(self, **kwargs):
@@ -398,17 +476,22 @@ class DataModule(L.LightningDataModule):
                     replacement=self.replacement,
                     n_workers=n_workers,
                     chunk_size=chunk_size,
+                    store_location=self.store_location,
+                    force_recompute_indices=self.force_recompute_indices,
                 )
             except ValueError as e:
                 raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
         else:
             train_sampler = SubsetRandomSampler(self.idx_full)
+        current_loader_kwargs = kwargs.copy()
+        current_loader_kwargs.update(self.kwargs)
+        import pdb
 
+        pdb.set_trace()
         return DataLoader(
             self.dataset,
             sampler=train_sampler,
-            **self.kwargs,
-            **kwargs,
+            **current_loader_kwargs,
         )
 
     def val_dataloader(self):
@@ -438,59 +521,6 @@ class DataModule(L.LightningDataModule):
             **self.kwargs,
         )
 
-    # def teardown(self):
-    # clean up state after the trainer stops, delete files...
-    # called on every process in DDP
-    # pass
-
-    @staticmethod
-    def _estimate_optimal_chunk_size(labels_size, n_workers, max_memory_fraction=0.5):
-        """Estimate optimal chunk size based on system memory.
-
-        Args:
-            labels_size: Size of the labels array
-            n_workers: Number of worker processes
-            max_memory_fraction: Maximum fraction of system memory to use
-
-        Returns:
-            Recommended chunk size
-        """
-        try:
-            import psutil
-
-            # Get available system memory in bytes
-            available_memory = psutil.virtual_memory().available
-
-            # Calculate bytes per element (int32 = 4 bytes)
-            bytes_per_element = 4
-
-            # Calculate memory per worker
-            memory_per_worker = available_memory * max_memory_fraction / n_workers
-
-            # Limit chunk size based on memory per worker
-            # We need memory for:
-            # 1. The chunk itself
-            # 2. The indices created
-            # 3. Other overhead (sorting, etc.) - factor of 3
-            memory_per_chunk = memory_per_worker / 3
-            max_elements_per_chunk = int(memory_per_chunk / (bytes_per_element + 8))
-
-            # Ensure a minimum chunk size
-            min_chunk_size = 1_000_000
-            chunk_size = max(min_chunk_size, max_elements_per_chunk)
-
-            # Ensure chunk size is reasonable for the dataset
-            chunk_size = min(chunk_size, labels_size // n_workers + 1)
-
-            print(f"Automatically determined chunk size: {chunk_size:,} elements")
-            return chunk_size
-
-        except ImportError:
-            # If psutil is not available, use a reasonable default
-            default_size = 10_000_000
-            print(f"psutil not available, using default chunk size: {default_size:,}")
-            return default_size
-
 
 class LabelWeightedSampler(Sampler[int]):
     """
@@ -517,7 +547,9 @@ class LabelWeightedSampler(Sampler[int]):
         replacement: bool = True,
         element_weights: Optional[Sequence[float]] = None,
         n_workers: int = None,
-        chunk_size: int = 10_000_000,  # Process 10M elements per chunk
+        chunk_size: int = None,  # Process 10M elements per chunk
+        store_location: str = None,
+        force_recompute_indices: bool = False,
     ) -> None:
         """
         Initialize the sampler with parallel processing for large datasets.
@@ -547,51 +579,65 @@ class LabelWeightedSampler(Sampler[int]):
 
         self.replacement = replacement
         self.num_samples = num_samples
-
-        # Set number of workers (default to CPU count - 1, but at least 1)
-        if n_workers is None:
-            # Check if running on SLURM
-            n_workers = min(20, max(1, mp.cpu_count() - 1))
-            if "SLURM_CPUS_PER_TASK" in os.environ:
-                n_workers = min(20, max(1, int(os.environ["SLURM_CPUS_PER_TASK"]) - 1))
-
-        # Try to auto-determine optimal chunk size based on memory
-        if chunk_size is None:
-            try:
-                import psutil
-
+        if (
+            store_location is None
+            or not os.path.exists(os.path.join(store_location, "klass_indices.pt"))
+            or force_recompute_indices
+        ):
+            # Set number of workers (default to CPU count - 1, but at least 1)
+            if n_workers is None:
                 # Check if running on SLURM
-                available_memory = psutil.virtual_memory().available
-                for name in [
-                    "SLURM_MEM_PER_NODE",
-                    "SLURM_MEM_PER_CPU",
-                    "SLURM_MEM_PER_GPU",
-                    "SLURM_MEM_PER_TASK",
-                ]:
-                    if name in os.environ:
-                        available_memory = (
-                            int(os.environ[name]) * 1024 * 1024
-                        )  # Convert MB to bytes
-                        break
+                n_workers = min(20, max(1, mp.cpu_count() - 1))
+                if "SLURM_CPUS_PER_TASK" in os.environ:
+                    n_workers = min(
+                        20, max(1, int(os.environ["SLURM_CPUS_PER_TASK"]) - 1)
+                    )
 
-                # Use at most 50% of available memory across all workers
-                memory_per_worker = 0.5 * available_memory / n_workers
-                # Rough estimate: each label takes 4 bytes, each index 8 bytes
-                bytes_per_element = 12
-                chunk_size = min(
-                    max(1_000_000, int(memory_per_worker / bytes_per_element / 3)),
-                    5_000_000,
-                )
-                print(f"Auto-determined chunk size: {chunk_size:,} elements")
-            except (ImportError, KeyError):
-                chunk_size = 5_000_000
-                print(f"Using default chunk size: {chunk_size:,} elements")
+            # Try to auto-determine optimal chunk size based on memory
+            if chunk_size is None:
+                try:
+                    import psutil
 
-        # Parallelize the class indices building
-        print(f"Building class indices in parallel with {n_workers} workers...")
-        self.klass_indices = self._build_class_indices_parallel(
-            labels, chunk_size, n_workers
-        )
+                    # Check if running on SLURM
+                    available_memory = psutil.virtual_memory().available
+                    for name in [
+                        "SLURM_MEM_PER_NODE",
+                        "SLURM_MEM_PER_CPU",
+                        "SLURM_MEM_PER_GPU",
+                        "SLURM_MEM_PER_TASK",
+                    ]:
+                        if name in os.environ:
+                            available_memory = (
+                                int(os.environ[name]) * 1024 * 1024
+                            )  # Convert MB to bytes
+                            break
+
+                    # Use at most 50% of available memory across all workers
+                    memory_per_worker = 0.5 * available_memory / n_workers
+                    # Rough estimate: each label takes 4 bytes, each index 8 bytes
+                    bytes_per_element = 12
+                    chunk_size = min(
+                        max(100_000, int(memory_per_worker / bytes_per_element / 3)),
+                        1_000_000,
+                    )
+                    print(f"Auto-determined chunk size: {chunk_size:,} elements")
+                except (ImportError, KeyError):
+                    chunk_size = 1_000_000
+                    print(f"Using default chunk size: {chunk_size:,} elements")
+
+            # Parallelize the class indices building
+            print(f"Building class indices in parallel with {n_workers} workers...")
+            self.klass_indices = self._build_class_indices_parallel(
+                labels, chunk_size, n_workers
+            )
+        if store_location is not None:
+            store_path = os.path.join(store_location, "klass_indices.pt")
+            if os.path.exists(store_path) and not force_recompute_indices:
+                self.klass_indices = torch.load(store_path)
+                print(f"Loaded sampler indices from {store_path}")
+            else:
+                torch.save(self.klass_indices, store_path)
+                print(f"Saved sampler indices to {store_path}")
 
         # Calculate class sizes
         self.klass_sizes = {k: len(v) for k, v in self.klass_indices.items()}
@@ -646,7 +692,6 @@ class LabelWeightedSampler(Sampler[int]):
         """
         n = len(labels)
         results = []
-
         # Create chunks of the labels array with proper sizing
         n_chunks = (n + chunk_size - 1) // chunk_size  # Ceiling division
         print(f"Processing {n:,} elements in {n_chunks} chunks...")
@@ -711,63 +756,96 @@ class LabelWeightedSampler(Sampler[int]):
 
     def __iter__(self):
         # Sample classes according to their weights
+        print("sampling a new batch of size", self.num_samples)
+
+        import os
+        import psutil
+        import pdb
+
+        pdb.set_trace()
+
+        process = psutil.Process(os.getpid())
+
+        def log_mem(stage_name):
+            print(
+                f"[MemProfile SamplerWorker {os.getpid()}] Stage: {stage_name} | RSS: {process.memory_info().rss / 1024**2:.2f} MB"
+            )
+
+        # --- End Memory Profiling Imports ---
+
+        log_mem("Iter Start")
+
         sample_labels = torch.multinomial(
             self.label_weights,
             num_samples=self.num_samples,
             replacement=True,
         )
-        print("sampling a new batch of size", self.num_samples)
+        log_mem("After sample_labels multinomial")
+
         # Get counts of each class in sample_labels
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
+        log_mem("After unique_samples and sample_counts")
 
         # Initialize result tensor
-        result_indices = []
+        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
 
         # Process only the classes that were actually sampled
-        for label, count in zip(unique_samples.tolist(), sample_counts.tolist()):
+        for i, (label, count) in tqdm(
+            enumerate(zip(unique_samples.tolist(), sample_counts.tolist())),
+            total=len(unique_samples),
+            desc="Processing classes in sampler",
+        ):
             if label not in self.klass_indices:
                 continue
 
             klass_index = self.klass_indices[label]
+
             if klass_index.numel() == 0:
                 continue
 
             # Sample elements from this class
             if self.element_weights is not None:
-                # Use element weights for this class
+                # This is a critical point for memory
+                current_element_weights_slice = self.element_weights[klass_index]
+
                 if self.replacement:
-                    # With replacement - can sample as many as needed
                     right_inds = torch.multinomial(
-                        self.element_weights[klass_index],
+                        current_element_weights_slice,
                         num_samples=count,
                         replacement=True,
                     )
                 else:
-                    # Without replacement - can only sample up to class size
                     num_to_sample = min(count, len(klass_index))
                     right_inds = torch.multinomial(
-                        self.element_weights[klass_index],
+                        current_element_weights_slice,
                         num_samples=num_to_sample,
                         replacement=False,
                     )
             elif self.replacement:
-                # Random sampling with replacement
                 right_inds = torch.randint(len(klass_index), size=(count,))
             else:
-                # Without replacement - can only sample up to class size
                 num_to_sample = min(count, len(klass_index))
                 right_inds = torch.randperm(len(klass_index))[:num_to_sample]
 
             # Get actual indices
             sampled_indices = klass_index[right_inds]
-            result_indices.append(sampled_indices)
+            log_mem(
+                f"Loop iter {i}, Class {label} - After slicing klass_index with right_inds"
+            )
+            result_indices_list.append(sampled_indices)
 
+        log_mem("After processing all classes loop")
         # Combine all indices
-        if result_indices:
-            combined_indices = torch.cat(result_indices)
+        if result_indices_list:  # Check if the list is not empty
+            final_result_indices = torch.cat(
+                result_indices_list
+            )  # Use the list with the appended new name
 
             # Shuffle the combined indices
-            shuffled_indices = combined_indices[torch.randperm(len(combined_indices))]
+            shuffled_indices = final_result_indices[
+                torch.randperm(len(final_result_indices))
+            ]
+            log_mem("After shuffling final_result_indices")
             self.num_samples = len(shuffled_indices)
             yield from shuffled_indices.tolist()
         else:

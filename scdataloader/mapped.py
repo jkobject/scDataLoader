@@ -25,6 +25,9 @@ from lamindb.core.storage._anndata_accessor import (
 )
 from lamindb_setup.core.upath import UPath
 from tqdm import tqdm
+import os
+import torch
+
 
 if TYPE_CHECKING:
     from lamindb_setup.core.types import UPathStr
@@ -109,6 +112,8 @@ class MappedCollection:
         meta_assays: Assays that are already defined as metacells.
         metacell_mode: frequency at which to sample a metacell (an average of k-nearest neighbors).
         get_knn_cells: Whether to also dataload the k-nearest neighbors of each queried cells.
+        store_location: Path to a directory where klass_indices can be cached, or full path to the cache file.
+        force_recompute_indices: If True, recompute indices even if a cache file exists.
     """
 
     def __init__(
@@ -127,6 +132,8 @@ class MappedCollection:
         metacell_mode: float = 0.0,
         get_knn_cells: bool = False,
         meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
+        store_location: str | None = None,
+        force_recompute_indices: bool = False,
     ):
         if join not in {None, "inner", "outer"}:  # pragma: nocover
             raise ValueError(
@@ -184,14 +191,26 @@ class MappedCollection:
         self._cache_cats: dict = {}
         if self.obs_keys is not None:
             if cache_categories:
-                self._cache_categories(self.obs_keys)
+                if store_location is not None:
+                    self.store_location = os.path.join(store_location, "categories")
+                    if (
+                        not os.path.exists(self.store_location)
+                        or force_recompute_indices
+                    ):
+                        self._cache_categories(self.obs_keys)
+                        torch.save(self._cache_cats, self.store_location)
+                    else:
+                        self._cache_cats = torch.load(self.store_location)
+                        print(f"Loaded categories from {self.store_location}")
             self.encoders: dict = {}
             if self.encode_labels:
                 self._make_encoders(self.encode_labels)  # type: ignore
 
         self.n_obs_list = []
         self.indices_list = []
-        for i, storage in tqdm(enumerate(self.storages)):
+        for i, storage in tqdm(
+            enumerate(self.storages), desc="Checking datasets", total=len(self.storages)
+        ):
             with _Connect(storage) as store:
                 X = store["X"]
                 store_path = self.path_list[i]
@@ -266,7 +285,7 @@ class MappedCollection:
         self._cache_cats = {}
         for label in obs_keys:
             self._cache_cats[label] = []
-            for storage in tqdm(self.storages):
+            for storage in tqdm(self.storages, f"caching categories, {label}"):
                 with _Connect(storage) as store:
                     cats = self._get_categories(store, label)
                     cats = _decode(cats) if isinstance(cats[0], bytes) else cats[...]
@@ -571,8 +590,9 @@ class MappedCollection:
     def get_merged_labels(self, label_key: str, is_cat: bool = True):
         """Get merged labels for `label_key` from all `.obs`."""
         labels_merge = []
-        print(label_key)
-        for i, storage in enumerate(self.storages):
+        for i, storage in tqdm(
+            enumerate(self.storages), label_key, total=len(self.storages)
+        ):
             with _Connect(storage) as store:
                 labels = self._get_labels(
                     store, label_key, storage_idx=i, is_cat=is_cat

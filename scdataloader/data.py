@@ -42,6 +42,10 @@ class Dataset(torchDataset):
         clss_to_predict (list[str]): list of observations to encode
         join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
         hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
+        metacell_mode (float, optional): The mode to use for metacell sampling. Defaults to 0.0.
+        get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each cell. Defaults to False.
+        store_location (str, optional): The location to store the sampler indices. Defaults to None.
+        force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
     """
 
     lamin_dataset: ln.Collection
@@ -53,6 +57,8 @@ class Dataset(torchDataset):
     join_vars: Literal["inner", "outer"] | None = None
     metacell_mode: float = 0.0
     get_knn_cells: bool = False
+    store_location: str | None = None
+    force_recompute_indices: bool = False
 
     def __post_init__(self):
         self.mapped_dataset = mapped(
@@ -65,6 +71,8 @@ class Dataset(torchDataset):
             parallel=True,
             metacell_mode=self.metacell_mode,
             get_knn_cells=self.get_knn_cells,
+            store_location=self.store_location,
+            force_recompute_indices=self.force_recompute_indices,
         )
         print(
             "won't do any check but we recommend to have your dataset coming from local storage"
@@ -79,7 +87,7 @@ class Dataset(torchDataset):
                 if clss not in self.hierarchical_clss:
                     # otherwise it's already been done
                     self.class_topred[clss] = set(
-                        self.mapped_dataset.get_merged_categories(clss)
+                        self.mapped_dataset.encoders[clss].keys()
                     )
                     if (
                         self.mapped_dataset.unknown_label
@@ -269,7 +277,7 @@ class Dataset(torchDataset):
                         clss
                     )
                 )
-            cats = set(self.mapped_dataset.get_merged_categories(clss))
+            cats = set(self.mapped_dataset.encoders[clss].keys())
             groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
             for i, j in groupings.items():
                 if len(j) == 0:
@@ -397,6 +405,8 @@ def mapped(
     metacell_mode: bool = False,
     meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
     get_knn_cells: bool = False,
+    store_location: str | None = None,
+    force_recompute_indices: bool = False,
 ) -> MappedCollection:
     path_list = []
     for artifact in dataset.artifacts.all():
@@ -424,6 +434,8 @@ def mapped(
         meta_assays=meta_assays,
         metacell_mode=metacell_mode,
         get_knn_cells=get_knn_cells,
+        store_location=store_location,
+        force_recompute_indices=force_recompute_indices,
     )
     return ds
 

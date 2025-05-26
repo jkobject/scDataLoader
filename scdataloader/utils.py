@@ -18,6 +18,37 @@ from scipy.stats import median_abs_deviation
 from torch import Tensor
 
 
+def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
+    """
+    loads an input file with a\\n b\\n.. into a list [a,b,..]
+
+    Args:
+        input_str (str): The input string to be completed.
+
+    Returns:
+        str: The completed string with 'complete' appended.
+    """
+    with open(filename) as f:
+        return [strconv(val[:-1]) for val in f.readlines()]
+
+
+def listToFile(li: list, filename: str, strconv: callable = lambda x: str(x)) -> None:
+    """
+    listToFile loads a list with [a,b,..] into an input file a\\n b\\n..
+
+    Args:
+        l (list): The list of elements to be written to the file.
+        filename (str): The name of the file where the list will be written.
+        strconv (callable, optional): A function to convert each element of the list to a string. Defaults to str.
+
+    Returns:
+        None
+    """
+    with open(filename, "w") as f:
+        for item in li:
+            f.write("%s\n" % strconv(item))
+
+
 def slurm_restart_count(use_mine: bool = False):
     if use_mine:
         return int(os.getenv("MY_SLURM_RESTART_COUNT", 0))
