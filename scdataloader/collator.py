@@ -57,7 +57,6 @@ class Collator:
                 If [] all genes will be considered
         """
         self.organisms = organisms
-        genedf = load_genes(organisms)
         self.max_len = max_len
         self.n_bins = n_bins
         self.add_zero_genes = add_zero_genes
@@ -72,9 +71,10 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.to_subset = {}
-        self._setup(genedf, org_to_id, valid_genes, genelist)
+        self._setup(org_to_id, valid_genes, genelist)
 
-    def _setup(self, genedf, org_to_id=None, valid_genes=[], genelist=[]):
+    def _setup(self, org_to_id=None, valid_genes=[], genelist=[]):
+        genedf = load_genes(self.organisms)
         self.org_to_id = org_to_id
         self.to_subset = {}
         self.accepted_genes = {}
