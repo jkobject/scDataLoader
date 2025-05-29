@@ -258,6 +258,7 @@ class DataModule(L.LightningDataModule):
         self.dataset.genedf = self.dataset.genedf.loc[genes]
         self.kwargs["collate_fn"].genes = genes
         self.kwargs["collate_fn"]._setup(
+            genedf=self.dataset.genedf,
             org_to_id=self.kwargs["collate_fn"].org_to_id,
             valid_genes=genes,
         )
