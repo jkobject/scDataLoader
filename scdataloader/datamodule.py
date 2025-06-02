@@ -794,7 +794,7 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Processing {n:,} elements in {n_chunks} chunks...")
 
         # Process in chunks to limit memory usage
-        with ProcessPoolExecutor(max_workers=n_workers) as executor:
+        with ProcessPoolExecutor(max_workers=n_workers,mp_context=mp.get_context("spawn")) as executor:
             # Submit chunks for processing
             futures = []
             for i in range(n_chunks):
@@ -842,11 +842,10 @@ class LabelWeightedSampler(Sampler[int]):
 
         # Get unique labels in this slice for more efficient processing
         unique_labels = np.unique(labels_slice)
-
         # For each valid label, find its indices
         for label in unique_labels:
             # Find positions where this label appears (using direct boolean indexing)
             label_mask = labels_slice == label
             chunk_indices[int(label)] = indices[label_mask]
-
+        
         return chunk_indices
