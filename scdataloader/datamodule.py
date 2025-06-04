@@ -395,7 +395,7 @@ class DataModule(L.LightningDataModule):
             self.idx_full = idx_full
         if self.store_location is not None:
             if not os.path.exists(self.store_location) or self.force_recompute_indices:
-                os.makedirs(self.store_location)
+                os.makedirs(self.store_location, exist_ok=True)
                 if self.nnz is not None:
                     np.save(os.path.join(self.store_location, "nnz.npy"), self.nnz)
                 np.save(
@@ -794,7 +794,9 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Processing {n:,} elements in {n_chunks} chunks...")
 
         # Process in chunks to limit memory usage
-        with ProcessPoolExecutor(max_workers=n_workers) as executor:
+        with ProcessPoolExecutor(
+            max_workers=n_workers, mp_context=mp.get_context("spawn")
+        ) as executor:
             # Submit chunks for processing
             futures = []
             for i in range(n_chunks):
