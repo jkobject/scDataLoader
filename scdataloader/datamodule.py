@@ -309,7 +309,9 @@ class DataModule(L.LightningDataModule):
         start_time = time.time()
         if (
             self.store_location is None
-            or not os.path.exists(self.store_location)
+            or not os.path.exists(
+                os.path.join(self.store_location, "train_weights.npy")
+            )
             or self.force_recompute_indices
         ):
             if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
@@ -394,7 +396,12 @@ class DataModule(L.LightningDataModule):
             self.train_labels = labels
             self.idx_full = idx_full
         if self.store_location is not None:
-            if not os.path.exists(self.store_location) or self.force_recompute_indices:
+            if (
+                not os.path.exists(
+                    os.path.join(self.store_location, "train_weights.npy")
+                )
+                or self.force_recompute_indices
+            ):
                 os.makedirs(self.store_location, exist_ok=True)
                 if self.nnz is not None:
                     np.save(os.path.join(self.store_location, "nnz.npy"), self.nnz)
