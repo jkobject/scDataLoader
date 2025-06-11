@@ -382,19 +382,3 @@ EFO:0010010: 5231
 EFO:0008953: 4693
 EFO:0008720: 2768
 EFO:0008930: 1679
-
-import plotly.express as px
-
-# Sample data
-labels = ['Apples', 'Bananas', 'Cherries', 'Dates']
-values = [10, 15, 7, 13]
-
-# Create a camembert plot
-fig = px.pie(
-    names=labels,
-    values=values,
-    title="My Beautiful Camembert Plot",
-    hole=0.3  # for a donut-style camembert
-)
-
-fig.show()
