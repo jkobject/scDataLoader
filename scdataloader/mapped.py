@@ -192,6 +192,7 @@ class MappedCollection:
         if self.obs_keys is not None:
             if cache_categories:
                 if store_location is not None:
+                    os.makedirs(store_location, exist_ok=True)
                     self.store_location = os.path.join(store_location, "categories")
                     if (
                         not os.path.exists(self.store_location)
@@ -205,7 +206,6 @@ class MappedCollection:
             self.encoders: dict = {}
             if self.encode_labels:
                 self._make_encoders(self.encode_labels)  # type: ignore
-
         self.n_obs_list = []
         self.indices_list = []
         for i, storage in tqdm(

@@ -143,7 +143,7 @@
 'UBERON:0000916': 59001
 'UBERON:0014455': 58536
 'UBERON:0002661': 58226
- 'UBERON:0001873': 57571
+'UBERON:0001873': 57571
 'UBERON:0001769': 57422
 'UBERON:0008953': 56919
 'UBERON:0002372': 56899
@@ -330,6 +330,7 @@
 
 human: 230822337
 mouse: 102753838
+# other 14070000
 macaque: 3161179
 zebrafish: 3117237
 pig: 1641179
@@ -382,3 +383,18 @@ EFO:0008953: 4693
 EFO:0008720: 2768
 EFO:0008930: 1679
 
+import plotly.express as px
+
+# Sample data
+labels = ['Apples', 'Bananas', 'Cherries', 'Dates']
+values = [10, 15, 7, 13]
+
+# Create a camembert plot
+fig = px.pie(
+    names=labels,
+    values=values,
+    title="My Beautiful Camembert Plot",
+    hole=0.3  # for a donut-style camembert
+)
+
+fig.show()
