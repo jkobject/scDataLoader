@@ -61,6 +61,8 @@ class DataModule(L.LightningDataModule):
         get_knn_cells: bool = False,
         store_location: str = None,
         force_recompute_indices: bool = False,
+        sampler_workers: int = None,
+        sampler_chunk_size: int = None,
         **kwargs,
     ):
         """
@@ -97,6 +99,8 @@ class DataModule(L.LightningDataModule):
             get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
             store_location (str, optional): The location to store the sampler indices. Defaults to None.
             force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
+            sampler_workers (int, optional): The number of workers to use for the sampler. Defaults to None (auto-determined).
+            sampler_chunk_size (int, optional): The size of the chunks to use for the sampler. Defaults to None (auto-determined).
             **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
             see @file data.py and @file collator.py for more details about some of the parameters
         """
@@ -148,6 +152,9 @@ class DataModule(L.LightningDataModule):
                     prev_chromosome = r["chromosome_name"]
                 print(f"reduced the size to {len(set(c)) / len(biomart)}")
                 biomart["pos"] = c
+            import pdb
+
+            pdb.set_trace()
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
         if gene_embeddings != "":
@@ -169,7 +176,7 @@ class DataModule(L.LightningDataModule):
                 org_to_id=mdataset.encoder[organism_name],
                 tp_name=tp_name,
                 organism_name=organism_name,
-                class_names=clss_to_predict,
+                class_names=list(self.classes.keys()),
             )
         self.validation_split = validation_split
         self.test_split = test_split
@@ -185,6 +192,8 @@ class DataModule(L.LightningDataModule):
         self.clss_to_weight = clss_to_weight
         self.train_weights = None
         self.train_labels = None
+        self.sampler_workers = sampler_workers
+        self.sampler_chunk_size = sampler_chunk_size
         self.store_location = store_location
         self.nnz = None
         self.test_datasets = []
@@ -467,23 +476,16 @@ class DataModule(L.LightningDataModule):
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
             try:
                 print("Setting up the parallel train sampler...")
-
-                # Get number of workers from kwargs, environment variable, or use a reasonable default
-                n_workers = kwargs.pop("sampler_workers", None)
-
-                # Let the sampler auto-determine chunk size
-                chunk_size = kwargs.pop("sampler_chunk_size", None)
-
                 # Create the optimized parallel sampler
-                print(f"Using {n_workers} workers for class indexing")
+                print(f"Using {self.sampler_workers} workers for class indexing")
                 train_sampler = LabelWeightedSampler(
                     label_weights=self.train_weights,
                     labels=self.train_labels,
                     num_samples=int(self.n_samples_per_epoch),
                     element_weights=self.nnz,
                     replacement=self.replacement,
-                    n_workers=n_workers,
-                    chunk_size=chunk_size,
+                    n_workers=self.sampler_workers,
+                    chunk_size=self.sampler_chunk_size,
                     store_location=self.store_location,
                     force_recompute_indices=self.force_recompute_indices,
                 )
@@ -856,5 +858,5 @@ class LabelWeightedSampler(Sampler[int]):
             # Find positions where this label appears (using direct boolean indexing)
             label_mask = labels_slice == label
             chunk_indices[int(label)] = indices[label_mask]
-        
+
         return chunk_indices
