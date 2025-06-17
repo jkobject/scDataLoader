@@ -169,7 +169,7 @@ class DataModule(L.LightningDataModule):
                 org_to_id=mdataset.encoder[organism_name],
                 tp_name=tp_name,
                 organism_name=organism_name,
-                class_names=clss_to_predict,
+                class_names=list(self.classes.keys()),
             )
         self.validation_split = validation_split
         self.test_split = test_split
