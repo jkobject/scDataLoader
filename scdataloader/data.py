@@ -279,6 +279,7 @@ class Dataset(torchDataset):
                 )
             cats = set(self.mapped_dataset.encoders[clss].keys())
             groupings, _, leaf_labels = get_ancestry_mapping(cats, parentdf)
+            groupings.pop(None, None)
             for i, j in groupings.items():
                 if len(j) == 0:
                     # that should not happen
@@ -286,6 +287,7 @@ class Dataset(torchDataset):
 
                     pdb.set_trace()
                     groupings.pop(i)
+
             self.labels_groupings[clss] = groupings
             if clss in self.clss_to_predict:
                 # if we have added new clss, we need to update the encoder with them too.
