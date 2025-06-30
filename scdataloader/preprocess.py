@@ -1,4 +1,5 @@
 import gc
+import time
 from typing import Callable, Optional, Union
 from uuid import uuid4
 
@@ -8,11 +9,10 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 from anndata import AnnData, read_h5ad
+from django.db.utils import OperationalError
 from scipy.sparse import csr_matrix
 from upath import UPath
-import gc
-from django.db.utils import OperationalError
-import time
+
 from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
@@ -792,6 +792,7 @@ def additional_postprocess(adata):
     MINCELLS = 10
     MAXSIM = 0.94
     from collections import Counter
+
     import bionty as bt
 
     from .config import MAIN_HUMAN_MOUSE_DEV_STAGE_MAP

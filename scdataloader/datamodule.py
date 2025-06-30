@@ -1,14 +1,15 @@
-import os
-from typing import Optional, Sequence, Union
 import multiprocessing as mp
+import os
+import random
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
+from typing import Optional, Sequence, Union
 
 import lamindb as ln
 import lightning as L
 import numpy as np
 import pandas as pd
-from .utils import fileToList, listToFile
 import torch
 from torch.utils.data import DataLoader, Sampler
 from torch.utils.data.sampler import (
@@ -17,13 +18,11 @@ from torch.utils.data.sampler import (
     SubsetRandomSampler,
     WeightedRandomSampler,
 )
+from tqdm import tqdm
 
 from .collator import Collator
 from .data import Dataset
-from .utils import getBiomartTable
-import random
-from tqdm import tqdm
-import time
+from .utils import fileToList, getBiomartTable, listToFile
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 

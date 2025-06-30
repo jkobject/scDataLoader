@@ -7,12 +7,14 @@
 
 from __future__ import annotations
 
+import os
 from collections import Counter
 from functools import reduce
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import pandas as pd
+import torch
 from lamindb.core.storage._anndata_accessor import (
     ArrayType,
     ArrayTypes,
@@ -25,9 +27,6 @@ from lamindb.core.storage._anndata_accessor import (
 )
 from lamindb_setup.core.upath import UPath
 from tqdm import tqdm
-import os
-import torch
-
 
 if TYPE_CHECKING:
     from lamindb_setup.core.types import UPathStr
