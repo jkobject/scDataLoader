@@ -49,7 +49,7 @@ class DataModule(L.LightningDataModule):
         max_len: int = 1000,
         add_zero_genes: int = 100,
         replacement: bool = True,
-        do_gene_pos: Union[bool, str] = True,
+        do_gene_pos: str = "",
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: list = [
             # "EFO:0008853", #patch seq
@@ -122,39 +122,7 @@ class DataModule(L.LightningDataModule):
         self.gene_pos = None
         self.collection_name = collection_name
         if do_gene_pos:
-            if type(do_gene_pos) is str:
-                print("seeing a string: loading gene positions as biomart parquet file")
-                biomart = pd.read_parquet(do_gene_pos)
-            else:
-                # and annotations
-                if mdataset.organisms != ["NCBITaxon:9606"]:
-                    raise ValueError(
-                        "need to provide your own table as this automated function only works for humans for now"
-                    )
-                biomart = getBiomartTable(
-                    attributes=["start_position", "chromosome_name"],
-                    useCache=True,
-                ).set_index("ensembl_gene_id")
-                biomart = biomart.loc[~biomart.index.duplicated(keep="first")]
-                biomart = biomart.sort_values(by=["chromosome_name", "start_position"])
-                c = []
-                i = 0
-                prev_position = -100000
-                prev_chromosome = None
-                for _, r in biomart.iterrows():
-                    if (
-                        r["chromosome_name"] != prev_chromosome
-                        or r["start_position"] - prev_position > gene_position_tolerance
-                    ):
-                        i += 1
-                    c.append(i)
-                    prev_position = r["start_position"]
-                    prev_chromosome = r["chromosome_name"]
-                print(f"reduced the size to {len(set(c)) / len(biomart)}")
-                biomart["pos"] = c
-            import pdb
-
-            pdb.set_trace()
+            biomart = pd.read_parquet(do_gene_pos)
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
         if gene_embeddings != "":
@@ -349,9 +317,9 @@ class DataModule(L.LightningDataModule):
                 len_test = self.test_split
             else:
                 len_test = int(self.n_samples * self.test_split)
-            assert (
-                len_test + len_valid < self.n_samples
-            ), "test set + valid set size is configured to be larger than entire dataset."
+            assert len_test + len_valid < self.n_samples, (
+                "test set + valid set size is configured to be larger than entire dataset."
+            )
 
             idx_full = []
             if len(self.assays_to_drop) > 0:
