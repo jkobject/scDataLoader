@@ -233,19 +233,19 @@ class Dataset(torchDataset):
             elif clss == "cell_type_ontology_term_id":
                 parentdf = (
                     bt.CellType.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
             elif clss == "tissue_ontology_term_id":
                 parentdf = (
                     bt.Tissue.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
             elif clss == "disease_ontology_term_id":
                 parentdf = (
                     bt.Disease.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
             elif clss in [
@@ -255,19 +255,19 @@ class Dataset(torchDataset):
             ]:
                 parentdf = (
                     bt.DevelopmentalStage.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
             elif clss == "assay_ontology_term_id":
                 parentdf = (
                     bt.ExperimentalFactor.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
             elif clss == "self_reported_ethnicity_ontology_term_id":
                 parentdf = (
                     bt.Ethnicity.filter()
-                    .df(include=["parents__ontology_id"])
+                    .df(include=["parents__ontology_id", "ontology_id"])
                     .set_index("ontology_id")
                 )
 
