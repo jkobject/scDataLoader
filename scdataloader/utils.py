@@ -585,9 +585,14 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
 
 
 def _adding_scbasecamp_genes(
-    species=set(bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id)
-    - set(["NCBITaxon:10090", "NCBITaxon:9606"]),
+    species=[],
 ):
+    if len(species) == 0:
+        species = set(
+            bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id
+        )
+        -set(["NCBITaxon:10090", "NCBITaxon:9606"])
+    species = list(species)
     if len(bt.Organism.filter(ontology_id="NCBITaxon:9593")) == 0:
         bt.Organism(
             name="gorilla gorilla",
