@@ -108,7 +108,7 @@ class DataModule(L.LightningDataModule):
                 "need 'organism_ontology_term_id' in the set of classes at least"
             )
         mdataset = Dataset(
-            ln.Collection.filter(name=collection_name, is_latest=True).first(),
+            ln.Collection.filter(key=collection_name, is_latest=True).first(),
             clss_to_predict=clss_to_predict,
             hierarchical_clss=hierarchical_clss,
             metacell_mode=metacell_mode,

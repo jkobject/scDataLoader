@@ -16,6 +16,7 @@ from django.db import IntegrityError
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from torch import Tensor
+from lamindb.errors import DoesNotExist
 
 
 def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
@@ -583,6 +584,49 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
     return organismdf
 
 
+def _adding_scbasecamp_genes(
+    species=set(bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id)
+    - set(["NCBITaxon:10090", "NCBITaxon:9606"]),
+):
+    if len(bt.Organism.filter(ontology_id="NCBITaxon:9593")) == 0:
+        bt.Organism(
+            name="gorilla gorilla",
+            ontology_id="NCBITaxon:9593",
+            scientific_name="Gorilla gorilla gorilla",
+        ).save()
+    if len(bt.Organism.filter(ontology_id="NCBITaxon:9594")) == 0:
+        bt.Organism(
+            name="rice",
+            ontology_id="NCBITaxon:4530",
+            scientific_name="Oryza sativa (main)",
+        ).save()
+
+    for i in species:
+        print(i)
+        df = (
+            bt.Gene.using("laminlabs/arc-virtual-cell-atlas")
+            .filter(organism__ontology_id=i)
+            .all()
+            .df()
+        )
+        genes = []
+        org = bt.Organism.filter(ontology_id=i).one()
+        ido = org.id
+        for row in df.to_dict(orient="records"):
+            row["organism_id"] = ido
+            gene = bt.Gene(
+                ensembl_gene_id=row["ensembl_gene_id"],
+                stable_id=row["stable_id"],
+                description=row["description"],
+                symbol=row["symbol"],
+                biotype=row["biotype"],
+                organism=org,
+                _skip_validation=True,
+            )
+            genes.append(gene)
+        ln.save(genes, ignore_conflicts=True)
+
+
 def populate_my_ontology(
     sex: List[str] = ["PATO:0000384", "PATO:0000383"],
     celltypes: List[str] = [],
@@ -591,7 +635,8 @@ def populate_my_ontology(
     tissues: List[str] = [],
     diseases: List[str] = [],
     dev_stages: List[str] = [],
-    organisms_clade: List[str] = ["vertebrates", "plants"],
+    organisms_clade: List[str] = ["vertebrates", "plants", "metazoa"],
+    genes_from: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
 ):
     """
     creates a local version of the lamin ontologies and add the required missing values in base ontologies
@@ -607,8 +652,6 @@ def populate_my_ontology(
     `df["assay_ontology_term_id"].unique()`
 
     Args:
-        lb (lamindb): lamindb instance.
-        organisms (list, optional): List of organisms. Defaults to ["NCBITaxon:10090", "NCBITaxon:9606"].
         sex (list, optional): List of sexes. Defaults to ["PATO:0000384", "PATO:0000383"].
         celltypes (list, optional): List of cell types. Defaults to [].
         ethnicities (list, optional): List of ethnicities. Defaults to [].
@@ -616,6 +659,7 @@ def populate_my_ontology(
         tissues (list, optional): List of tissues. Defaults to [].
         diseases (list, optional): List of diseases. Defaults to [].
         dev_stages (list, optional): List of developmental stages. Defaults to [].
+        organisms_clade (list, optional): List of organisms clade. Defaults to ["vertebrates", "plants"].
     """
     # cell type
     if celltypes is not None:
@@ -626,17 +670,17 @@ def populate_my_ontology(
             records = bt.CellType.from_values(names, field="ontology_id")
             ln.save(records)
         bt.CellType(name="unknown", ontology_id="unknown").save()
-    # Organism
+    # OrganismClade
     if organisms_clade is not None:
         records = []
         for organism_clade in organisms_clade:
             names = bt.Organism.public(organism=organism_clade).df().index
-            source = bt.PublicSource.filter(
-                name="ensembl", organism=organism_clade
-            ).last()
-            records += [
-                bt.Organism.from_source(name=name, source=source) for name in names
-            ]
+            source = bt.Source.filter(name="ensembl", organism=organism_clade).last()
+            for name in names:
+                try:
+                    records.append(bt.Organism.from_source(name=name, source=source))
+                except DoesNotExist as e:
+                    print(f"Organism {name} not found in source {source}")
         nrecords = []
         prevrec = set()
         for rec in records:
@@ -652,7 +696,7 @@ def populate_my_ontology(
     # Phenotype
     if sex is not None:
         names = bt.Phenotype.public().df().index if not sex else sex
-        source = bt.PublicSource.filter(name="pato").first()
+        source = bt.Source.filter(name="pato").first()
         records = [
             bt.Phenotype.from_source(ontology_id=i, source=source) for i in names
         ]
@@ -693,7 +737,7 @@ def populate_my_ontology(
     if dev_stages is not None:
         if len(dev_stages) == 0:
             bt.DevelopmentalStage.import_source()
-            source = bt.PublicSource.filter(organism="mouse", name="mmusdv").last()
+            source = bt.Source.filter(organism="mouse", name="mmusdv").last()
             bt.DevelopmentalStage.import_source(source=source)
         else:
             names = (
@@ -716,7 +760,7 @@ def populate_my_ontology(
         bt.Disease(name="normal", ontology_id="PATO:0000461").save()
         bt.Disease(name="unknown", ontology_id="unknown").save()
     # genes
-    for organism in ["NCBITaxon:10090", "NCBITaxon:9606"]:
+    for organism in genes_from:
         # convert onto to name
         organism = bt.Organism.filter(ontology_id=organism).one().name
         names = bt.Gene.public(organism=organism).df()["ensembl_gene_id"]
