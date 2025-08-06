@@ -56,7 +56,7 @@ class Preprocessor:
             "donor_id",
             "suspension_type",
         ],
-        skip_validate: bool = False,
+        skip_validate: bool = True,
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         do_postp: bool = True,
