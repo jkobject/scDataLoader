@@ -1,5 +1,5 @@
 import argparse
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import lamindb as ln
 
@@ -149,7 +149,7 @@ def main():
     )
     preprocess_parser.add_argument(
         "--batch_keys",
-        type=list[str],
+        type=List[str],
         default=[
             "assay_ontology_term_id",
             "self_reported_ethnicity_ontology_term_id",
@@ -229,11 +229,11 @@ def main():
     if args.instance is not None:
         collection = (
             ln.Collection.using(instance=args.instance)
-            .filter(name=args.name, version=args.version)
+            .filter(key=args.name, version=args.version)
             .first()
         )
     else:
-        collection = ln.Collection.filter(name=args.name, version=args.version).first()
+        collection = ln.Collection.filter(key=args.name, version=args.version).first()
 
     print(
         "using the dataset ", collection, " of size ", len(collection.artifacts.all())
@@ -262,7 +262,6 @@ def main():
         additional_preprocess=additional_preprocess,
         additional_postprocess=additional_postprocess,
         keep_files=False,
-        force_preloaded=args.force_preloaded,
     )
 
     # Preprocess the dataset

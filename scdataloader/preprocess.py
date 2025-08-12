@@ -1,6 +1,6 @@
 import gc
 import time
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 from uuid import uuid4
 
 import anndata as ad
@@ -49,7 +49,7 @@ class Preprocessor:
         maxdropamount: int = 50,
         madoutlier: int = 5,
         pct_mt_outlier: int = 8,
-        batch_keys: list[str] = [
+        batch_keys: List[str] = [
             "assay_ontology_term_id",
             "self_reported_ethnicity_ontology_term_id",
             "sex_ontology_term_id",
@@ -60,7 +60,7 @@ class Preprocessor:
         additional_preprocess: Optional[Callable[[AnnData], AnnData]] = None,
         additional_postprocess: Optional[Callable[[AnnData], AnnData]] = None,
         do_postp: bool = True,
-        organisms: list[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
+        organisms: List[str] = ["NCBITaxon:9606", "NCBITaxon:10090"],
         use_raw: bool = True,
         keepdata: bool = False,
         drop_non_primary: bool = False,
@@ -448,12 +448,14 @@ class LaminPreprocessor(Preprocessor):
         cache: bool = True,
         keep_files: bool = True,
         force_lamin_cache: bool = False,
+        assays_to_drop: List[str] = ["EFO:0008939"],
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.cache = cache
         self.keep_files = keep_files
         self.force_lamin_cache = force_lamin_cache
+        self.assays_to_drop = assays_to_drop
 
     def __call__(
         self,
@@ -499,11 +501,14 @@ class LaminPreprocessor(Preprocessor):
                     if backed.obs.is_primary_data.sum() == 0:
                         print(f"{file.key} only contains non primary cells.. dropping")
                         # Save the stem_uid to a file to avoid loading it again
-                    with open("nonprimary.txt", "a") as f:
-                        f.write(f"{file.stem_uid}\n")
-                    continue
+                        with open("nonprimary.txt", "a") as f:
+                            f.write(f"{file.stem_uid}\n")
+                        continue
                 else:
                     print("Warning: couldn't check unicity from is_primary_data column")
+                if backed.obs.assay_ontology_term_id[0] in self.assays_to_drop:
+                    print(f"{file.key} is in the assay drop list.. dropping")
+                    continue
                 if backed.shape[1] < 1000:
                     print(
                         f"{file.key} only contains less than 1000 genes and is likely not scRNAseq... dropping"
@@ -577,7 +582,7 @@ class LaminPreprocessor(Preprocessor):
                             try:
                                 myfile = ln.Artifact.from_anndata(
                                     adata,
-                                    revises=file,
+                                    # revises=file,
                                     description=description + " p" + str(i),
                                     version=version,
                                 )
