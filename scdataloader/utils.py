@@ -13,10 +13,10 @@ import torch
 from anndata import AnnData
 from biomart import BiomartServer
 from django.db import IntegrityError
+from lamindb.errors import DoesNotExist
 from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from torch import Tensor
-from lamindb.errors import DoesNotExist
 
 
 def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
@@ -33,7 +33,9 @@ def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
         return [strconv(val[:-1]) for val in f.readlines()]
 
 
-def listToFile(li: list, filename: str, strconv: callable = lambda x: str(x)) -> None:
+def listToFile(
+    li: List[str], filename: str, strconv: callable = lambda x: str(x)
+) -> None:
     """
     listToFile loads a list with [a,b,..] into an input file a\\n b\\n..
 
@@ -69,7 +71,7 @@ def createFoldersFor(filepath: str):
 
 
 def _fetchFromServer(
-    ensemble_server: str, attributes: list, database: str = "hsapiens_gene_ensembl"
+    ensemble_server: str, attributes: List[str], database: str = "hsapiens_gene_ensembl"
 ):
     """
     Fetches data from the specified ensemble server.
@@ -275,7 +277,7 @@ def get_descendants(val, df):
     return r_onto | ontos
 
 
-def get_ancestry_mapping(all_elem: list, onto_df: pd.DataFrame):
+def get_ancestry_mapping(all_elem: List[str], onto_df: pd.DataFrame):
     """
     This function generates a mapping of all elements to their ancestors in the ontology dataframe.
 
@@ -371,12 +373,14 @@ def load_dataset_local(
     return dataset
 
 
-def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
+def load_genes(
+    organisms: Union[str, List[str]] = "NCBITaxon:9606",
+):  # "NCBITaxon:10090",
     """
     Loads genes from the given organisms.
 
     Args:
-        organisms (Union[str, list]): The organisms to load genes from.
+        organisms (Union[str, List[str]]): The organisms to load genes from.
 
     Returns:
         pd.DataFrame: The genes dataframe.
@@ -684,7 +688,7 @@ def populate_my_ontology(
             for name in names:
                 try:
                     records.append(bt.Organism.from_source(name=name, source=source))
-                except DoesNotExist as e:
+                except DoesNotExist:
                     print(f"Organism {name} not found in source {source}")
         nrecords = []
         prevrec = set()

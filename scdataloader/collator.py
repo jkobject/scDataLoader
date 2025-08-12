@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 from torch import Tensor, long
@@ -9,10 +9,10 @@ from .utils import load_genes
 class Collator:
     def __init__(
         self,
-        organisms: list[str],
+        organisms: List[str],
         how: str = "all",
         org_to_id: dict[str, int] = None,
-        valid_genes: list[str] = [],
+        valid_genes: List[str] = [],
         max_len: int = 2000,
         add_zero_genes: int = 0,
         logp1: bool = False,
@@ -20,8 +20,8 @@ class Collator:
         n_bins: int = 0,
         tp_name: Optional[str] = None,
         organism_name: str = "organism_ontology_term_id",
-        class_names: list[str] = [],
-        genelist: list[str] = [],
+        class_names: List[str] = [],
+        genelist: List[str] = [],
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -107,7 +107,7 @@ class Collator:
         __call__ applies the collator to a minibatch of data
 
         Args:
-            batch (list[dict[str: array]]): List of dicts of arrays containing gene expression data.
+            batch (List[dict[str: array]]): List of dicts of arrays containing gene expression data.
                 the first list is for the different samples, the second list is for the different elements with
                 elem["X"]: gene expression
                 elem["organism_name"]: organism ontology term id
@@ -115,7 +115,7 @@ class Collator:
                 elem["class_names.."]: other classes
 
         Returns:
-            list[Tensor]: List of tensors containing the collated data.
+            List[Tensor]: List of tensors containing the collated data.
         """
         # do count selection
         # get the unseen info and don't add any unseen
