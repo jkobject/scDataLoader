@@ -43,11 +43,9 @@ def test_base():
     ln.Collection(art, name="test", description="test").save()
     datamodule = DataModule(
         collection_name="test",
-        organisms=["NCBITaxon:9606"],  # organism that we will work on
         how="most expr",  # for the collator (most expr genes only will be selected)
         max_len=1000,  # only the 1000 most expressed
         batch_size=64,
-        do_gene_pos=False,
         num_workers=1,
         use_default_col=True,
         clss_to_weight=["organism_ontology_term_id", "cell_type_ontology_term_id"],

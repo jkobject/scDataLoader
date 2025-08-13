@@ -200,7 +200,7 @@ class MappedCollection:
                         self._cache_categories(self.obs_keys)
                         torch.save(self._cache_cats, self.store_location)
                     else:
-                        self._cache_cats = torch.load(self.store_location)
+                        self._cache_cats = torch.load(self.store_location, weights_only=False)
                         print(f"Loaded categories from {self.store_location}")
             self.encoders: dict = {}
             if self.encode_labels:

@@ -48,7 +48,7 @@ class DataModule(L.LightningDataModule):
         max_len: int = 1000,
         add_zero_genes: int = 100,
         replacement: bool = True,
-        do_gene_pos: str = "",
+        gene_pos_file: str = "",
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: List[str] = [
             # "EFO:0008853", #patch seq
@@ -86,7 +86,7 @@ class DataModule(L.LightningDataModule):
                 any genes within this distance of each other will be considered at the same position.
             clss_to_weight (List[str], optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
             assays_to_drop (List[str], optional): List of assays to drop from the dataset. Defaults to [].
-            do_gene_pos (Union[bool, str], optional): Whether to use gene positions. Defaults to True.
+            gene_pos_file (Union[bool, str], optional): The path to the gene positions file. Defaults to True.
             max_len (int, optional): The maximum length of the input tensor. Defaults to 1000.
             add_zero_genes (int, optional): The number of zero genes to add to the input tensor. Defaults to 100.
             how (str, optional): The method to use for the collator. Defaults to "random expr".
@@ -120,15 +120,15 @@ class DataModule(L.LightningDataModule):
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
-        if do_gene_pos:
-            biomart = pd.read_parquet(do_gene_pos)
+        if gene_pos_file:
+            biomart = pd.read_parquet(gene_pos_file)
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
                 pd.read_parquet(gene_embeddings).loc[:, :2], how="inner"
             )
-            if do_gene_pos:
+            if gene_pos_file:
                 self.gene_pos = mdataset.genedf["pos"].tolist()
         self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
