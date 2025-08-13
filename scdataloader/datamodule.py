@@ -4,7 +4,7 @@ import random
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import lamindb as ln
 import lightning as L
@@ -31,7 +31,7 @@ class DataModule(L.LightningDataModule):
     def __init__(
         self,
         collection_name: str,
-        clss_to_weight: list = ["organism_ontology_term_id"],
+        clss_to_weight: List[str] = ["organism_ontology_term_id"],
         weight_scaler: int = 10,
         n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
@@ -40,17 +40,17 @@ class DataModule(L.LightningDataModule):
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
-        clss_to_predict: list = ["organism_ontology_term_id"],
-        hierarchical_clss: list = [],
+        clss_to_predict: List[str] = ["organism_ontology_term_id"],
+        hierarchical_clss: List[str] = [],
         # this is for the collator
         how: str = "random expr",
         organism_name: str = "organism_ontology_term_id",
         max_len: int = 1000,
         add_zero_genes: int = 100,
         replacement: bool = True,
-        do_gene_pos: str = "",
+        gene_pos_file: str = "",
         tp_name: Optional[str] = None,  # "heat_diff"
-        assays_to_drop: list = [
+        assays_to_drop: List[str] = [
             # "EFO:0008853", #patch seq
             # "EFO:0010961", # visium
             "EFO:0030007",  # ATACseq
@@ -84,17 +84,17 @@ class DataModule(L.LightningDataModule):
             use_default_col (bool, optional): Whether to use the default collator. Defaults to True.
             gene_position_tolerance (int, optional): The tolerance for gene position. Defaults to 10_000.
                 any genes within this distance of each other will be considered at the same position.
-            clss_to_weight (list, optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
-            assays_to_drop (list, optional): List of assays to drop from the dataset. Defaults to [].
-            do_gene_pos (Union[bool, str], optional): Whether to use gene positions. Defaults to True.
+            clss_to_weight (List[str], optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
+            assays_to_drop (List[str], optional): List of assays to drop from the dataset. Defaults to [].
+            gene_pos_file (Union[bool, str], optional): The path to the gene positions file. Defaults to True.
             max_len (int, optional): The maximum length of the input tensor. Defaults to 1000.
             add_zero_genes (int, optional): The number of zero genes to add to the input tensor. Defaults to 100.
             how (str, optional): The method to use for the collator. Defaults to "random expr".
             organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
-            hierarchical_clss (list, optional): List of hierarchical classes. Defaults to [].
+            hierarchical_clss (List[str], optional): List of hierarchical classes. Defaults to [].
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
-            clss_to_predict (list, optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
+            clss_to_predict (List[str], optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
             get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
             store_location (str, optional): The location to store the sampler indices. Defaults to None.
             force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
@@ -120,15 +120,15 @@ class DataModule(L.LightningDataModule):
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
-        if do_gene_pos:
-            biomart = pd.read_parquet(do_gene_pos)
+        if gene_pos_file:
+            biomart = pd.read_parquet(gene_pos_file)
             mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
             self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
         if gene_embeddings != "":
             mdataset.genedf = mdataset.genedf.join(
                 pd.read_parquet(gene_embeddings).loc[:, :2], how="inner"
             )
-            if do_gene_pos:
+            if gene_pos_file:
                 self.gene_pos = mdataset.genedf["pos"].tolist()
         self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
@@ -228,6 +228,13 @@ class DataModule(L.LightningDataModule):
             list
         """
         return self.dataset.genedf.index.tolist()
+
+    @property
+    def genes_dict(self):
+        return {
+            i: self.dataset.genedf.index[self.dataset.genedf.organism == i].tolist()
+            for i in self.dataset.organisms
+        }
 
     @genes.setter
     def genes(self, genes):

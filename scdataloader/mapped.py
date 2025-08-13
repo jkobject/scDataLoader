@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from collections import Counter
 from functools import reduce
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -117,20 +117,20 @@ class MappedCollection:
 
     def __init__(
         self,
-        path_list: list[UPathStr],
-        layers_keys: str | list[str] | None = None,
-        obs_keys: str | list[str] | None = None,
-        obsm_keys: str | list[str] | None = None,
+        path_list: List[UPathStr],
+        layers_keys: str | List[str] | None = None,
+        obs_keys: str | List[str] | None = None,
+        obsm_keys: str | List[str] | None = None,
         obs_filter: dict[str, str | tuple[str, ...]] | None = None,
         join: Literal["inner", "outer"] | None = "inner",
-        encode_labels: bool | list[str] = True,
+        encode_labels: bool | List[str] = True,
         unknown_label: str | dict[str, str] | None = None,
         cache_categories: bool = True,
         parallel: bool = False,
         dtype: str | None = None,
         metacell_mode: float = 0.0,
         get_knn_cells: bool = False,
-        meta_assays: list[str] = ["EFO:0022857", "EFO:0010961"],
+        meta_assays: List[str] = ["EFO:0022857", "EFO:0010961"],
         store_location: str | None = None,
         force_recompute_indices: bool = False,
     ):
@@ -200,7 +200,7 @@ class MappedCollection:
                         self._cache_categories(self.obs_keys)
                         torch.save(self._cache_cats, self.store_location)
                     else:
-                        self._cache_cats = torch.load(self.store_location)
+                        self._cache_cats = torch.load(self.store_location, weights_only=False)
                         print(f"Loaded categories from {self.store_location}")
             self.encoders: dict = {}
             if self.encode_labels:
@@ -348,7 +348,7 @@ class MappedCollection:
             vrs_sort_status = (vrs.is_monotonic_decreasing for vrs in self.var_list)
         return all(vrs_sort_status)
 
-    def check_vars_non_aligned(self, vars: pd.Index | list) -> list[int]:
+    def check_vars_non_aligned(self, vars: pd.Index | List) -> List[int]:
         """Returns indices of objects with non-aligned variables.
 
         Args:
@@ -380,7 +380,7 @@ class MappedCollection:
         return (self.n_obs, self.n_vars)
 
     @property
-    def original_shapes(self) -> list[tuple[int, int]]:
+    def original_shapes(self) -> List[tuple[int, int]]:
         """Shapes of the underlying AnnData objects (with `obs_filter` applied)."""
         if self.n_vars_list is None:
             n_vars_list = [None] * len(self.n_obs_list)
@@ -541,7 +541,7 @@ class MappedCollection:
 
     def get_label_weights(
         self,
-        obs_keys: str | list[str],
+        obs_keys: str | List[str],
         scaler: float | None = None,
         return_categories: bool = False,
     ):
