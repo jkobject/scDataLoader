@@ -1,5 +1,7 @@
 import io
 import os
+import random
+import string
 import urllib
 from collections import Counter
 from functools import lru_cache
@@ -784,6 +786,29 @@ def populate_my_ontology(
                 organism=organism,
             )
             ln.save(records)
+
+
+def random_str(stringLength=6, stype="all", withdigits=True):
+    """
+    Generate a random string of letters and digits
+
+    Args:
+        stringLength (int, optional): the amount of char. Defaults to 6.
+        stype (str, optional): one of lowercase, uppercase, all. Defaults to 'all'.
+        withdigits (bool, optional): digits allowed in the string? Defaults to True.
+
+        Returns:
+        str: random string
+    """
+    if stype == "lowercase":
+        lettersAndDigits = string.ascii_lowercase
+    elif stype == "uppercase":
+        lettersAndDigits = string.ascii_uppercase
+    else:
+        lettersAndDigits = string.ascii_letters
+    if withdigits:
+        lettersAndDigits += string.digits
+    return "".join(random.choice(lettersAndDigits) for i in range(stringLength))
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int):
