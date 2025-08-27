@@ -102,10 +102,10 @@ class Dataset(torchDataset):
                     "need 'organism_ontology_term_id' in the set of classes if you don't provide a genedf"
                 )
             self.organisms = list(self.class_topred["organism_ontology_term_id"])
-            self.organisms.sort()
             self.genedf = load_genes(self.organisms)
         else:
-            self.organisms = None
+            self.organisms = self.genedf["organism"].unique().tolist()
+        self.organisms.sort()
 
         self.genedf.columns = self.genedf.columns.astype(str)
         # self.check_aligned_vars()

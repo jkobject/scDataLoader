@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import numpy as np
+import pandas as pd
 from torch import Tensor, long
 
 from .utils import load_genes
@@ -22,6 +23,7 @@ class Collator:
         organism_name: str = "organism_ontology_term_id",
         class_names: List[str] = [],
         genelist: List[str] = [],
+        genedf: Optional[pd.DataFrame] = None,
     ):
         """
         This class is responsible for collating data for the scPRINT model. It handles the
@@ -71,20 +73,21 @@ class Collator:
         self.start_idx = {}
         self.accepted_genes = {}
         self.to_subset = {}
-        self._setup(None, org_to_id, valid_genes, genelist)
+        self._setup(genedf, org_to_id, valid_genes, genelist)
 
     def _setup(self, genedf=None, org_to_id=None, valid_genes=[], genelist=[]):
         if genedf is None:
             genedf = load_genes(self.organisms)
+            self.organism_ids = (
+                set([org_to_id[k] for k in self.organisms])
+                if org_to_id is not None
+                else set(self.organisms)
+            )
         self.org_to_id = org_to_id
         self.to_subset = {}
         self.accepted_genes = {}
         self.start_idx = {}
-        self.organism_ids = (
-            set([org_to_id[k] for k in self.organisms])
-            if org_to_id is not None
-            else set(self.organisms)
-        )
+        
         if len(valid_genes) > 0:
             if len(set(valid_genes) - set(genedf.index)) > 0:
                 print("Some valid genes are not in the genedf!!!")

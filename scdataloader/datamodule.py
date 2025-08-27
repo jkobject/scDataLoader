@@ -12,12 +12,9 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Sampler
-from torch.utils.data.sampler import (
-    RandomSampler,
-    SequentialSampler,
-    SubsetRandomSampler,
-    WeightedRandomSampler,
-)
+from torch.utils.data.sampler import (RandomSampler, SequentialSampler,
+                                      SubsetRandomSampler,
+                                      WeightedRandomSampler)
 from tqdm import tqdm
 
 from .collator import Collator
@@ -36,7 +33,6 @@ class DataModule(L.LightningDataModule):
         n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
         test_split: float = 0,
-        gene_embeddings: str = "",
         use_default_col: bool = True,
         gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
@@ -44,11 +40,10 @@ class DataModule(L.LightningDataModule):
         hierarchical_clss: List[str] = [],
         # this is for the collator
         how: str = "random expr",
-        organism_name: str = "organism_ontology_term_id",
+        organism_col: str = "organism_ontology_term_id",
         max_len: int = 1000,
-        add_zero_genes: int = 100,
         replacement: bool = True,
-        gene_pos_file: str = "",
+        gene_subset: Optional[list[str]] = None,
         tp_name: Optional[str] = None,  # "heat_diff"
         assays_to_drop: List[str] = [
             # "EFO:0008853", #patch seq
@@ -62,6 +57,8 @@ class DataModule(L.LightningDataModule):
         force_recompute_indices: bool = False,
         sampler_workers: int = None,
         sampler_chunk_size: int = None,
+        organisms: Optional[str] = None,
+        genedf: Optional[pd.DataFrame] = None,
         **kwargs,
     ):
         """
@@ -78,19 +75,15 @@ class DataModule(L.LightningDataModule):
             validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
             test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
                 it will use a full dataset and will round to the nearest dataset's cell count.
-            gene_embeddings (str, optional): The path to the gene embeddings file. Defaults to "".
-                the file must have ensembl_gene_id as index.
-                This is used to subset the available genes further to the ones that have embeddings in your model.
             use_default_col (bool, optional): Whether to use the default collator. Defaults to True.
-            gene_position_tolerance (int, optional): The tolerance for gene position. Defaults to 10_000.
-                any genes within this distance of each other will be considered at the same position.
             clss_to_weight (List[str], optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
             assays_to_drop (List[str], optional): List of assays to drop from the dataset. Defaults to [].
             gene_pos_file (Union[bool, str], optional): The path to the gene positions file. Defaults to True.
+                the file must have ensembl_gene_id as index.
+                This is used to subset the available genes further to the ones that have embeddings in your model.
             max_len (int, optional): The maximum length of the input tensor. Defaults to 1000.
-            add_zero_genes (int, optional): The number of zero genes to add to the input tensor. Defaults to 100.
             how (str, optional): The method to use for the collator. Defaults to "random expr".
-            organism_name (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
+            organism_col (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
             tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
             hierarchical_clss (List[str], optional): List of hierarchical classes. Defaults to [].
             metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
@@ -115,35 +108,30 @@ class DataModule(L.LightningDataModule):
             get_knn_cells=get_knn_cells,
             store_location=store_location,
             force_recompute_indices=force_recompute_indices,
+            genedf=genedf,
         )
         # and location
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
-        if gene_pos_file:
-            biomart = pd.read_parquet(gene_pos_file)
-            mdataset.genedf = mdataset.genedf.join(biomart, how="inner")
-            self.gene_pos = mdataset.genedf["pos"].astype(int).tolist()
-        if gene_embeddings != "":
-            mdataset.genedf = mdataset.genedf.join(
-                pd.read_parquet(gene_embeddings).loc[:, :2], how="inner"
-            )
-            if gene_pos_file:
-                self.gene_pos = mdataset.genedf["pos"].tolist()
+        if gene_subset:
+            tokeep = set(mdataset.genedf.index.tolist())
+            gene_subset = [u for u in gene_subset if u in tokeep]
+            mdataset.genedf = mdataset.genedf.loc[gene_subset]
         self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
         if use_default_col:
             kwargs["collate_fn"] = Collator(
-                organisms=mdataset.organisms,
+                organisms=mdataset.organisms if organisms is None else organisms,
                 how=how,
                 valid_genes=mdataset.genedf.index.tolist(),
                 max_len=max_len,
-                add_zero_genes=add_zero_genes,
-                org_to_id=mdataset.encoder[organism_name],
+                org_to_id=mdataset.encoder[organism_col],
                 tp_name=tp_name,
-                organism_name=organism_name,
+                organism_name=organism_col,
                 class_names=list(self.classes.keys()),
+                genedf=genedf,
             )
         self.validation_split = validation_split
         self.test_split = test_split
@@ -273,6 +261,7 @@ class DataModule(L.LightningDataModule):
             org_to_id=self.kwargs["collate_fn"].org_to_id,
             valid_genes=self.genes,
         )
+        
 
     @property
     def num_datasets(self):
