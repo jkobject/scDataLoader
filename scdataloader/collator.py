@@ -13,7 +13,7 @@ class Collator:
         organisms: List[str],
         how: str = "all",
         org_to_id: dict[str, int] = None,
-        valid_genes: List[str] = [],
+        valid_genes: Optional[List[str]] = None,
         max_len: int = 2000,
         add_zero_genes: int = 0,
         logp1: bool = False,
@@ -88,7 +88,7 @@ class Collator:
         self.accepted_genes = {}
         self.start_idx = {}
         
-        if len(valid_genes) > 0:
+        if valid_genes is not None:
             if len(set(valid_genes) - set(genedf.index)) > 0:
                 print("Some valid genes are not in the genedf!!!")
             tot = genedf[genedf.index.isin(valid_genes)]
@@ -99,7 +99,7 @@ class Collator:
             self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
 
             ogenedf = genedf[genedf.organism == organism]
-            if len(valid_genes) > 0:
+            if valid_genes is not None:
                 self.accepted_genes.update({org: ogenedf.index.isin(valid_genes)})
             if len(genelist) > 0:
                 df = ogenedf[ogenedf.index.isin(valid_genes)]

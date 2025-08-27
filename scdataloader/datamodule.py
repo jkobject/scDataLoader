@@ -114,10 +114,9 @@ class DataModule(L.LightningDataModule):
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
-        if gene_subset:
+        if gene_subset is not None:
             tokeep = set(mdataset.genedf.index.tolist())
             gene_subset = [u for u in gene_subset if u in tokeep]
-            mdataset.genedf = mdataset.genedf.loc[gene_subset]
         self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
@@ -125,7 +124,7 @@ class DataModule(L.LightningDataModule):
             kwargs["collate_fn"] = Collator(
                 organisms=mdataset.organisms if organisms is None else organisms,
                 how=how,
-                valid_genes=mdataset.genedf.index.tolist(),
+                valid_genes=gene_subset,
                 max_len=max_len,
                 org_to_id=mdataset.encoder[organism_col],
                 tp_name=tp_name,
@@ -224,12 +223,10 @@ class DataModule(L.LightningDataModule):
             for i in self.dataset.organisms
         }
 
-    @genes.setter
-    def genes(self, genes):
-        self.dataset.genedf = self.dataset.genedf.loc[genes]
-        self.kwargs["collate_fn"].genes = genes
+    def set_valid_genes_collator(self, genes):
         self.kwargs["collate_fn"]._setup(
-            genedf=self.dataset.genedf,
+            # cannot use genedf there since I am purposefully decreasing it...
+            # genedf=self.dataset.genedf,
             org_to_id=self.kwargs["collate_fn"].org_to_id,
             valid_genes=genes,
         )
