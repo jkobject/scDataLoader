@@ -200,7 +200,9 @@ class MappedCollection:
                         self._cache_categories(self.obs_keys)
                         torch.save(self._cache_cats, self.store_location)
                     else:
-                        self._cache_cats = torch.load(self.store_location, weights_only=False)
+                        self._cache_cats = torch.load(
+                            self.store_location, weights_only=False
+                        )
                         print(f"Loaded categories from {self.store_location}")
             self.encoders: dict = {}
             if self.encode_labels:
@@ -437,7 +439,20 @@ class MappedCollection:
                         print(out)
                         raise
 
-            if self.metacell_mode > 0:
+            if self.get_knn_cells:
+                distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
+                nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
+                out["knn_cells"] = np.array(
+                    [
+                        self._get_data_idx(
+                            lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
+                        )
+                        for i in nn_idx
+                    ],
+                    dtype=int,
+                )
+                out["knn_cells_info"] = distances[nn_idx]
+            elif self.metacell_mode > 0:
                 if (
                     len(self.meta_assays) > 0
                     and "assay_ontology_term_id" in self.obs_keys
@@ -454,19 +469,6 @@ class MappedCollection:
                         out[layers_key] += self._get_data_idx(
                             lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
                         )
-            elif self.get_knn_cells:
-                distances = self._get_data_idx(store["obsp"]["distances"], obs_idx)
-                nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
-                out["knn_cells"] = np.array(
-                    [
-                        self._get_data_idx(
-                            lazy_data, i, self.join_vars, var_idxs_join, self.n_vars
-                        )
-                        for i in nn_idx
-                    ],
-                    dtype=int,
-                )
-                out["distances"] = distances[nn_idx]
 
         return out
 
