@@ -87,7 +87,7 @@ class Collator:
         self.to_subset = {}
         self.accepted_genes = {}
         self.start_idx = {}
-        
+
         if valid_genes is not None:
             if len(set(valid_genes) - set(genedf.index)) > 0:
                 print("Some valid genes are not in the genedf!!!")
@@ -132,6 +132,7 @@ class Collator:
         nnz_loc = []
         is_meta = []
         knn_cells = []
+        knn_cells_info = []
         for elem in batch:
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
@@ -211,6 +212,8 @@ class Collator:
             exprs.append(expr)
             if "knn_cells" in elem:
                 knn_cells.append(elem["knn_cells"])
+            if "knn_cells_info" in elem:
+                knn_cells_info.append(elem["knn_cells_info"])
             # then we need to add the start_idx to the loc to give it the correct index
             # according to the model
             gene_locs.append(loc + self.start_idx[organism_id])
@@ -230,11 +233,15 @@ class Collator:
         dataset = np.array(dataset)
         is_meta = np.array(is_meta)
         knn_cells = np.array(knn_cells)
+        knn_cells_info = np.array(knn_cells_info)
         # normalize counts
         if self.norm_to is not None:
             expr = (expr * self.norm_to) / total_count[:, None]
+            # TODO: solve issue here
+            knn_cells = (knn_cells * self.norm_to) / total_count[:, None]
         if self.logp1:
             expr = np.log2(1 + expr)
+            knn_cells = np.log2(1 + knn_cells)
 
         # do binning of counts
         if self.n_bins:
@@ -251,6 +258,8 @@ class Collator:
             ret.update({"is_meta": Tensor(is_meta).int()})
         if len(knn_cells) > 0:
             ret.update({"knn_cells": Tensor(knn_cells)})
+        if len(knn_cells_info) > 0:
+            ret.update({"knn_cells_info": Tensor(knn_cells_info)})
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         return ret

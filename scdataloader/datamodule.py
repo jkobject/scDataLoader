@@ -12,9 +12,12 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Sampler
-from torch.utils.data.sampler import (RandomSampler, SequentialSampler,
-                                      SubsetRandomSampler,
-                                      WeightedRandomSampler)
+from torch.utils.data.sampler import (
+    RandomSampler,
+    SequentialSampler,
+    SubsetRandomSampler,
+    WeightedRandomSampler,
+)
 from tqdm import tqdm
 
 from .collator import Collator
@@ -99,6 +102,10 @@ class DataModule(L.LightningDataModule):
         if "organism_ontology_term_id" not in clss_to_predict:
             raise ValueError(
                 "need 'organism_ontology_term_id' in the set of classes at least"
+            )
+        if metacell_mode > 0 and get_knn_cells:
+            raise ValueError(
+                "cannot use metacell mode and get_knn_cells at the same time"
             )
         mdataset = Dataset(
             ln.Collection.filter(key=collection_name, is_latest=True).first(),
@@ -258,7 +265,6 @@ class DataModule(L.LightningDataModule):
             org_to_id=self.kwargs["collate_fn"].org_to_id,
             valid_genes=self.genes,
         )
-        
 
     @property
     def num_datasets(self):
