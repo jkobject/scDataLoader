@@ -12,12 +12,9 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Sampler
-from torch.utils.data.sampler import (
-    RandomSampler,
-    SequentialSampler,
-    SubsetRandomSampler,
-    WeightedRandomSampler,
-)
+from torch.utils.data.sampler import (RandomSampler, SequentialSampler,
+                                      SubsetRandomSampler,
+                                      WeightedRandomSampler)
 from tqdm import tqdm
 
 from .collator import Collator
@@ -62,6 +59,7 @@ class DataModule(L.LightningDataModule):
         sampler_chunk_size: int = None,
         organisms: Optional[str] = None,
         genedf: Optional[pd.DataFrame] = None,
+        n_bins: int = 0,
         **kwargs,
     ):
         """
@@ -138,6 +136,7 @@ class DataModule(L.LightningDataModule):
                 organism_name=organism_col,
                 class_names=list(self.classes.keys()),
                 genedf=genedf,
+                n_bins=n_bins,
             )
         self.validation_split = validation_split
         self.test_split = test_split
