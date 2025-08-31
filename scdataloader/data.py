@@ -336,6 +336,7 @@ class SimpleAnnDataset(torchDataset):
         obs_to_output: Optional[List[str]] = [],
         layer: Optional[str] = None,
         get_knn_cells: bool = False,
+        encoder: Optional[dict[str, dict]] = None,
     ):
         """
         SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
@@ -350,6 +351,7 @@ class SimpleAnnDataset(torchDataset):
         """
         self.adataX = adata.layers[layer] if layer is not None else adata.X
         self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
+        self.encoder = encoder
 
         self.obs_to_output = adata.obs[obs_to_output]
         self.get_knn_cells = get_knn_cells
@@ -363,23 +365,15 @@ class SimpleAnnDataset(torchDataset):
 
     def __iter__(self):
         for idx in range(self.adataX.shape[0]):
-            out = {"X": self.adataX[idx].reshape(-1)}
-            out.update(
-                {name: val for name, val in self.obs_to_output.iloc[idx].items()}
-            )
-            if self.get_knn_cells:
-                distances = self.distances[idx].toarray()[0]
-                nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
-                out["knn_cells"] = np.array(
-                    [self.adataX[i].reshape(-1) for i in nn_idx],
-                    dtype=int,
-                )
-                out["distances"] = distances[nn_idx]
+            out = self.__getitem__(idx)
             yield out
 
     def __getitem__(self, idx):
         out = {"X": self.adataX[idx].reshape(-1)}
-        out.update({name: val for name, val in self.obs_to_output.iloc[idx].items()})
+        for name, val in self.obs_to_output.iloc[idx].items():
+            out.update({
+                name: self.encoder[name][val] if name in self.encoder else val
+            })        
         if self.get_knn_cells:
             distances = self.distances[idx].toarray()[0]
             nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
