@@ -61,6 +61,23 @@ def slurm_restart_count(use_mine: bool = False):
         return int(os.getenv("SLURM_RESTART_COUNT", 0))
 
 
+def revert_to_raw(adata, mode="logp1"):
+    res = adata.X
+    if mode == "rlogp1":
+        res = np.exp(res) - 1
+    elif mode == "logp1":
+        res = (2**res) - 1
+    elif mode == "sqrt":
+        res = (res**2) - 1
+    res = (
+        (res.T / np.array([res[i][res[i] != 0].min() for i in range(res.shape[0])]))
+        .round()
+        .T
+    )  # .sum()
+    adata.X = res
+    return adata
+
+
 def createFoldersFor(filepath: str):
     """
     will recursively create folders if needed until having all the folders required to save the file in this filepath
@@ -880,7 +897,7 @@ def translate(
         return None
     if type(val) is str:
         return {val: obj.filter(ontology_id=val).one().name}
-    elif type(val) is list or type(val) is set:
-        return {i: obj.filter(ontology_id=i).one().name for i in set(val)}
     elif type(val) is dict or type(val) is Counter:
         return {obj.filter(ontology_id=k).one().name: v for k, v in val.items()}
+    else:
+        return {i: obj.filter(ontology_id=i).one().name for i in set(val)}

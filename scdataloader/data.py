@@ -351,7 +351,7 @@ class SimpleAnnDataset(torchDataset):
         """
         self.adataX = adata.layers[layer] if layer is not None else adata.X
         self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
-        self.encoder = encoder
+        self.encoder = encoder if encoder is not None else {}
 
         self.obs_to_output = adata.obs[obs_to_output]
         self.get_knn_cells = get_knn_cells
@@ -371,9 +371,7 @@ class SimpleAnnDataset(torchDataset):
     def __getitem__(self, idx):
         out = {"X": self.adataX[idx].reshape(-1)}
         for name, val in self.obs_to_output.iloc[idx].items():
-            out.update({
-                name: self.encoder[name][val] if name in self.encoder else val
-            })        
+            out.update({name: self.encoder[name][val] if name in self.encoder else val})
         if self.get_knn_cells:
             distances = self.distances[idx].toarray()[0]
             nn_idx = np.argsort(-1 / (distances - 1e-6))[:6]
