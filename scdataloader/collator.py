@@ -245,7 +245,7 @@ class Collator:
             knn_cells = np.log2(1 + knn_cells)
 
         # do binning of counts
-        if self.n_bins:
+        if self.n_bins > 0:
             binned_rows = []
             bin_edges = []
             for row in expr:
