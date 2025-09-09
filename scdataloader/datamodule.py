@@ -22,7 +22,7 @@ from .data import Dataset
 from .utils import fileToList, getBiomartTable, listToFile
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-
+NNZ_SCALE = 1000
 
 class DataModule(L.LightningDataModule):
     def __init__(
@@ -34,7 +34,6 @@ class DataModule(L.LightningDataModule):
         validation_split: float = 0.2,
         test_split: float = 0,
         use_default_col: bool = True,
-        gene_position_tolerance: int = 10_000,
         # this is for the mappedCollection
         clss_to_predict: List[str] = ["organism_ontology_term_id"],
         hierarchical_clss: List[str] = [],
@@ -156,6 +155,7 @@ class DataModule(L.LightningDataModule):
         self.sampler_chunk_size = sampler_chunk_size
         self.store_location = store_location
         self.nnz = None
+        self.max_len = max_len
         self.test_datasets = []
         self.force_recompute_indices = force_recompute_indices
         self.test_idx = []
@@ -278,7 +278,6 @@ class DataModule(L.LightningDataModule):
             stage (str, optional): The stage of the model training process.
             It can be either 'fit' or 'test'. Defaults to None.
         """
-        SCALE = 10
         print("setting up the datamodule")
         start_time = time.time()
         if (
@@ -293,10 +292,14 @@ class DataModule(L.LightningDataModule):
                     "nnz", is_cat=False
                 )
                 self.clss_to_weight.remove("nnz")
-                (
-                    (self.nnz.max() / SCALE)
-                    / ((1 + self.nnz - self.nnz.min()) + (self.nnz.max() / SCALE))
-                ).min()
+                # Sigmoid scaling with 2 parameters
+                midpoint = 2000
+                steepness = 0.003
+                # Apply sigmoid transformation
+                # sigmoid(x) = 1 / (1 + exp(-steepness * (x - midpoint)))
+                # Then scale to [1, NNZ_SCALE] range
+                sigmoid_values = 1 / (1 + np.exp(-steepness * (self.nnz - midpoint)))
+                self.nnz = 1 + (NNZ_SCALE - 1) * sigmoid_values
             if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
                 weights, labels = self.dataset.get_label_weights(
                     self.clss_to_weight,
