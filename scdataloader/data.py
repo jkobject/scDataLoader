@@ -379,7 +379,7 @@ class SimpleAnnDataset(torchDataset):
                 [self.adataX[i].reshape(-1) for i in nn_idx],
                 dtype=int,
             )
-            out["distances"] = distances[nn_idx]
+            out["knn_cells_info"] = distances[nn_idx]
         return out
 
 
