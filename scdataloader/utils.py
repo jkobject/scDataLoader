@@ -899,6 +899,8 @@ def translate(
         return {val: obj.filter(ontology_id=val).one().name}
     elif type(val) is dict or type(val) is Counter:
         return {obj.filter(ontology_id=k).one().name: v for k, v in val.items()}
+    elif type(val) is set:
+        return {i: obj.filter(ontology_id=i).one().name for i in val}
     else:
         rl = {i: obj.filter(ontology_id=i).one().name for i in set(val)}
         return [rl.get(i, None) for i in val]
