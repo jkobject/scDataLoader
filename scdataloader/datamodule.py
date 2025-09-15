@@ -137,6 +137,7 @@ class DataModule(L.LightningDataModule):
                 genedf=genedf,
                 n_bins=n_bins,
             )
+        self.n_bins = n_bins
         self.validation_split = validation_split
         self.test_split = test_split
         self.dataset = mdataset
