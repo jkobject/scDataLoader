@@ -156,6 +156,7 @@ class DataModule(L.LightningDataModule):
         self.sampler_chunk_size = sampler_chunk_size
         self.store_location = store_location
         self.nnz = None
+        self.idx_full=None
         self.max_len = max_len
         self.test_datasets = []
         self.force_recompute_indices = force_recompute_indices

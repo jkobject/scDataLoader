@@ -189,7 +189,14 @@ class Collator:
                 if "knn_cells" in elem:
                     # we complete with genes expressed in the knn
                     # which is not a zero_loc in this context
-                    zero_loc = np.argsort(elem["knn_cells"].sum(0))[-ma:][::-1]
+                    knn_expr = elem["knn_cells"].sum(0)
+                    mask = np.ones(len(knn_expr), dtype=bool)
+                    mask[loc] = False
+                    available_indices = np.where(mask)[0]
+                    available_knn_expr = knn_expr[available_indices]
+                    sorted_indices = np.argsort(available_knn_expr)[::-1]
+                    selected = min(ma, len(available_indices))
+                    zero_loc = available_indices[sorted_indices[:selected]]
                 else:
                     zero_loc = np.where(expr == 0)[0]
                     zero_loc = zero_loc[
@@ -223,7 +230,7 @@ class Collator:
                 tp.append(elem[self.tp_name])
             else:
                 tp.append(0)
-            if "is_meta" in elem:
+            if "is_meta" in elem:   
                 is_meta.append(elem["is_meta"])
             other_classes.append([elem[i] for i in self.class_names])
         expr = np.array(exprs)
