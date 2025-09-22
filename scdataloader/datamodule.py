@@ -178,9 +178,11 @@ class DataModule(L.LightningDataModule):
             f"\ttest datasets={str(self.test_datasets)},\n"
             f"perc test: {str(len(self.test_idx) / self.n_samples)},\n"
             f"\tclss_to_weight={self.clss_to_weight}\n"
-            + ("\twith train_dataset size of=(" + str(len(self.idx_full)) + ")\n)")
-            if self.idx_full is not None
-            else ")"
+            + (
+                "\twith train_dataset size of=(" + str(len(self.idx_full)) + ")\n)"
+                if self.idx_full is not None
+                else ")"
+            )
         )
 
     @property
