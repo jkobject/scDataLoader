@@ -145,9 +145,14 @@ class Preprocessor:
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
         if "organism_ontology_term_id" not in adata[0].obs.columns:
-            raise ValueError(
-                "organism_ontology_term_id not found in adata.obs, you need to add an ontology term id for the organism of your anndata"
-            )
+            if "organism_ontology_term_id" in adata.uns:
+                adata.obs["organism_ontology_term_id"] = adata.uns[
+                    "organism_ontology_term_id"
+                ]
+            else:
+                raise ValueError(
+                    "organism_ontology_term_id not found in adata.obs, you need to add an ontology term id for the organism of your anndata"
+                )
         if adata.obs["organism_ontology_term_id"].iloc[0] not in self.organisms:
             raise ValueError(
                 "we cannot work with this organism",
