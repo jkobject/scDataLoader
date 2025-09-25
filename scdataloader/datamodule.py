@@ -537,6 +537,7 @@ class LabelWeightedSampler(Sampler[int]):
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion
         counts = np.bincount(labels)
+        counts[-1] = 0  # Ensure the weight for the 'NONE' class is zero
         label_weights = (weight_scaler * counts) / (counts + weight_scaler)
         self.label_weights = torch.as_tensor(
             label_weights, dtype=torch.float32
@@ -638,8 +639,6 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Done initializing sampler with {len(self.klass_offsets)} classes")
 
     def __iter__(self):
-        # this is a debugger line
-        import pdb; pdb.set_trace()
         self.count+=1
         # Sample classes according to their weights
         print("sampling a new batch of size", self.num_samples)
