@@ -544,9 +544,11 @@ class LabelWeightedSampler(Sampler[int]):
         """
         print("Initializing optimized parallel weighted sampler...")
         super(LabelWeightedSampler, self).__init__(None)
+        self.count = 0
 
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion
+        import pdb; pdb.set_trace()
         label_weights = np.asarray(label_weights) * np.bincount(labels)
         self.label_weights = torch.as_tensor(
             label_weights, dtype=torch.float32
@@ -648,11 +650,14 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Done initializing sampler with {len(self.klass_offsets)} classes")
 
     def __iter__(self):
+        # this is a debugger line
+        import pdb; pdb.set_trace()
+        self.count+=1
         # Sample classes according to their weights
         print("sampling a new batch of size", self.num_samples)
 
         sample_labels = torch.multinomial(
-            self.label_weights,
+            self.label_weights, #**min(1, (self.count/20)),
             num_samples=self.num_samples,
             replacement=True,
         )

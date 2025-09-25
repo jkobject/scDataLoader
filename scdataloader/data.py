@@ -162,8 +162,8 @@ class Dataset(torchDataset):
 
     def get_label_weights(
         self,
-        obs_keys: str | List[str],
-        scaler: int = 10,
+        obs_keys: Union[str, List[str]],
+        scaler: Optional[int] = 10,
         return_categories=False,
     ):
         """Get all weights for the given label keys."""
@@ -177,16 +177,11 @@ class Dataset(torchDataset):
             else:
                 labels = concat_categorical_codes([labels, labels_to_str])
         counter = Counter(labels.codes)  # type: ignore
+        counts = np.array([counter[label] for label in labels.codes])
+        weights = scaler / (counts + scaler)
         if return_categories:
-            counter = np.array(list(counter.values()))
-            weights = scaler / (counter + scaler)
             return weights, np.array(labels.codes)
         else:
-            counts = np.array([counter[label] for label in labels.codes])
-            if scaler is None:
-                weights = 1.0 / counts
-            else:
-                weights = scaler / (counts + scaler)
             return weights
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
