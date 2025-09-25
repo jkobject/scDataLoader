@@ -160,13 +160,11 @@ class Dataset(torchDataset):
             + "     {} metacell_mode\n".format(self.metacell_mode)
         )
 
-    def get_label_weights(
+    def get_label_cats(
         self,
         obs_keys: Union[str, List[str]],
-        scaler: Optional[int] = 10,
-        return_categories=False,
     ):
-        """Get all weights for the given label keys."""
+        """Get all categories for the given label keys."""
         if isinstance(obs_keys, str):
             obs_keys = [obs_keys]
         labels = None
@@ -176,15 +174,8 @@ class Dataset(torchDataset):
                 labels = labels_to_str
             else:
                 labels = concat_categorical_codes([labels, labels_to_str])
-        counter = Counter(labels.codes)  # type: ignore
-        if return_categories:
-            counts = np.array([counter[i] for i in range(len(counter))])
-            weights = scaler / (counts + scaler)
-            return weights, np.array(labels.codes)
-        else:
-            counts = np.array([counter[label] for label in labels.codes])
-            weights = scaler / (counts + scaler)
-            return weights
+            return np.array(labels.codes)
+
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
         """

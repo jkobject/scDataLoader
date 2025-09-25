@@ -305,13 +305,10 @@ class DataModule(L.LightningDataModule):
                 sigmoid_values = 1 / (1 + np.exp(-steepness * (self.nnz - midpoint)))
                 self.nnz = 1 + (NNZ_SCALE - 1) * sigmoid_values
             if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
-                weights, labels = self.dataset.get_label_weights(
+                labels = self.dataset.get_label_cats(
                     self.clss_to_weight,
-                    scaler=self.weight_scaler,
-                    return_categories=True,
                 )
             else:
-                weights = np.ones(1)
                 labels = np.zeros(self.n_samples, dtype=int)
             if isinstance(self.validation_split, int):
                 len_valid = self.validation_split
@@ -368,28 +365,22 @@ class DataModule(L.LightningDataModule):
                 idx_full = idx_full[len_valid:]
             else:
                 self.valid_idx = None
-            weights = np.concatenate([weights, np.zeros(1)])
-            labels[~np.isin(np.arange(self.n_samples), idx_full)] = len(weights) - 1
+            labels[~np.isin(np.arange(self.n_samples), idx_full)] = labels.max() + 1
             # some labels will now not exist anymore as replaced by len(weights) - 1.
             # this means that the associated weights should be 0.
             # by doing np.bincount(labels)*weights this will be taken into account
-            self.train_weights = weights
             self.train_labels = labels
             self.idx_full = idx_full
         if self.store_location is not None:
             if (
                 not os.path.exists(
-                    os.path.join(self.store_location, "train_weights.npy")
+                    os.path.join(self.store_location, "train_labels.npy")
                 )
                 or self.force_recompute_indices
             ):
                 os.makedirs(self.store_location, exist_ok=True)
                 if self.nnz is not None:
                     np.save(os.path.join(self.store_location, "nnz.npy"), self.nnz)
-                np.save(
-                    os.path.join(self.store_location, "train_weights.npy"),
-                    self.train_weights,
-                )
                 np.save(
                     os.path.join(self.store_location, "train_labels.npy"),
                     self.train_labels,
@@ -415,9 +406,6 @@ class DataModule(L.LightningDataModule):
                     np.load(os.path.join(self.store_location, "nnz.npy"), mmap_mode="r")
                     if os.path.exists(os.path.join(self.store_location, "nnz.npy"))
                     else None
-                )
-                self.train_weights = np.load(
-                    os.path.join(self.store_location, "train_weights.npy")
                 )
                 self.train_labels = np.load(
                     os.path.join(self.store_location, "train_labels.npy")
@@ -451,8 +439,8 @@ class DataModule(L.LightningDataModule):
                 # Create the optimized parallel sampler
                 print(f"Using {self.sampler_workers} workers for class indexing")
                 train_sampler = LabelWeightedSampler(
-                    label_weights=self.train_weights,
                     labels=self.train_labels,
+                    weight_scaler=self.weight_scaler,
                     num_samples=int(self.n_samples_per_epoch),
                     element_weights=self.nnz,
                     replacement=self.replacement,
@@ -520,10 +508,10 @@ class LabelWeightedSampler(Sampler[int]):
 
     def __init__(
         self,
-        label_weights: Sequence[float],
         labels: np.ndarray,
         num_samples: int,
         replacement: bool = True,
+        weight_scaler: Optional[float] = None,
         element_weights: Optional[Sequence[float]] = None,
         n_workers: int = None,
         chunk_size: int = None,  # Process 10M elements per chunk
@@ -534,7 +522,7 @@ class LabelWeightedSampler(Sampler[int]):
         Initialize the sampler with parallel processing for large datasets.
 
         Args:
-            label_weights: Weights for each class (length = number of classes)
+            weight_scaler: Scaling factor for class weights (higher means less balanced sampling)
             labels: Class label for each dataset element (length = dataset size)
             num_samples: Number of samples to draw
             replacement: Whether to sample with replacement
@@ -548,8 +536,8 @@ class LabelWeightedSampler(Sampler[int]):
 
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion
-        import pdb; pdb.set_trace()
-        label_weights = np.asarray(label_weights) * np.bincount(labels)
+        counts = np.bincount(labels)
+        label_weights = (weight_scaler * counts) / (counts + weight_scaler)
         self.label_weights = torch.as_tensor(
             label_weights, dtype=torch.float32
         ).share_memory_()
@@ -657,7 +645,7 @@ class LabelWeightedSampler(Sampler[int]):
         print("sampling a new batch of size", self.num_samples)
 
         sample_labels = torch.multinomial(
-            self.label_weights, #**min(1, (self.count/20)),
+            self.label_weights, #**min(1, (self.count/5)),
             num_samples=self.num_samples,
             replacement=True,
         )
