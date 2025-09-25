@@ -177,11 +177,13 @@ class Dataset(torchDataset):
             else:
                 labels = concat_categorical_codes([labels, labels_to_str])
         counter = Counter(labels.codes)  # type: ignore
-        counts = np.array([counter[label] for label in labels.codes])
-        weights = scaler / (counts + scaler)
         if return_categories:
+            counts = np.array([counter[i] for i in range(len(counter))])
+            weights = scaler / (counts + scaler)
             return weights, np.array(labels.codes)
         else:
+            counts = np.array([counter[label] for label in labels.codes])
+            weights = scaler / (counts + scaler)
             return weights
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
