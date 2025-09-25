@@ -287,7 +287,7 @@ class DataModule(L.LightningDataModule):
         if (
             self.store_location is None
             or not os.path.exists(
-                os.path.join(self.store_location, "train_weights.npy")
+                os.path.join(self.store_location, "train_labels.npy")
             )
             or self.force_recompute_indices
         ):
@@ -671,7 +671,12 @@ class LabelWeightedSampler(Sampler[int]):
             if self.element_weights is not None:
                 # This is a critical point for memory
                 current_element_weights_slice = self.element_weights[klass_index]
-
+                
+                if current_element_weights_slice.shape[0]>=(2**24)-1:
+                    ind = torch.randperm(len(klass_index))[:(2**24)-10]
+                    klass_index = klass_index[ind]
+                    current_element_weights_slice = current_element_weights_slice[ind]
+                    
                 if self.replacement:
                     right_inds = torch.multinomial(
                         current_element_weights_slice,
