@@ -174,7 +174,7 @@ class Dataset(torchDataset):
                 labels = labels_to_str
             else:
                 labels = concat_categorical_codes([labels, labels_to_str])
-            return np.array(labels.codes)
+        return np.array(labels.codes)
 
 
     def get_unseen_mapped_dataset_elements(self, idx: int):

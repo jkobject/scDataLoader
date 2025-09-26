@@ -644,7 +644,7 @@ class LabelWeightedSampler(Sampler[int]):
         print("sampling a new batch of size", self.num_samples)
 
         sample_labels = torch.multinomial(
-            self.label_weights, #**min(1, (self.count/5)),
+            self.label_weights, #**min(1, (self.count+5/20)),
             num_samples=self.num_samples,
             replacement=True,
         )
