@@ -242,6 +242,14 @@ class Collator:
         is_meta = np.array(is_meta)
         knn_cells = np.array(knn_cells)
         knn_cells_info = np.array(knn_cells_info)
+        if len(knn_cells) > 0:
+            nn = min(6, int(7*np.random.random()))
+            knn_cells = knn_cells[:, :nn]
+            knn_cells_info = knn_cells_info[:, :nn]
+            if knn_cells.shape[1] == 0:
+                knn_cells = np.array([])
+                knn_cells_info = np.array([])
+                    
         # normalize counts
         if self.norm_to is not None:
             expr = (expr * self.norm_to) / total_count[:, None]
@@ -298,40 +306,3 @@ class Collator:
             ret.update({"dataset": Tensor(dataset).to(long)})
         return ret
 
-
-#############
-#### WIP ####
-#############
-class GeneformerCollator(Collator):
-    def __init__(self, *args, gene_norm_list: list, **kwargs):
-        """
-        GeneformerCollator to finish
-
-        Args:
-            gene_norm_list (list): the normalization of expression through all datasets, per gene.
-        """
-        super().__init__(*args, **kwargs)
-        self.gene_norm_list = gene_norm_list
-
-    def __call__(self, batch):
-        super().__call__(batch)
-        # normlization per gene
-
-        # tokenize the empty locations
-
-
-class scGPTCollator(Collator):
-    """
-    scGPTCollator to finish
-    """
-
-    def __call__(self, batch):
-        super().__call__(batch)
-        # binning
-
-        # tokenize the empty locations
-
-
-class scPRINTCollator(Collator):
-    def __call__(self, batch):
-        super().__call__(batch)
