@@ -242,13 +242,6 @@ class Collator:
         is_meta = np.array(is_meta)
         knn_cells = np.array(knn_cells)
         knn_cells_info = np.array(knn_cells_info)
-        if len(knn_cells) > 0:
-            nn = min(6, int(7*np.random.random()))
-            knn_cells = knn_cells[:, :nn]
-            knn_cells_info = knn_cells_info[:, :nn]
-            if knn_cells.shape[1] == 0:
-                knn_cells = np.array([])
-                knn_cells_info = np.array([])
                     
         # normalize counts
         if self.norm_to is not None:
