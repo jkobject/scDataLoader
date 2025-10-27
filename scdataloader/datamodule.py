@@ -13,9 +13,12 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Sampler, Subset
-from torch.utils.data.sampler import (RandomSampler, SequentialSampler,
-                                      SubsetRandomSampler,
-                                      WeightedRandomSampler)
+from torch.utils.data.sampler import (
+    RandomSampler,
+    SequentialSampler,
+    SubsetRandomSampler,
+    WeightedRandomSampler,
+)
 from tqdm import tqdm
 
 from .collator import Collator
@@ -24,6 +27,7 @@ from .utils import fileToList, getBiomartTable, listToFile
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 NNZ_SCALE = 1000
+
 
 class DataModule(L.LightningDataModule):
     def __init__(
@@ -287,9 +291,7 @@ class DataModule(L.LightningDataModule):
         start_time = time.time()
         if (
             self.store_location is None
-            or not os.path.exists(
-                os.path.join(self.store_location, "train_labels.npy")
-            )
+            or not os.path.exists(os.path.join(self.store_location, "train_labels.npy"))
             or self.force_recompute_indices
         ):
             if "nnz" in self.clss_to_weight and self.weight_scaler > 0:
@@ -319,9 +321,9 @@ class DataModule(L.LightningDataModule):
                 len_test = self.test_split
             else:
                 len_test = int(self.n_samples * self.test_split)
-            assert len_test + len_valid < self.n_samples, (
-                "test set + valid set size is configured to be larger than entire dataset."
-            )
+            assert (
+                len_test + len_valid < self.n_samples
+            ), "test set + valid set size is configured to be larger than entire dataset."
 
             idx_full = []
             if len(self.assays_to_drop) > 0:
@@ -642,12 +644,12 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Done initializing sampler with {len(self.klass_offsets)} classes")
 
     def __iter__(self):
-        self.count+=1
+        self.count += 1
         # Sample classes according to their weights
         print("sampling a new batch of size", self.num_samples)
 
         sample_labels = torch.multinomial(
-            self.label_weights, #**min(1, (self.count+5/20)),
+            self.label_weights ** min(1, ((self.count + 5) / 20)),
             num_samples=self.num_samples,
             replacement=True,
         )
@@ -655,7 +657,9 @@ class LabelWeightedSampler(Sampler[int]):
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
 
         # Initialize result tensor
-        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
+        result_indices_list = (
+            []
+        )  # Changed name to avoid conflict if you had result_indices elsewhere
 
         # Process only the classes that were actually sampled
         for i, (label, count) in tqdm(
@@ -674,12 +678,12 @@ class LabelWeightedSampler(Sampler[int]):
             if self.element_weights is not None:
                 # This is a critical point for memory
                 current_element_weights_slice = self.element_weights[klass_index]
-                
-                if current_element_weights_slice.shape[0]>=(2**24)-1:
-                    ind = torch.randperm(len(klass_index))[:(2**24)-10]
+
+                if current_element_weights_slice.shape[0] >= (2**24) - 1:
+                    ind = torch.randperm(len(klass_index))[: (2**24) - 10]
                     klass_index = klass_index[ind]
                     current_element_weights_slice = current_element_weights_slice[ind]
-                    
+
                 if self.replacement:
                     right_inds = torch.multinomial(
                         current_element_weights_slice,
@@ -837,6 +841,7 @@ class LabelWeightedSampler(Sampler[int]):
 class RankShardSampler(Sampler[int]):
     """Shards a dataset contiguously across ranks without padding or duplicates.
     Preserves the existing order (e.g., your pre-shuffled idx_full)."""
+
     def __init__(self, data_len: int):
         self.data_len = data_len
         if torch.distributed.is_available() and torch.distributed.is_initialized():
