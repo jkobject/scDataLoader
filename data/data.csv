@@ -1,0 +1,5 @@
+name,disease,disease_ontology_term_id,species,species_ontology_term_id,sex,sex_ontology_term_id,age,development_stage_ontology_term_id,tissue,tissue_ontology_term_id,ethnicity,self_reported_ethnicity_ontology_term_id,cell_type,cell_type_ontology_term_id,assay,assay_ontology_term_id
+K562,Chronic myeloid leukemia,MONDO:0011996,human,NCBITaxon:9606,female,PATO:0000383,53 year old,HsapDv:0000227,pleural effusion,UBERON:0000175,european,HANCESTRO:0005,malignant cell,CL:0001064,10X v3 3",EFO:0009922
+HCT116,Colorectal carcinoma,MONDO:0024331,human,NCBITaxon:9606,male,PATO:0000384,48 year old,HsapDv:0000227,colon,UBERON:0001155,european,HANCESTRO:0005,malignant cell,CL:0001064,Parse Biosciences technology,EFO:0022603
+RPE1,normal,PATO:0000461,human,NCBITaxon:9606,female,PATO:0000383,1 year old,HsapDv:0000260,eye,UBERON:0000970,unknown,unknown,unknown,unknown,10X v3 3",EFO:0009922
+HEK293T,normal,PATO:0000461,human,NCBITaxon:9606,female,PATO:0000383,foetus,HsapDv:0000037,kidney,UBERON:0002113,european,HANCESTRO:0005,unknown,unknown,Parse Biosciences technology,EFO:0022603

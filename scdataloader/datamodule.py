@@ -1,3 +1,4 @@
+import math
 import multiprocessing as mp
 import os
 import random
@@ -11,7 +12,7 @@ import lightning as L
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Sampler
+from torch.utils.data import DataLoader, Sampler, Subset
 from torch.utils.data.sampler import (RandomSampler, SequentialSampler,
                                       SubsetRandomSampler,
                                       WeightedRandomSampler)
@@ -156,7 +157,7 @@ class DataModule(L.LightningDataModule):
         self.sampler_chunk_size = sampler_chunk_size
         self.store_location = store_location
         self.nnz = None
-        self.idx_full=None
+        self.idx_full = None
         self.max_len = max_len
         self.test_datasets = []
         self.force_recompute_indices = force_recompute_indices
@@ -303,7 +304,7 @@ class DataModule(L.LightningDataModule):
                 # sigmoid(x) = 1 / (1 + exp(-steepness * (x - midpoint)))
                 # Then scale to [1, NNZ_SCALE] range
                 sigmoid_values = 1 / (1 + np.exp(-steepness * (self.nnz - midpoint)))
-                self.nnz = 1 + (NNZ_SCALE - 1) * sigmoid_values
+                self.nnz = 1 + ((NNZ_SCALE - 1) * sigmoid_values)
             if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
                 labels = self.dataset.get_label_cats(
                     self.clss_to_weight,
@@ -451,12 +452,14 @@ class DataModule(L.LightningDataModule):
                 )
             except ValueError as e:
                 raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
+            dataset = None
         else:
-            train_sampler = SubsetRandomSampler(self.idx_full)
+            dataset = Subset(self.dataset, self.idx_full)
+            train_sampler = RankShardSampler(len(dataset))
         current_loader_kwargs = kwargs.copy()
         current_loader_kwargs.update(self.kwargs)
         return DataLoader(
-            self.dataset,
+            self.dataset if dataset is None else dataset,
             sampler=train_sampler,
             **current_loader_kwargs,
         )
@@ -464,12 +467,11 @@ class DataModule(L.LightningDataModule):
     def val_dataloader(self):
         return (
             DataLoader(
-                self.dataset,
-                sampler=SubsetRandomSampler(self.valid_idx),
+                Subset(self.dataset, self.valid_idx),
                 **self.kwargs,
             )
             if self.valid_idx is not None
-            else None
+            else []
         )
 
     def test_dataloader(self):
@@ -478,20 +480,21 @@ class DataModule(L.LightningDataModule):
                 self.dataset, sampler=SequentialSampler(self.test_idx), **self.kwargs
             )
             if self.test_idx is not None
-            else None
+            else []
         )
 
     def predict_dataloader(self):
+        subset = Subset(self.dataset, self.idx_full)
         return DataLoader(
-            self.dataset,
-            sampler=SubsetRandomSampler(self.idx_full),
+            subset,
+            sampler=RankShardSampler(len(subset)),
             **self.kwargs,
         )
 
 
 class LabelWeightedSampler(Sampler[int]):
     """
-    A weighted random sampler that samples from a dataset with respect t o both class weights and element weights.
+    A weighted random sampler that samples from a dataset with respect to both class weights and element weights.
 
     This sampler is designed to handle very large datasets efficiently, with optimizations for:
     1. Parallel building of class indices
@@ -829,3 +832,26 @@ class LabelWeightedSampler(Sampler[int]):
             chunk_indices[int(label)] = indices[label_mask]
 
         return chunk_indices
+
+
+class RankShardSampler(Sampler[int]):
+    """Shards a dataset contiguously across ranks without padding or duplicates.
+    Preserves the existing order (e.g., your pre-shuffled idx_full)."""
+    def __init__(self, data_len: int):
+        self.data_len = data_len
+        if torch.distributed.is_available() and torch.distributed.is_initialized():
+            self.rank = torch.distributed.get_rank()
+            self.world_size = torch.distributed.get_world_size()
+        else:
+            self.rank, self.world_size = 0, 1
+
+        # contiguous chunk per rank (last rank may be shorter)
+        per_rank = math.ceil(self.data_len / self.world_size)
+        self.start = self.rank * per_rank
+        self.end = min(self.start + per_rank, self.data_len)
+
+    def __iter__(self):
+        return iter(range(self.start, self.end))
+
+    def __len__(self):
+        return self.end - self.start

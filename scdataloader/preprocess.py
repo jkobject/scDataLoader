@@ -16,7 +16,7 @@ from upath import UPath
 from scdataloader import utils as data_utils
 
 FULL_LENGTH_ASSAYS = [
-    "EFO: 0700016",
+    "EFO:0700016",
     "EFO:0008930",
     "EFO:0008931",
 ]
