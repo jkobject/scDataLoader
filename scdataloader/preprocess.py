@@ -387,9 +387,11 @@ class Preprocessor:
                     )
             print("starting PCA")
             adata.obsm["X_pca"] = sc.pp.pca(
-                adata.layers["norm"][:, adata.var['highly_variable']]
-                if "highly_variable" in adata.var.columns
-                else adata.layers["norm"],
+                (
+                    adata.layers["norm"][:, adata.var["highly_variable"]]
+                    if "highly_variable" in adata.var.columns
+                    else adata.layers["norm"]
+                ),
                 n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
             )
 

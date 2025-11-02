@@ -64,6 +64,7 @@ class DataModule(L.LightningDataModule):
         organisms: Optional[str] = None,
         genedf: Optional[pd.DataFrame] = None,
         n_bins: int = 0,
+        curiculum: int = 0,
         **kwargs,
     ):
         """
@@ -165,6 +166,8 @@ class DataModule(L.LightningDataModule):
         self.max_len = max_len
         self.test_datasets = []
         self.force_recompute_indices = force_recompute_indices
+        self.curiculum = curiculum
+        self.valid_idx = []
         self.test_idx = []
         super().__init__()
         print("finished init")
@@ -451,6 +454,7 @@ class DataModule(L.LightningDataModule):
                     chunk_size=self.sampler_chunk_size,
                     store_location=self.store_location,
                     force_recompute_indices=self.force_recompute_indices,
+                    curiculum=self.curiculum,
                 )
             except ValueError as e:
                 raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
@@ -522,6 +526,7 @@ class LabelWeightedSampler(Sampler[int]):
         chunk_size: int = None,  # Process 10M elements per chunk
         store_location: str = None,
         force_recompute_indices: bool = False,
+        curiculum: int = 0,
     ) -> None:
         """
         Initialize the sampler with parallel processing for large datasets.
@@ -538,6 +543,7 @@ class LabelWeightedSampler(Sampler[int]):
         print("Initializing optimized parallel weighted sampler...")
         super(LabelWeightedSampler, self).__init__(None)
         self.count = 0
+        self.curiculum = curiculum
 
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion
@@ -649,7 +655,11 @@ class LabelWeightedSampler(Sampler[int]):
         print("sampling a new batch of size", self.num_samples)
 
         sample_labels = torch.multinomial(
-            self.label_weights ** min(1, ((self.count + 5) / 20)),
+            (
+                self.label_weights ** min(1, ((self.count + 5) / self.curiculum))
+                if self.curiculum
+                else self.label_weights
+            ),
             num_samples=self.num_samples,
             replacement=True,
         )

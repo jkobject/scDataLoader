@@ -61,6 +61,7 @@ class Dataset(torchDataset):
     force_recompute_indices: bool = False
 
     def __post_init__(self):
+        # see at the end of the file for the mapped function
         self.mapped_dataset = mapped(
             self.lamin_dataset,
             obs_keys=list(set(self.hierarchical_clss + self.clss_to_predict)),
@@ -175,7 +176,6 @@ class Dataset(torchDataset):
             else:
                 labels = concat_categorical_codes([labels, labels_to_str])
         return np.array(labels.codes)
-
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
         """
@@ -336,6 +336,7 @@ class SimpleAnnDataset(torchDataset):
             obs_to_output (List[str]): list of observations to output from anndata.obs
             layer (str): layer of the anndata to use
             get_knn_cells (bool): whether to get the knn cells
+            encoder (dict[str, dict]): dictionary of encoders for the observations.
         """
         self.adataX = adata.layers[layer] if layer is not None else adata.X
         self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
@@ -358,6 +359,7 @@ class SimpleAnnDataset(torchDataset):
 
     def __getitem__(self, idx):
         out = {"X": self.adataX[idx].reshape(-1)}
+        # put the observation into the output and encode if needed
         for name, val in self.obs_to_output.iloc[idx].items():
             out.update({name: self.encoder[name][val] if name in self.encoder else val})
         if self.get_knn_cells:
