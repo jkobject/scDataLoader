@@ -392,7 +392,8 @@ class Preprocessor:
                     if "highly_variable" in adata.var.columns
                     else adata.layers["norm"]
                 ),
-                n_comps=200 if adata.shape[0] > 200 else adata.shape[0] - 2,
+                n_comps=50 if adata.shape[0] > 1000 else adata.shape[0] // 20,
+                chunked=adata.shape[0] > 100_000,
             )
 
             # additional

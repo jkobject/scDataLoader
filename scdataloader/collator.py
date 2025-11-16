@@ -230,7 +230,7 @@ class Collator:
                 tp.append(elem[self.tp_name])
             else:
                 tp.append(0)
-            if "is_meta" in elem:   
+            if "is_meta" in elem:
                 is_meta.append(elem["is_meta"])
             other_classes.append([elem[i] for i in self.class_names])
         expr = np.array(exprs)
@@ -242,7 +242,7 @@ class Collator:
         is_meta = np.array(is_meta)
         knn_cells = np.array(knn_cells)
         knn_cells_info = np.array(knn_cells_info)
-                    
+
         # normalize counts
         if self.norm_to is not None:
             expr = (expr * self.norm_to) / total_count[:, None]
@@ -280,7 +280,7 @@ class Collator:
                 binned_rows.append(binned_row)
                 bin_edges.append(np.concatenate([[0], bins]))
             expr = np.stack(binned_rows)
-            #expr = np.digitize(expr, bins=self.bins)
+            # expr = np.digitize(expr, bins=self.bins)
 
         ret = {
             "x": Tensor(expr),
@@ -298,4 +298,3 @@ class Collator:
         if len(dataset) > 0:
             ret.update({"dataset": Tensor(dataset).to(long)})
         return ret
-
