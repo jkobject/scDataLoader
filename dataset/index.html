@@ -59,7 +59,7 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_label_weights">get_label_weights</a>
+    <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_label_cats">get_label_cats</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a>
     </li>
@@ -124,6 +124,7 @@
               Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
 
+
         <p>Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.</p>
 <p>This serves as a wrapper around lamin's mappedCollection to provide more features,
 mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species</p>
@@ -135,13 +136,17 @@ mostly, the management of hierarchical labels, the encoding of labels, the manag
         <hr />
 <pre><code>lamin_dataset (lamindb.Dataset): lamin dataset to load
 genedf (pd.Dataframe): dataframe containing the genes to load
-organisms (list[str]): list of organisms to load
-    (for now only validates the the genes map to this organism)
-obs (list[str]): list of observations to load from the Collection
-clss_to_predict (list[str]): list of observations to encode
+obs (List[str]): list of observations to load from the Collection
+clss_to_predict (List[str]): list of observations to encode
 join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
 hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
+metacell_mode (float, optional): The mode to use for metacell sampling. Defaults to 0.0.
+get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each cell. Defaults to False.
+store_location (str, optional): The location to store the sampler indices. Defaults to None.
+force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
 </code></pre>
+
+
 
 
 
@@ -161,7 +166,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.define_hierarchies" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="define_hierarchies (scdataloader.data.Dataset.define_hierarchies)" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>define_hierarchies is a method to define the hierarchies for the classes to predict</p>
@@ -169,15 +174,15 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.get_label_weights" href="#scdataloader.data.Dataset.get_label_weights">get_label_weights</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="get_label_cats (scdataloader.data.Dataset.get_label_cats)" href="#scdataloader.data.Dataset.get_label_cats">get_label_cats</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Get all weights for the given label keys.</p>
+                  <p>Get all categories for the given label keys.</p>
                 </div>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.get_unseen_mapped_dataset_elements" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="get_unseen_mapped_dataset_elements (scdataloader.data.Dataset.get_unseen_mapped_dataset_elements)" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</p>
@@ -193,6 +198,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -228,7 +234,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
         <ul class="first simple">
             <li>
               <b><code>clsses</code></b>
-                  (<code>list[str]</code>)
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>list of classes to predict</p>
@@ -251,7 +257,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>ValueError</code>
+                  <code><span title="ValueError">ValueError</span></code>
               –
               <div class="doc-md-description">
                 <p>if the class is not in the accepted classes</p>
@@ -262,9 +268,12 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
@@ -384,12 +393,15 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    define_hierarchies is a method to define the hierarchies for the classes to predict</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        clsses (list[str]): list of classes to predict</span>
+<span class="sd">        clsses (List[str]): list of classes to predict</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if the class is not in the accepted classes</span>
@@ -416,19 +428,19 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="ow">in</span> <span class="p">[</span>
@@ -438,19 +450,19 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
         <span class="p">]:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
 
@@ -460,13 +472,17 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
                     <span class="n">clss</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="n">cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_categories</span><span class="p">(</span><span class="n">clss</span><span class="p">))</span>
-        <span class="n">addition</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">LABELS_TOADD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">clss</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="n">cats</span> <span class="o">|=</span> <span class="n">addition</span>
+        <span class="n">cats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">groupings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">leaf_labels</span> <span class="o">=</span> <span class="n">get_ancestry_mapping</span><span class="p">(</span><span class="n">cats</span><span class="p">,</span> <span class="n">parentdf</span><span class="p">)</span>
+        <span class="n">groupings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">groupings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># that should not happen</span>
+                <span class="kn">import</span> <span class="nn">pdb</span>
+
+                <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
                 <span class="n">groupings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">labels_groupings</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span> <span class="o">=</span> <span class="n">groupings</span>
         <span class="k">if</span> <span class="n">clss</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clss_to_predict</span><span class="p">:</span>
             <span class="c1"># if we have added new clss, we need to update the encoder with them too.</span>
@@ -480,11 +496,12 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
             <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-                <span class="n">addition</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="nb">set</span><span class="p">(</span><span class="n">groupings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
             <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="n">mlength</span> <span class="o">+</span> <span class="n">i</span><span class="p">})</span>
-            <span class="c1"># we need to change the ordering so that the things that can&#39;t be predicted appear afterward</span>
 
+            <span class="c1"># we need to change the ordering so that the things that can&#39;t be predicted appear afterward</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">class_topred</span><span class="p">[</span><span class="n">clss</span><span class="p">]</span> <span class="o">=</span> <span class="n">leaf_labels</span>
             <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">update</span> <span class="o">=</span> <span class="p">{}</span>
@@ -514,37 +531,20 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <div class="doc doc-object doc-function">
 
 
-<h3 id="scdataloader.data.Dataset.get_label_weights" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_label_weights</span></code>
+<h3 id="scdataloader.data.Dataset.get_label_cats" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_label_cats</span></code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Get all weights for the given label keys.</p>
+        <p>Get all categories for the given label keys.</p>
 
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span>
@@ -558,43 +558,21 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_label_weights</span><span class="p">(</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_label_cats</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">obs_keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">scaler</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">return_categories</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">bypass_label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;neuron&quot;</span><span class="p">],</span>
+    <span class="n">obs_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all weights for the given label keys.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all categories for the given label keys.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">obs_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs_keys</span><span class="p">]</span>
-    <span class="n">labels_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">label_key</span> <span class="ow">in</span> <span class="n">obs_keys</span><span class="p">:</span>
-        <span class="n">labels_to_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="n">label_key</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">labels_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels_to_str</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;___&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels_obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">labels_obs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">labels_list</span><span class="p">)]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-    <span class="k">if</span> <span class="n">return_categories</span><span class="p">:</span>
-        <span class="n">rn</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">counter</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rn</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">])</span>
-        <span class="n">counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">counter</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-        <span class="n">weights</span> <span class="o">=</span> <span class="n">scaler</span> <span class="o">/</span> <span class="p">(</span><span class="n">counter</span> <span class="o">+</span> <span class="n">scaler</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">labels</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">counter</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">scaler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weights</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">counts</span>
+        <span class="n">labels_to_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">get_merged_labels</span><span class="p">(</span><span class="n">label_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">labels_to_str</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights</span> <span class="o">=</span> <span class="n">scaler</span> <span class="o">/</span> <span class="p">(</span><span class="n">counts</span> <span class="o">+</span> <span class="n">scaler</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">weights</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">concat_categorical_codes</span><span class="p">([</span><span class="n">labels</span><span class="p">,</span> <span class="n">labels_to_str</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -627,7 +605,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
         <ul class="first simple">
             <li>
               <b><code>idx</code></b>
-                  (<code>int</code>)
+                  (<code><span title="int">int</span></code>)
               –
               <div class="doc-md-description">
                 <p>index of the element to get</p>
@@ -652,7 +630,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
             <li>
               –
               <div class="doc-md-description">
-                <p>list[str]: list of unseen genes</p>
+                <p>List[str]: list of unseen genes</p>
               </div>
             </li>
         </ul>
@@ -660,9 +638,12 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
@@ -670,9 +651,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</span>
 
@@ -680,7 +659,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
 <span class="sd">        idx (int): index of the element to get</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list[str]: list of unseen genes</span>
+<span class="sd">        List[str]: list of unseen genes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">uns</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;unseen_genes&quot;</span><span class="p">)]</span>
 </code></pre></div></td></tr></table></div>
@@ -694,6 +673,7 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
   </div>
 
     </div>
+
 
 </div>
 
@@ -712,13 +692,18 @@ hierarchical_clss: list of observations to map to a hierarchy using lamin's bion
               Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
 
+
         <p>SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
 scDataloader and with your model during inference.</p>
         <hr />
 <pre><code>adata (anndata.AnnData): anndata object to use
-obs_to_output (list[str]): list of observations to output from anndata.obs
+obs_to_output (List[str]): list of observations to output from anndata.obs
 layer (str): layer of the anndata to use
+get_knn_cells (bool): whether to get the knn cells
+encoder (dict[str, dict]): dictionary of encoders for the observations.
 </code></pre>
+
+
 
 
 
@@ -731,10 +716,7 @@ layer (str): layer of the anndata to use
 
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/data.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
@@ -749,11 +731,27 @@ layer (str): layer of the anndata to use
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
-    <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">get_knn_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of</span>
@@ -762,12 +760,21 @@ layer (str): layer of the anndata to use
 <span class="sd">    Args:</span>
 <span class="sd">    ----</span>
 <span class="sd">        adata (anndata.AnnData): anndata object to use</span>
-<span class="sd">        obs_to_output (list[str]): list of observations to output from anndata.obs</span>
+<span class="sd">        obs_to_output (List[str]): list of observations to output from anndata.obs</span>
 <span class="sd">        layer (str): layer of the anndata to use</span>
+<span class="sd">        get_knn_cells (bool): whether to get the knn cells</span>
+<span class="sd">        encoder (dict[str, dict]): dictionary of encoders for the observations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span> <span class="k">if</span> <span class="n">issparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">encoder</span> <span class="k">if</span> <span class="n">encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">obs_to_output</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">obs_to_output</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">get_knn_cells</span> <span class="o">=</span> <span class="n">get_knn_cells</span>
+    <span class="k">if</span> <span class="n">get_knn_cells</span> <span class="ow">and</span> <span class="s2">&quot;connectivities&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;neighbors key not found in adata.obsm&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">get_knn_cells</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;distances&quot;</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -785,9 +792,11 @@ layer (str): layer of the anndata to use
 
 
 
+
   </div>
 
     </div>
+
 
 </div>
               
