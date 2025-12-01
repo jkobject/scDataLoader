@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Updates. [jkobject]
+
+
+2.0.1 (2025-12-01)
+------------------
+- Release: version 2.0.1 🚀 [jkobject]
 - Making preprocessing faster. [jkobject]
 - Adding curiculum. [jkobject]
 - Reactivate the curriculum. [jkobject]
