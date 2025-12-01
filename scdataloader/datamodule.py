@@ -324,9 +324,9 @@ class DataModule(L.LightningDataModule):
                 len_test = self.test_split
             else:
                 len_test = int(self.n_samples * self.test_split)
-            assert (
-                len_test + len_valid < self.n_samples
-            ), "test set + valid set size is configured to be larger than entire dataset."
+            assert len_test + len_valid < self.n_samples, (
+                "test set + valid set size is configured to be larger than entire dataset."
+            )
 
             idx_full = []
             if len(self.assays_to_drop) > 0:
@@ -667,9 +667,7 @@ class LabelWeightedSampler(Sampler[int]):
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
 
         # Initialize result tensor
-        result_indices_list = (
-            []
-        )  # Changed name to avoid conflict if you had result_indices elsewhere
+        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
 
         # Process only the classes that were actually sampled
         for i, (label, count) in tqdm(

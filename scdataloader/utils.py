@@ -893,6 +893,8 @@ def translate(
         obj = bt.Disease
     elif t == "self_reported_ethnicity_ontology_term_id":
         obj = bt.Ethnicity
+    elif t == "organism_ontology_term_id":
+        obj = bt.Organism
     else:
         return None
     if type(val) is str:
