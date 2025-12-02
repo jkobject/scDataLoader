@@ -324,9 +324,9 @@ class DataModule(L.LightningDataModule):
                 len_test = self.test_split
             else:
                 len_test = int(self.n_samples * self.test_split)
-            assert len_test + len_valid < self.n_samples, (
-                "test set + valid set size is configured to be larger than entire dataset."
-            )
+            assert (
+                len_test + len_valid < self.n_samples
+            ), "test set + valid set size is configured to be larger than entire dataset."
 
             idx_full = []
             if len(self.assays_to_drop) > 0:
@@ -667,7 +667,9 @@ class LabelWeightedSampler(Sampler[int]):
         unique_samples, sample_counts = torch.unique(sample_labels, return_counts=True)
 
         # Initialize result tensor
-        result_indices_list = []  # Changed name to avoid conflict if you had result_indices elsewhere
+        result_indices_list = (
+            []
+        )  # Changed name to avoid conflict if you had result_indices elsewhere
 
         # Process only the classes that were actually sampled
         for i, (label, count) in tqdm(
@@ -850,8 +852,9 @@ class RankShardSampler(Sampler[int]):
     """Shards a dataset contiguously across ranks without padding or duplicates.
     Preserves the existing order (e.g., your pre-shuffled idx_full)."""
 
-    def __init__(self, data_len: int):
+    def __init__(self, data_len: int, start_at: int = 0) -> None:
         self.data_len = data_len
+        self.start_at = start_at
         if torch.distributed.is_available() and torch.distributed.is_initialized():
             self.rank = torch.distributed.get_rank()
             self.world_size = torch.distributed.get_world_size()
@@ -860,7 +863,7 @@ class RankShardSampler(Sampler[int]):
 
         # contiguous chunk per rank (last rank may be shorter)
         per_rank = math.ceil(self.data_len / self.world_size)
-        self.start = self.rank * per_rank
+        self.start = (self.start_at / self.world_size) + (self.rank * per_rank)
         self.end = min(self.start + per_rank, self.data_len)
 
     def __iter__(self):
