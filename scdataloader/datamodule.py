@@ -65,6 +65,7 @@ class DataModule(L.LightningDataModule):
         genedf: Optional[pd.DataFrame] = None,
         n_bins: int = 0,
         curiculum: int = 0,
+        start_at: int = 0,
         **kwargs,
     ):
         """
@@ -162,6 +163,7 @@ class DataModule(L.LightningDataModule):
         self.sampler_chunk_size = sampler_chunk_size
         self.store_location = store_location
         self.nnz = None
+        self.start_at = start_at
         self.idx_full = None
         self.max_len = max_len
         self.test_datasets = []
@@ -461,7 +463,7 @@ class DataModule(L.LightningDataModule):
             dataset = None
         else:
             dataset = Subset(self.dataset, self.idx_full)
-            train_sampler = RankShardSampler(len(dataset))
+            train_sampler = RankShardSampler(len(dataset), start_at=self.start_at)
         current_loader_kwargs = kwargs.copy()
         current_loader_kwargs.update(self.kwargs)
         return DataLoader(
@@ -492,8 +494,8 @@ class DataModule(L.LightningDataModule):
     def predict_dataloader(self):
         subset = Subset(self.dataset, self.idx_full)
         return DataLoader(
-            subset,
-            sampler=RankShardSampler(len(subset)),
+            self.dataset,
+            sampler=RankShardSampler(len(subset), start_at=self.start_at),
             **self.kwargs,
         )
 
@@ -862,9 +864,16 @@ class RankShardSampler(Sampler[int]):
             self.rank, self.world_size = 0, 1
 
         # contiguous chunk per rank (last rank may be shorter)
-        per_rank = math.ceil(self.data_len / self.world_size)
-        self.start = (self.start_at / self.world_size) + (self.rank * per_rank)
+        if self.start_at > 0:
+            print(
+                "!!!!ATTTENTION: make sure that you are running on the exact same \
+                    number of GPU as your previous run!!!!!"
+            )
+        print(f"Sharding data of size {data_len} over {self.world_size} ranks")
+        per_rank = math.ceil((self.data_len - self.start_at) / self.world_size)
+        self.start = int((self.start_at / self.world_size) + (self.rank * per_rank))
         self.end = min(self.start + per_rank, self.data_len)
+        print(f"Rank {self.rank} processing indices from {self.start} to {self.end}")
 
     def __iter__(self):
         return iter(range(self.start, self.end))

@@ -15,6 +15,7 @@ dependencies = [
     "cellxgene-census>=0.1.0",
     "torch>=2.2.0",
     "pytorch-lightning>=2.3.0",
+    "lightning>=2.3.0",
     "anndata>=0.9.0",
     "zarr>=2.10.0",
     "matplotlib>=3.5.0",
@@ -27,8 +28,6 @@ dependencies = [
     "django>=4.0.0",
     "scikit-misc>=0.5.0",
     "jupytext>=1.16.0",
-    "lightning>=2.3.0",
-    "pytorch-lightning>=2.3.0",
 ]
 
 [project.optional-dependencies]
