@@ -481,7 +481,7 @@ Defaults to False.</p>
 <span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filter_gene_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filter_cell_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -679,7 +679,7 @@ Defaults to False.</p>
 <span class="normal">465</span>
 <span class="normal">466</span>
 <span class="normal">467</span>
-<span class="normal">468</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">468</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -928,7 +928,7 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">636</span>
 <span class="normal">637</span>
 <span class="normal">638</span>
-<span class="normal">639</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">639</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
@@ -1180,7 +1180,7 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">774</span>
 <span class="normal">775</span>
 <span class="normal">776</span>
-<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1413,7 +1413,7 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">936</span>
 <span class="normal">937</span>
 <span class="normal">938</span>
-<span class="normal">939</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">939</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="c1"># import palantir</span>
 
     <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>
@@ -1442,11 +1442,11 @@ is used in the highly variable gene selection step.</p>
     <span class="n">NEWOBS</span> <span class="o">=</span> <span class="s2">&quot;clust_cell_type&quot;</span>
     <span class="n">MINCELLS</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">MAXSIM</span> <span class="o">=</span> <span class="mf">0.94</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 
-    <span class="kn">import</span> <span class="nn">bionty</span> <span class="k">as</span> <span class="nn">bt</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">bionty</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bt</span>
 
-    <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
 
     <span class="n">remap_stages</span> <span class="o">=</span> <span class="p">{</span><span class="n">u</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">v</span><span class="p">}</span>
 

@@ -569,7 +569,9 @@ This is used to subset the available genes further to the ones that have embeddi
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
-<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">clss_to_weight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
@@ -604,6 +606,7 @@ This is used to subset the available genes further to the ones that have embeddi
     <span class="n">genedf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">curiculum</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">start_at</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -701,6 +704,7 @@ This is used to subset the available genes further to the ones that have embeddi
     <span class="bp">self</span><span class="o">.</span><span class="n">sampler_chunk_size</span> <span class="o">=</span> <span class="n">sampler_chunk_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">store_location</span> <span class="o">=</span> <span class="n">store_location</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nnz</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">start_at</span> <span class="o">=</span> <span class="n">start_at</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">idx_full</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="o">=</span> <span class="n">max_len</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">test_datasets</span> <span class="o">=</span> <span class="p">[]</span>
@@ -901,9 +905,7 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
@@ -1056,7 +1058,9 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
 <span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
-<span class="normal">439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    setup method is used to prepare the data for the training, validation, and test sets.</span>
 <span class="sd">    It shuffles the data, calculates weights for each set, and creates samplers for each set.</span>
@@ -1099,9 +1103,9 @@ It shuffles the data, calculates weights for each set, and creates samplers for 
             <span class="n">len_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">len_test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">len_test</span> <span class="o">+</span> <span class="n">len_valid</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="p">(</span>
-            <span class="s2">&quot;test set + valid set size is configured to be larger than entire dataset.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">len_test</span> <span class="o">+</span> <span class="n">len_valid</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+        <span class="p">),</span> <span class="s2">&quot;test set + valid set size is configured to be larger than entire dataset.&quot;</span>
 
         <span class="n">idx_full</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assays_to_drop</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
