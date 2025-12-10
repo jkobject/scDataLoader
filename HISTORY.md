@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Debug the start_at. [jkobject]
+- Fmt. [jkobject]
+
+
+2.0.2 (2025-12-01)
+------------------
+- Release: version 2.0.2 🚀 [jkobject]
 - Updates. [jkobject]
 
 
