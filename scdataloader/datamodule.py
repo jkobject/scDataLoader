@@ -869,8 +869,6 @@ class RankShardSampler(Sampler[int]):
                 "!!!!ATTENTION: make sure that you are running on the exact same \
                     number of GPU as your previous run!!!!!"
             )
-        if self.rank == 1:
-            self.start_at = 
         print(f"Sharding data of size {data_len} over {self.world_size} ranks")
         per_rank = math.ceil(self.data_len / self.world_size)
         self.start = int((self.start_at / self.world_size) + (self.rank * per_rank))
