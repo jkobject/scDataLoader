@@ -125,27 +125,242 @@
 
 
 
-        <p>Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.</p>
-<p>This serves as a wrapper around lamin's mappedCollection to provide more features,
-mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species</p>
-<p>For an example of mappedDataset, see :meth:<code>~lamindb.Dataset.mapped</code>.</p>
-<p>.. note::</p>
-<pre><code>A related data loader exists `here
-&lt;https://github.com/Genentech/scimilarity&gt;`__.
-</code></pre>
-        <hr />
-<pre><code>lamin_dataset (lamindb.Dataset): lamin dataset to load
-genedf (pd.Dataframe): dataframe containing the genes to load
-obs (List[str]): list of observations to load from the Collection
-clss_to_predict (List[str]): list of observations to encode
-join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
-hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
-metacell_mode (float, optional): The mode to use for metacell sampling. Defaults to 0.0.
-get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each cell. Defaults to False.
-store_location (str, optional): The location to store the sampler indices. Defaults to None.
-force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
-</code></pre>
+        <p>PyTorch Dataset for loading single-cell data from a LaminDB Collection.</p>
+<p>This class wraps LaminDB's MappedCollection to provide additional features:
+- Management of hierarchical ontology labels (cell type, tissue, disease, etc.)
+- Automatic encoding of categorical labels to integers
+- Multi-species gene handling with unified gene indexing
+- Optional metacell aggregation and KNN neighbor retrieval</p>
+<p>The dataset lazily loads data from storage, making it memory-efficient for
+large collections spanning multiple files.</p>
 
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>lamin_dataset</code></b>
+                  (<code><span title="lamindb.Collection">Collection</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>LaminDB Collection containing the artifacts to load.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>genedf</code></b>
+                  (<code><span title="pandas.DataFrame">DataFrame</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>DataFrame with gene information, indexed by gene ID
+with an 'organism' column. If None, automatically loaded based on organisms
+in the dataset. Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>clss_to_predict</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code><span title="list">list</span>()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Observation columns to encode as prediction
+targets. These will be integer-encoded in the output. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>hierarchical_clss</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code><span title="list">list</span>()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Observation columns with hierarchical
+ontology structure. These will have their ancestry relationships computed
+using Bionty. Supported columns:
+- "cell_type_ontology_term_id"
+- "tissue_ontology_term_id"
+- "disease_ontology_term_id"
+- "development_stage_ontology_term_id"
+- "assay_ontology_term_id"
+- "self_reported_ethnicity_ontology_term_id"
+Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>join_vars</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>How to join variables across artifacts.
+"inner" for intersection, "outer" for union, None for no joining.
+Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metacell_mode</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>0.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Probability of returning aggregated metacell
+expression instead of single-cell. Defaults to 0.0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>get_knn_cells</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to include k-nearest neighbor cell
+expression in the output. Requires precomputed neighbors in the data.
+Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>store_location</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Directory path to cache computed indices.
+Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>force_recompute_indices</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Force recomputation of cached data.
+Defaults to False.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>mapped_dataset</code></b>
+                  (<code><span title="scdataloader.mapped.MappedCollection">MappedCollection</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Underlying mapped collection for data access.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>genedf</code></b>
+                  (<code><span title="pandas.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Gene information DataFrame.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organisms</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
+              –
+              <div class="doc-md-description">
+                <p>List of organism ontology term IDs in the dataset.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>class_topred</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="set">set</span>]</code>)
+              –
+              <div class="doc-md-description">
+                <p>Mapping from class name to set of valid labels.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>labels_groupings</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>)
+              –
+              <div class="doc-md-description">
+                <p>Hierarchical groupings for ontology classes.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>encoder</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>)
+              –
+              <div class="doc-md-description">
+                <p>Label encoders mapping strings to integers.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="ValueError">ValueError</span></code>
+              –
+              <div class="doc-md-description">
+                <p>If genedf is None and "organism_ontology_term_id" is not in clss_to_predict.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>collection = ln.Collection.filter(key="my_collection").first()
+dataset = Dataset(
+...     lamin_dataset=collection,
+...     clss_to_predict=["organism_ontology_term_id", "cell_type_ontology_term_id"],
+...     hierarchical_clss=["cell_type_ontology_term_id"],
+... )
+sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
 
 
 
@@ -169,7 +384,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
               <td><code><a class="autorefs autorefs-internal" title="define_hierarchies (scdataloader.data.Dataset.define_hierarchies)" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>define_hierarchies is a method to define the hierarchies for the classes to predict</p>
+                  <p>Define hierarchical label groupings from ontology relationships.</p>
                 </div>
               </td>
             </tr>
@@ -177,7 +392,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
               <td><code><a class="autorefs autorefs-internal" title="get_label_cats (scdataloader.data.Dataset.get_label_cats)" href="#scdataloader.data.Dataset.get_label_cats">get_label_cats</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Get all categories for the given label keys.</p>
+                  <p>Get combined categorical codes for one or more label columns.</p>
                 </div>
               </td>
             </tr>
@@ -185,7 +400,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
               <td><code><a class="autorefs autorefs-internal" title="get_unseen_mapped_dataset_elements (scdataloader.data.Dataset.get_unseen_mapped_dataset_elements)" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</p>
+                  <p>Get genes marked as unseen for a specific sample.</p>
                 </div>
               </td>
             </tr>
@@ -219,7 +434,11 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 
     <div class="doc doc-contents ">
 
-        <p>define_hierarchies is a method to define the hierarchies for the classes to predict</p>
+        <p>Define hierarchical label groupings from ontology relationships.</p>
+<p>Uses Bionty to retrieve parent-child relationships for ontology terms,
+then builds groupings mapping parent terms to their descendants.
+Updates encoders to include parent terms and reorders labels so that
+leaf terms (directly predictable) come first.</p>
 
 
 <table class="field-list">
@@ -237,7 +456,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
                   (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
               –
               <div class="doc-md-description">
-                <p>list of classes to predict</p>
+                <p>List of ontology column names to process.</p>
               </div>
             </li>
         </ul>
@@ -260,7 +479,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
                   <code><span title="ValueError">ValueError</span></code>
               –
               <div class="doc-md-description">
-                <p>if the class is not in the accepted classes</p>
+                <p>If a class name is not in the supported ontology types.</p>
               </div>
             </li>
         </ul>
@@ -269,61 +488,15 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
   </tbody>
 </table>
 
+<details class="note" open>
+  <summary>Note</summary>
+  <p>Modifies self.labels_groupings, self.class_topred, and
+self.mapped_dataset.encoders in place.</p>
+</details>
+
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">244</span>
 <span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
@@ -396,15 +569,85 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 <span class="normal">314</span>
 <span class="normal">315</span>
 <span class="normal">316</span>
-<span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    define_hierarchies is a method to define the hierarchies for the classes to predict</span>
+<span class="sd">    Define hierarchical label groupings from ontology relationships.</span>
+
+<span class="sd">    Uses Bionty to retrieve parent-child relationships for ontology terms,</span>
+<span class="sd">    then builds groupings mapping parent terms to their descendants.</span>
+<span class="sd">    Updates encoders to include parent terms and reorders labels so that</span>
+<span class="sd">    leaf terms (directly predictable) come first.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        clsses (List[str]): list of classes to predict</span>
+<span class="sd">        clsses (List[str]): List of ontology column names to process.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if the class is not in the accepted classes</span>
+<span class="sd">        ValueError: If a class name is not in the supported ontology types.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Modifies self.labels_groupings, self.class_topred, and</span>
+<span class="sd">        self.mapped_dataset.encoders in place.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">labels_groupings</span> <span class="o">=</span> <span class="p">{}</span>
@@ -539,30 +782,106 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 
     <div class="doc doc-contents ">
 
-        <p>Get all categories for the given label keys.</p>
+        <p>Get combined categorical codes for one or more label columns.</p>
+<p>Retrieves labels from the mapped dataset and combines them into a single
+categorical encoding. Useful for creating compound class labels for
+stratified sampling.</p>
 
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>obs_keys</code></b>
+                  (<code><span title="str">str</span> | <span title="typing.List">List</span>[<span title="str">str</span>]</code>)
+              –
+              <div class="doc-md-description">
+                <p>Column name(s) to retrieve and combine.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>np.ndarray: Integer codes representing the (combined) categories.
+Shape: (n_samples,).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_label_cats</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_label_cats</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obs_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all categories for the given label keys.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get combined categorical codes for one or more label columns.</span>
+
+<span class="sd">    Retrieves labels from the mapped dataset and combines them into a single</span>
+<span class="sd">    categorical encoding. Useful for creating compound class labels for</span>
+<span class="sd">    stratified sampling.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obs_keys (str | List[str]): Column name(s) to retrieve and combine.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Integer codes representing the (combined) categories.</span>
+<span class="sd">            Shape: (n_samples,).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">obs_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs_keys</span><span class="p">]</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="kc">None</span>
@@ -590,7 +909,9 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 
     <div class="doc doc-contents ">
 
-        <p>get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</p>
+        <p>Get genes marked as unseen for a specific sample.</p>
+<p>Retrieves the list of genes that were not observed (expression = 0 or
+marked as unseen) for the sample at the given index.</p>
 
 
 <table class="field-list">
@@ -608,7 +929,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
                   (<code><span title="int">int</span></code>)
               –
               <div class="doc-md-description">
-                <p>index of the element to get</p>
+                <p>Sample index in the dataset.</p>
               </div>
             </li>
         </ul>
@@ -630,7 +951,7 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
             <li>
               –
               <div class="doc-md-description">
-                <p>List[str]: list of unseen genes</p>
+                <p>List[str]: List of unseen gene identifiers.</p>
               </div>
             </li>
         </ul>
@@ -641,25 +962,31 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements</span>
+<span class="sd">    Get genes marked as unseen for a specific sample.</span>
+
+<span class="sd">    Retrieves the list of genes that were not observed (expression = 0 or</span>
+<span class="sd">    marked as unseen) for the sample at the given index.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        idx (int): index of the element to get</span>
+<span class="sd">        idx (int): Sample index in the dataset.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[str]: list of unseen genes</span>
+<span class="sd">        List[str]: List of unseen gene identifiers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_dataset</span><span class="o">.</span><span class="n">uns</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;unseen_genes&quot;</span><span class="p">)]</span>
 </code></pre></div></td></tr></table></div>
@@ -693,16 +1020,167 @@ force_recompute_indices (bool, optional): Whether to force recompute the sampler
 
 
 
-        <p>SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
-scDataloader and with your model during inference.</p>
-        <hr />
-<pre><code>adata (anndata.AnnData): anndata object to use
-obs_to_output (List[str]): list of observations to output from anndata.obs
-layer (str): layer of the anndata to use
-get_knn_cells (bool): whether to get the knn cells
-encoder (dict[str, dict]): dictionary of encoders for the observations.
-</code></pre>
+        <p>Simple PyTorch Dataset wrapper for a single AnnData object.</p>
+<p>Provides a lightweight interface for using AnnData with PyTorch DataLoaders,
+compatible with the scDataLoader collator. Useful for inference on new data
+that isn't stored in LaminDB.</p>
 
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adata</code></b>
+                  (<code><span title="anndata.AnnData">AnnData</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>AnnData object containing expression data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>obs_to_output</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code>[]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Observation columns to include in
+output dictionaries. Defaults to [].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>layer</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Layer name to use for expression values. If None,
+uses adata.X. Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>get_knn_cells</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to include k-nearest neighbor
+expression data. Requires precomputed neighbors in adata.obsp.
+Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>encoder</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary mapping observation column
+names to encoding dictionaries (str -&gt; int). Defaults to None.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>adataX</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Dense expression matrix.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>encoder</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Label encoders.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>obs_to_output</code></b>
+                  (<code><span title="pandas.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Observation metadata to include.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>distances</code></b>
+                  (<code>scipy.sparse matrix</code>)
+              –
+              <div class="doc-md-description">
+                <p>KNN distance matrix (if get_knn_cells=True).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="ValueError">ValueError</span></code>
+              –
+              <div class="doc-md-description">
+                <p>If get_knn_cells=True but "connectivities" not in adata.obsp.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>dataset = SimpleAnnDataset(
+...     adata=my_adata,
+...     obs_to_output=["cell_type", "organism_ontology_term_id"],
+...     encoder={"organism_ontology_term_id": {"NCBITaxon:9606": 0}},
+... )
+loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
 
 
 
@@ -716,36 +1194,60 @@ encoder (dict[str, dict]): dictionary of encoders for the observations.
 
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/data.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
     <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -754,16 +1256,40 @@ encoder (dict[str, dict]): dictionary of encoders for the observations.
     <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of</span>
-<span class="sd">    scDataloader and with your model during inference.</span>
+<span class="sd">    Simple PyTorch Dataset wrapper for a single AnnData object.</span>
+
+<span class="sd">    Provides a lightweight interface for using AnnData with PyTorch DataLoaders,</span>
+<span class="sd">    compatible with the scDataLoader collator. Useful for inference on new data</span>
+<span class="sd">    that isn&#39;t stored in LaminDB.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    ----</span>
-<span class="sd">        adata (anndata.AnnData): anndata object to use</span>
-<span class="sd">        obs_to_output (List[str]): list of observations to output from anndata.obs</span>
-<span class="sd">        layer (str): layer of the anndata to use</span>
-<span class="sd">        get_knn_cells (bool): whether to get the knn cells</span>
-<span class="sd">        encoder (dict[str, dict]): dictionary of encoders for the observations.</span>
+<span class="sd">        adata (AnnData): AnnData object containing expression data.</span>
+<span class="sd">        obs_to_output (List[str], optional): Observation columns to include in</span>
+<span class="sd">            output dictionaries. Defaults to [].</span>
+<span class="sd">        layer (str, optional): Layer name to use for expression values. If None,</span>
+<span class="sd">            uses adata.X. Defaults to None.</span>
+<span class="sd">        get_knn_cells (bool, optional): Whether to include k-nearest neighbor</span>
+<span class="sd">            expression data. Requires precomputed neighbors in adata.obsp.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        encoder (dict[str, dict], optional): Dictionary mapping observation column</span>
+<span class="sd">            names to encoding dictionaries (str -&gt; int). Defaults to None.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        adataX (np.ndarray): Dense expression matrix.</span>
+<span class="sd">        encoder (dict): Label encoders.</span>
+<span class="sd">        obs_to_output (pd.DataFrame): Observation metadata to include.</span>
+<span class="sd">        distances (scipy.sparse matrix): KNN distance matrix (if get_knn_cells=True).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If get_knn_cells=True but &quot;connectivities&quot; not in adata.obsp.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; dataset = SimpleAnnDataset(</span>
+<span class="sd">        ...     adata=my_adata,</span>
+<span class="sd">        ...     obs_to_output=[&quot;cell_type&quot;, &quot;organism_ontology_term_id&quot;],</span>
+<span class="sd">        ...     encoder={&quot;organism_ontology_term_id&quot;: {&quot;NCBITaxon:9606&quot;: 0}},</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span> <span class="k">if</span> <span class="n">issparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adataX</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">adataX</span>
