@@ -69,39 +69,98 @@ class DataModule(L.LightningDataModule):
         **kwargs,
     ):
         """
-        DataModule a pytorch lighting datamodule directly from a lamin Collection.
-        it can work with bare pytorch too
+        PyTorch Lightning DataModule for loading single-cell data from a LaminDB Collection.
 
-        It implements train / val / test dataloaders. the train is weighted random, val is random, test is one to many separated datasets.
-        This is where the mappedCollection, dataset, and collator are combined to create the dataloaders.
+        This DataModule provides train/val/test dataloaders with configurable sampling strategies.
+        It combines MappedCollection, Dataset, and Collator to create efficient data pipelines
+        for training single-cell foundation models.
+
+        The training dataloader uses weighted random sampling based on class frequencies,
+        validation uses random sampling, and test uses sequential sampling on held-out datasets.
 
         Args:
-            collection_name (str): The lamindb collection to be used.
-            weight_scaler (int, optional): how much more you will see the most present vs less present category.
-            n_samples_per_epoch (int, optional): The number of samples to include in the training set for each epoch. Defaults to 2_000_000.
-            validation_split (float, optional): The proportion of the dataset to include in the validation split. Defaults to 0.2.
-            test_split (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.
-                it will use a full dataset and will round to the nearest dataset's cell count.
-            use_default_col (bool, optional): Whether to use the default collator. Defaults to True.
-            clss_to_weight (List[str], optional): List of labels to weight in the trainer's weighted random sampler. Defaults to [].
-            assays_to_drop (List[str], optional): List of assays to drop from the dataset. Defaults to [].
-            gene_pos_file (Union[bool, str], optional): The path to the gene positions file. Defaults to True.
-                the file must have ensembl_gene_id as index.
-                This is used to subset the available genes further to the ones that have embeddings in your model.
-            max_len (int, optional): The maximum length of the input tensor. Defaults to 1000.
-            how (str, optional): The method to use for the collator. Defaults to "random expr".
-            organism_col (str, optional): The name of the organism. Defaults to "organism_ontology_term_id".
-            tp_name (Optional[str], optional): The name of the timepoint. Defaults to None.
-            hierarchical_clss (List[str], optional): List of hierarchical classes. Defaults to [].
-            metacell_mode (float, optional): The probability of using metacell mode. Defaults to 0.0.
-            clss_to_predict (List[str], optional): List of classes to predict. Defaults to ["organism_ontology_term_id"].
-            get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each queried cells. Defaults to False.
-            store_location (str, optional): The location to store the sampler indices. Defaults to None.
-            force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
-            sampler_workers (int, optional): The number of workers to use for the sampler. Defaults to None (auto-determined).
-            sampler_chunk_size (int, optional): The size of the chunks to use for the sampler. Defaults to None (auto-determined).
-            **kwargs: Additional keyword arguments passed to the pytorch DataLoader.
-            see @file data.py and @file collator.py for more details about some of the parameters
+            collection_name (str): Key of the LaminDB Collection to load.
+            clss_to_weight (List[str], optional): Label columns to use for weighted sampling
+                in the training dataloader. Supports "nnz" for weighting by number of
+                non-zero genes. Defaults to ["organism_ontology_term_id"].
+            weight_scaler (int, optional): Controls balance between rare and common classes.
+                Higher values lead to more uniform sampling across classes. Set to 0 to
+                disable weighted sampling. Defaults to 10.
+            n_samples_per_epoch (int, optional): Number of samples to draw per training epoch.
+                Defaults to 2,000,000.
+            validation_split (float | int, optional): Proportion (float) or absolute number (int)
+                of samples for validation. Defaults to 0.2.
+            test_split (float | int, optional): Proportion (float) or absolute number (int)
+                of samples for testing. Uses entire datasets as test sets, rounding to
+                nearest dataset boundary. Defaults to 0.
+            use_default_col (bool, optional): Whether to use the default Collator for batch
+                preparation. If False, no collate_fn is applied. Defaults to True.
+            clss_to_predict (List[str], optional): Observation columns to encode as prediction
+                targets. Must include "organism_ontology_term_id". Defaults to
+                ["organism_ontology_term_id"].
+            hierarchical_clss (List[str], optional): Observation columns with hierarchical
+                ontology structure to be processed. Defaults to [].
+            how (str, optional): Gene selection strategy passed to Collator. One of
+                "most expr", "random expr", "all", "some". Defaults to "random expr".
+            organism_col (str, optional): Column name for organism ontology term ID.
+                Defaults to "organism_ontology_term_id".
+            max_len (int, optional): Maximum number of genes per sample passed to Collator.
+                Defaults to 1000.
+            replacement (bool, optional): Whether to sample with replacement in training.
+                Defaults to True.
+            gene_subset (List[str], optional): List of genes to restrict the dataset to.
+                Useful when model only supports specific genes. Defaults to None.
+            tp_name (str, optional): Column name for time point or heat diffusion values.
+                Defaults to None.
+            assays_to_drop (List[str], optional): List of assay ontology term IDs to exclude
+                from training. Defaults to ["EFO:0030007"] (ATAC-seq).
+            metacell_mode (float, optional): Probability of using metacell aggregation mode.
+                Cannot be used with get_knn_cells. Defaults to 0.0.
+            get_knn_cells (bool, optional): Whether to include k-nearest neighbor cell
+                expression data. Cannot be used with metacell_mode. Defaults to False.
+            store_location (str, optional): Directory path to cache sampler indices and
+                labels for faster subsequent loading. Defaults to None.
+            force_recompute_indices (bool, optional): Force recomputation of cached indices
+                even if they exist. Defaults to False.
+            sampler_workers (int, optional): Number of parallel workers for building sampler
+                indices. Auto-determined based on available CPUs if None. Defaults to None.
+            sampler_chunk_size (int, optional): Chunk size for parallel sampler processing.
+                Auto-determined based on available memory if None. Defaults to None.
+            organisms (List[str], optional): List of organisms to include. If None, uses
+                all organisms in the dataset. Defaults to None.
+            genedf (pd.DataFrame, optional): Gene information DataFrame. If None, loaded
+                automatically. Defaults to None.
+            n_bins (int, optional): Number of bins for expression discretization. 0 means
+                no binning. Defaults to 0.
+            curiculum (int, optional): Curriculum learning parameter. If > 0, gradually
+                increases sampling weight balance over epochs. Defaults to 0.
+            start_at (int, optional): Starting index for resuming inference. Requires same
+                number of GPUs as previous run. Defaults to 0.
+            **kwargs: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
+                num_workers, pin_memory).
+
+        Attributes:
+            dataset (Dataset): The underlying Dataset instance.
+            classes (dict[str, int]): Mapping from class names to number of categories.
+            train_labels (np.ndarray): Label array for weighted sampling.
+            idx_full (np.ndarray): Indices for training samples.
+            valid_idx (np.ndarray): Indices for validation samples.
+            test_idx (np.ndarray): Indices for test samples.
+            test_datasets (List[str]): Paths to datasets used for testing.
+
+        Raises:
+            ValueError: If "organism_ontology_term_id" not in clss_to_predict.
+            ValueError: If both metacell_mode > 0 and get_knn_cells are True.
+
+        Example:
+            >>> dm = DataModule(
+            ...     collection_name="my_collection",
+            ...     batch_size=32,
+            ...     num_workers=4,
+            ...     max_len=2000,
+            ... )
+            >>> dm.setup()
+            >>> train_loader = dm.train_dataloader()
         """
         if "organism_ontology_term_id" not in clss_to_predict:
             raise ValueError(
@@ -285,12 +344,24 @@ class DataModule(L.LightningDataModule):
 
     def setup(self, stage=None):
         """
-        setup method is used to prepare the data for the training, validation, and test sets.
-        It shuffles the data, calculates weights for each set, and creates samplers for each set.
+        Prepare data splits for training, validation, and testing.
+
+        This method shuffles the data, computes sample weights for weighted sampling,
+        removes samples from dropped assays, and creates train/val/test splits.
+        Test splits use entire datasets to ensure evaluation on unseen data sources.
+
+        Results can be cached to `store_location` for faster subsequent runs.
 
         Args:
-            stage (str, optional): The stage of the model training process.
-            It can be either 'fit' or 'test'. Defaults to None.
+            stage (str, optional): Training stage ('fit', 'test', or None for both).
+                Currently not used but kept for Lightning compatibility. Defaults to None.
+
+        Returns:
+            List[str]: List of paths to test datasets.
+
+        Note:
+            Must be called before using dataloaders. The train/val/test split is
+            deterministic when loading from cache.
         """
         print("setting up the datamodule")
         start_time = time.time()
@@ -441,6 +512,22 @@ class DataModule(L.LightningDataModule):
         return self.test_datasets
 
     def train_dataloader(self, **kwargs):
+        """
+        Create the training DataLoader with weighted random sampling.
+
+        Uses LabelWeightedSampler for class-balanced sampling when weight_scaler > 0
+        and clss_to_weight is specified. Otherwise uses RankShardSampler for
+        distributed training without weighting.
+
+        Args:
+            **kwargs: Additional arguments passed to DataLoader, overriding defaults.
+
+        Returns:
+            DataLoader: Training DataLoader instance.
+
+        Raises:
+            ValueError: If setup() has not been called.
+        """
         if len(self.clss_to_weight) > 0 and self.weight_scaler > 0:
             try:
                 print("Setting up the parallel train sampler...")
@@ -473,6 +560,12 @@ class DataModule(L.LightningDataModule):
         )
 
     def val_dataloader(self):
+        """
+        Create the validation DataLoader.
+
+        Returns:
+            DataLoader | List: Validation DataLoader, or empty list if no validation split.
+        """
         return (
             DataLoader(
                 Subset(self.dataset, self.valid_idx),
@@ -483,6 +576,12 @@ class DataModule(L.LightningDataModule):
         )
 
     def test_dataloader(self):
+        """
+        Create the test DataLoader with sequential sampling.
+
+        Returns:
+            DataLoader | List: Test DataLoader, or empty list if no test split.
+        """
         return (
             DataLoader(
                 self.dataset, sampler=SequentialSampler(self.test_idx), **self.kwargs
@@ -492,6 +591,14 @@ class DataModule(L.LightningDataModule):
         )
 
     def predict_dataloader(self):
+        """
+        Create a DataLoader for prediction over all training data.
+
+        Uses RankShardSampler for distributed inference.
+
+        Returns:
+            DataLoader: Prediction DataLoader instance.
+        """
         subset = Subset(self.dataset, self.idx_full)
         return DataLoader(
             self.dataset,
@@ -501,15 +608,6 @@ class DataModule(L.LightningDataModule):
 
 
 class LabelWeightedSampler(Sampler[int]):
-    """
-    A weighted random sampler that samples from a dataset with respect to both class weights and element weights.
-
-    This sampler is designed to handle very large datasets efficiently, with optimizations for:
-    1. Parallel building of class indices
-    2. Chunked processing for large arrays
-    3. Efficient memory management
-    4. Proper handling of replacement and non-replacement sampling
-    """
 
     label_weights: torch.Tensor
     klass_indices: dict[int, torch.Tensor]
@@ -531,16 +629,58 @@ class LabelWeightedSampler(Sampler[int]):
         curiculum: int = 0,
     ) -> None:
         """
-        Initialize the sampler with parallel processing for large datasets.
+        Weighted random sampler balancing both class frequencies and element weights.
+
+        This sampler is optimized for very large datasets (millions of samples) with:
+        - Parallel construction of class indices using multiple CPU workers
+        - Chunked processing to manage memory usage
+        - Support for curriculum learning via progressive weight scaling
+        - Optional per-element weights (e.g., by number of expressed genes)
+
+        The sampling process:
+        1. Sample class labels according to class weights
+        2. For each sampled class, sample elements according to element weights
+        3. Shuffle all sampled indices
 
         Args:
-            weight_scaler: Scaling factor for class weights (higher means less balanced sampling)
-            labels: Class label for each dataset element (length = dataset size)
-            num_samples: Number of samples to draw
-            replacement: Whether to sample with replacement
-            element_weights: Optional weights for each element within classes
-            n_workers: Number of parallel workers to use (default: number of CPUs-1)
-            chunk_size: Size of chunks to process in parallel (default: 10M elements)
+            labels (np.ndarray): Integer class label for each dataset element.
+                Shape: (dataset_size,). The last unique label is treated as
+                "excluded" with weight 0.
+            num_samples (int): Number of samples to draw per epoch.
+            replacement (bool, optional): Whether to sample with replacement.
+                Defaults to True.
+            weight_scaler (float, optional): Controls class weight balance.
+                Weight formula: (scaler * count) / (count + scaler).
+                Higher values = more uniform sampling. Defaults to None.
+            element_weights (Sequence[float], optional): Per-element sampling weights.
+                Shape: (dataset_size,). Defaults to None (uniform within class).
+            n_workers (int, optional): Number of parallel workers for index building.
+                Defaults to min(20, num_cpus - 1).
+            chunk_size (int, optional): Elements per chunk for parallel processing.
+                Auto-determined based on available memory if None.
+            store_location (str, optional): Directory to cache computed indices.
+                Defaults to None.
+            force_recompute_indices (bool, optional): Recompute indices even if cached.
+                Defaults to False.
+            curiculum (int, optional): Curriculum learning epochs. If > 0, weight
+                exponent increases from 0 to 1 over this many epochs. Defaults to 0.
+
+        Attributes:
+            label_weights (torch.Tensor): Computed weights per class label.
+            klass_indices (torch.Tensor): Concatenated indices for all classes.
+            klass_offsets (torch.Tensor): Starting offset for each class in klass_indices.
+            count (int): Number of times __iter__ has been called (for curriculum).
+
+        Example:
+            >>> sampler = LabelWeightedSampler(
+            ...     labels=train_labels,
+            ...     num_samples=1_000_000,
+            ...     weight_scaler=10,
+            ...     element_weights=nnz_weights,
+            ... )
+            >>> for idx in sampler:
+            ...     # Process sample at idx
+            ...     pass
         """
         print("Initializing optimized parallel weighted sampler...")
         super(LabelWeightedSampler, self).__init__(None)
@@ -851,8 +991,32 @@ class LabelWeightedSampler(Sampler[int]):
 
 
 class RankShardSampler(Sampler[int]):
-    """Shards a dataset contiguously across ranks without padding or duplicates.
-    Preserves the existing order (e.g., your pre-shuffled idx_full)."""
+    """
+    Sampler that shards data contiguously across distributed ranks.
+
+    Divides the dataset into contiguous chunks, one per rank, without
+    padding or duplicating samples. Preserves the original data order
+    within each shard (useful for pre-shuffled data).
+
+    Args:
+        data_len (int): Total number of samples in the dataset.
+        start_at (int, optional): Global starting index for resuming training.
+            Requires the same number of GPUs as the previous run. Defaults to 0.
+
+    Attributes:
+        rank (int): Current process rank (0 if not distributed).
+        world_size (int): Total number of processes (1 if not distributed).
+        start (int): Starting index for this rank's shard.
+        end (int): Ending index (exclusive) for this rank's shard.
+
+    Note:
+        The last rank may have fewer samples than others if the dataset
+        size is not evenly divisible by world_size.
+
+    Example:
+        >>> sampler = RankShardSampler(len(dataset))
+        >>> loader = DataLoader(dataset, sampler=sampler)
+    """
 
     def __init__(self, data_len: int, start_at: int = 0) -> None:
         self.data_len = data_len
@@ -867,7 +1031,7 @@ class RankShardSampler(Sampler[int]):
         if self.start_at > 0:
             print(
                 "!!!!ATTENTION: make sure that you are running on the exact same \
-                    number of GPU as your previous run!!!!!"
+                number of GPU as your previous run!!!!!"
             )
         print(f"Sharding data of size {data_len} over {self.world_size} ranks")
         per_rank = math.ceil(self.data_len / self.world_size)

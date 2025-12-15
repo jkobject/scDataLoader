@@ -27,37 +27,60 @@ class Collator:
         genedf: Optional[pd.DataFrame] = None,
     ):
         """
-        This class is responsible for collating data for the scPRINT model. It handles the
-        organization and preparation of gene expression data from different organisms,
-        allowing for various configurations such as maximum gene list length, normalization,
-        and selection method for gene expression.
+        Collator for preparing gene expression data batches for the scPRINT model.
 
-        This Collator should work with scVI's dataloader as well!
+        This class handles the organization and preparation of gene expression data from
+        different organisms, allowing for various configurations such as maximum gene list
+        length, normalization, binning, and gene selection strategies.
+
+        Compatible with scVI's dataloader and other PyTorch data loading pipelines.
 
         Args:
-            organisms (list): List of organisms to be considered for gene expression data.
-                it will drop any other organism it sees (might lead to batches of different sizes!)
-            how (flag, optional): Method for selecting gene expression. Defaults to "most expr".
-                one of ["most expr", "random expr", "all", "some"]:
-                "most expr": selects the max_len most expressed genes,
-                if less genes are expressed, will sample random unexpressed genes,
-                "random expr": uses a random set of max_len expressed genes.
-                if less genes are expressed, will sample random unexpressed genes
-                "all": uses all genes
-                "some": uses only the genes provided through the genelist param
-            org_to_id (dict): Dictionary mapping organisms to their respective IDs.
-            valid_genes (list, optional): List of genes from the datasets, to be considered. Defaults to [].
-                it will drop any other genes from the input expression data (usefull when your model only works on some genes)
-            max_len (int, optional): Total number of genes to use (for random expr and most expr). Defaults to 2000.
-            n_bins (int, optional): Number of bins for binning the data. Defaults to 0. meaning, no binning of expression.
-            add_zero_genes (int, optional): Number of additional unexpressed genes to add to the input data. Defaults to 0.
-            logp1 (bool, optional): If True, logp1 normalization is applied. Defaults to False.
-            norm_to (float, optional): Rescaling value of the normalization to be applied. Defaults to None.
-            organism_name (str, optional): Name of the organism ontology term id. Defaults to "organism_ontology_term_id".
-            tp_name (str, optional): Name of the heat diff. Defaults to None.
-            class_names (list, optional): List of other classes to be considered. Defaults to [].
-            genelist (list, optional): List of genes to be considered. Defaults to [].
-                If [] all genes will be considered
+            organisms (List[str]): List of organism ontology term IDs to include.
+                Samples from other organisms will be dropped (may lead to variable batch sizes).
+            how (str, optional): Gene selection strategy. Defaults to "all".
+                - "most expr": Select the `max_len` most expressed genes. If fewer genes
+                  are expressed, randomly sample unexpressed genes to fill.
+                - "random expr": Randomly select `max_len` expressed genes. If fewer genes
+                  are expressed, randomly sample unexpressed genes to fill.
+                - "all": Use all genes without filtering.
+                - "some": Use only genes specified in the `genelist` parameter.
+            org_to_id (dict[str, int], optional): Mapping from organism names to integer IDs.
+                If None, organism names are used directly. Defaults to None.
+            valid_genes (List[str], optional): List of gene names to consider from input data.
+                Genes not in this list will be dropped. Useful when the model only supports
+                specific genes. Defaults to None (use all genes).
+            max_len (int, optional): Maximum number of genes to include when using "most expr"
+                or "random expr" selection methods. Defaults to 2000.
+            add_zero_genes (int, optional): Number of additional unexpressed genes to include
+                in the output. Only applies when `how` is "most expr" or "random expr".
+                Defaults to 0.
+            logp1 (bool, optional): Apply log2(1 + x) transformation to expression values.
+                Applied after normalization if both are enabled. Defaults to False.
+            norm_to (float, optional): Target sum for count normalization. Expression values
+                are scaled so that total counts equal this value. Defaults to None (no normalization).
+            n_bins (int, optional): Number of bins for expression value binning. If 0, no
+                binning is applied. Binning uses quantile-based discretization. Defaults to 0.
+            tp_name (str, optional): Column name in batch data for time point or heat diffusion
+                values. If None, time point values default to 0. Defaults to None.
+            organism_name (str, optional): Column name in batch data for organism ontology
+                term ID. Defaults to "organism_ontology_term_id".
+            class_names (List[str], optional): List of additional metadata column names to
+                include in the output. Defaults to [].
+            genelist (List[str], optional): List of specific genes to use when `how="some"`.
+                Required if `how="some"`. Defaults to [].
+            genedf (pd.DataFrame, optional): DataFrame containing gene information indexed by
+                gene name with an 'organism' column. If None, loaded automatically using
+                `load_genes()`. Defaults to None.
+
+        Attributes:
+            organism_ids (set): Set of organism IDs being processed.
+            start_idx (dict): Mapping from organism ID to starting gene index in the model.
+            accepted_genes (dict): Boolean masks for valid genes per organism.
+            to_subset (dict): Boolean masks for genelist filtering per organism.
+
+        Raises:
+            AssertionError: If `how="some"` but `genelist` is empty.
         """
         self.organisms = organisms
         self.max_len = max_len
@@ -77,6 +100,19 @@ class Collator:
         self._setup(genedf, org_to_id, valid_genes, genelist)
 
     def _setup(self, genedf=None, org_to_id=None, valid_genes=[], genelist=[]):
+        """
+        Initialize gene mappings and indices for each organism.
+
+        Sets up internal data structures for gene filtering, organism-specific
+        gene indices, and gene subsetting based on the provided configuration.
+
+        Args:
+            genedf (pd.DataFrame, optional): Gene information DataFrame. If None,
+                loaded via `load_genes()`. Defaults to None.
+            org_to_id (dict, optional): Organism name to ID mapping. Defaults to None.
+            valid_genes (List[str], optional): Genes to accept from input. Defaults to [].
+            genelist (List[str], optional): Genes to subset to when `how="some"`. Defaults to [].
+        """
         if genedf is None:
             genedf = load_genes(self.organisms)
             self.organism_ids = (
@@ -108,18 +144,45 @@ class Collator:
 
     def __call__(self, batch) -> dict[str, Tensor]:
         """
-        __call__ applies the collator to a minibatch of data
+        Collate a minibatch of gene expression data.
+
+        Processes a list of sample dictionaries, applying gene selection, normalization,
+        log transformation, and binning as configured. Filters out samples from organisms
+        not in the configured organism list.
 
         Args:
-            batch (List[dict[str: array]]): List of dicts of arrays containing gene expression data.
-                the first list is for the different samples, the second list is for the different elements with
-                elem["X"]: gene expression
-                elem["organism_name"]: organism ontology term id
-                elem["tp_name"]: heat diff
-                elem["class_names.."]: other classes
+            batch (List[dict]): List of sample dictionaries, each containing:
+                - "X" (array): Gene expression values.
+                - organism_name (any): Organism identifier (column name set by `organism_name`).
+                - tp_name (float, optional): Time point value (column name set by `tp_name`).
+                - class_names... (any, optional): Additional class labels.
+                - "_storage_idx" (int, optional): Dataset storage index.
+                - "is_meta" (int, optional): Metadata flag.
+                - "knn_cells" (array, optional): KNN neighbor expression data.
+                - "knn_cells_info" (array, optional): KNN neighbor metadata.
 
         Returns:
-            List[Tensor]: List of tensors containing the collated data.
+            dict[str, Tensor]: Dictionary containing collated tensors:
+                - "x" (Tensor): Gene expression matrix of shape (batch_size, n_genes).
+                  Values may be raw counts, normalized, log-transformed, or binned
+                  depending on configuration.
+                - "genes" (Tensor): Gene indices of shape (batch_size, n_genes) as int32.
+                  Indices correspond to positions in the model's gene vocabulary.
+                - "class" (Tensor): Class labels of shape (batch_size, n_classes) as int32.
+                - "tp" (Tensor): Time point values of shape (batch_size,).
+                - "depth" (Tensor): Total counts per cell of shape (batch_size,).
+                - "is_meta" (Tensor, optional): Metadata flags as int32. Present if input
+                  contains "is_meta".
+                - "knn_cells" (Tensor, optional): KNN expression data. Present if input
+                  contains "knn_cells".
+                - "knn_cells_info" (Tensor, optional): KNN metadata. Present if input
+                  contains "knn_cells_info".
+                - "dataset" (Tensor, optional): Dataset indices as int64. Present if input
+                  contains "_storage_idx".
+
+        Note:
+            Batch size in output may be smaller than input if some samples are filtered
+            out due to organism mismatch.
         """
         # do count selection
         # get the unseen info and don't add any unseen

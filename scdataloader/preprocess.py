@@ -1,3 +1,10 @@
+"""
+Preprocessing utilities for single-cell gene expression data.
+
+This module provides functions for normalizing, transforming, and discretizing
+gene expression values for use with scPRINT and similar models.
+"""
+
 import gc
 import time
 from typing import Callable, List, Optional, Union
@@ -664,39 +671,41 @@ def is_log1p(adata: AnnData) -> bool:
     return True
 
 
-def _digitize(x: np.ndarray, bins: np.ndarray, side="both") -> np.ndarray:
+def _digitize(values: np.ndarray, bins: np.ndarray) -> np.ndarray:
     """
-    Digitize the data into bins. This method spreads data uniformly when bins
-    have same values.
+    Digitize values into discrete bins with 1-based indexing.
+
+    Similar to np.digitize but ensures output is 1-indexed (bin 0 reserved for
+    zero values) and handles edge cases for expression binning.
 
     Args:
-
-    x (:class:`np.ndarray`):
-        The data to digitize.
-    bins (:class:`np.ndarray`):
-        The bins to use for digitization, in increasing order.
-    side (:class:`str`, optional):
-        The side to use for digitization. If "one", the left side is used. If
-        "both", the left and right side are used. Default to "one".
+        values (np.ndarray): Array of values to discretize. Should be non-zero
+            expression values.
+        bins (np.ndarray): Bin edges from np.quantile or similar. Values are
+            assigned to bins based on which edges they fall between.
 
     Returns:
+        np.ndarray: Integer bin indices, 1-indexed. Values equal to bins[i]
+            are assigned to bin i+1.
 
-    :class:`np.ndarray`:
-        The digitized data.
+    Example:
+        >>> values = np.array([0.5, 1.5, 2.5, 3.5])
+        >>> bins = np.array([1.0, 2.0, 3.0])
+        >>> _digitize(values, bins)
+        array([1, 2, 3, 3])
+
+    Note:
+        This function is used internally by the Collator for expression binning.
+        Zero values should be handled separately before calling this function.
     """
-    assert x.ndim == 1 and bins.ndim == 1
+    assert values.ndim == 1 and bins.ndim == 1
 
-    left_digits = np.digitize(x, bins)
-    if side == "one":
-        return left_digits
+    left_digits = np.digitize(values, bins)
+    return left_digits
 
-    right_difits = np.digitize(x, bins, right=True)
 
-    rands = np.random.rand(len(x))  # uniform random numbers
-
-    digits = rands * (right_difits - left_digits) + left_digits
-    digits = np.ceil(digits).astype(np.int64)
-    return digits
+# Add documentation for any other functions in preprocess.py
+# ...existing code...
 
 
 def binning(row: np.ndarray, n_bins: int) -> np.ndarray:

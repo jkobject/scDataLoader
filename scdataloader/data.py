@@ -22,30 +22,66 @@ from .mapped import MappedCollection, _Connect
 @dataclass
 class Dataset(torchDataset):
     """
-    Dataset class to load a bunch of anndata from a lamin dataset (Collection) in a memory efficient way.
+    PyTorch Dataset for loading single-cell data from a LaminDB Collection.
 
-    This serves as a wrapper around lamin's mappedCollection to provide more features,
-    mostly, the management of hierarchical labels, the encoding of labels, the management of multiple species
+    This class wraps LaminDB's MappedCollection to provide additional features:
+    - Management of hierarchical ontology labels (cell type, tissue, disease, etc.)
+    - Automatic encoding of categorical labels to integers
+    - Multi-species gene handling with unified gene indexing
+    - Optional metacell aggregation and KNN neighbor retrieval
 
-    For an example of mappedDataset, see :meth:`~lamindb.Dataset.mapped`.
-
-    .. note::
-
-        A related data loader exists `here
-        <https://github.com/Genentech/scimilarity>`__.
+    The dataset lazily loads data from storage, making it memory-efficient for
+    large collections spanning multiple files.
 
     Args:
-    ----
-        lamin_dataset (lamindb.Dataset): lamin dataset to load
-        genedf (pd.Dataframe): dataframe containing the genes to load
-        obs (List[str]): list of observations to load from the Collection
-        clss_to_predict (List[str]): list of observations to encode
-        join_vars (flag): join variables @see :meth:`~lamindb.Dataset.mapped`.
-        hierarchical_clss: list of observations to map to a hierarchy using lamin's bionty
-        metacell_mode (float, optional): The mode to use for metacell sampling. Defaults to 0.0.
-        get_knn_cells (bool, optional): Whether to get the k-nearest neighbors of each cell. Defaults to False.
-        store_location (str, optional): The location to store the sampler indices. Defaults to None.
-        force_recompute_indices (bool, optional): Whether to force recompute the sampler indices. Defaults to False.
+        lamin_dataset (ln.Collection): LaminDB Collection containing the artifacts to load.
+        genedf (pd.DataFrame, optional): DataFrame with gene information, indexed by gene ID
+            with an 'organism' column. If None, automatically loaded based on organisms
+            in the dataset. Defaults to None.
+        clss_to_predict (List[str], optional): Observation columns to encode as prediction
+            targets. These will be integer-encoded in the output. Defaults to [].
+        hierarchical_clss (List[str], optional): Observation columns with hierarchical
+            ontology structure. These will have their ancestry relationships computed
+            using Bionty. Supported columns:
+            - "cell_type_ontology_term_id"
+            - "tissue_ontology_term_id"
+            - "disease_ontology_term_id"
+            - "development_stage_ontology_term_id"
+            - "assay_ontology_term_id"
+            - "self_reported_ethnicity_ontology_term_id"
+            Defaults to [].
+        join_vars (str, optional): How to join variables across artifacts.
+            "inner" for intersection, "outer" for union, None for no joining.
+            Defaults to None.
+        metacell_mode (float, optional): Probability of returning aggregated metacell
+            expression instead of single-cell. Defaults to 0.0.
+        get_knn_cells (bool, optional): Whether to include k-nearest neighbor cell
+            expression in the output. Requires precomputed neighbors in the data.
+            Defaults to False.
+        store_location (str, optional): Directory path to cache computed indices.
+            Defaults to None.
+        force_recompute_indices (bool, optional): Force recomputation of cached data.
+            Defaults to False.
+
+    Attributes:
+        mapped_dataset (MappedCollection): Underlying mapped collection for data access.
+        genedf (pd.DataFrame): Gene information DataFrame.
+        organisms (List[str]): List of organism ontology term IDs in the dataset.
+        class_topred (dict[str, set]): Mapping from class name to set of valid labels.
+        labels_groupings (dict[str, dict]): Hierarchical groupings for ontology classes.
+        encoder (dict[str, dict]): Label encoders mapping strings to integers.
+
+    Raises:
+        ValueError: If genedf is None and "organism_ontology_term_id" is not in clss_to_predict.
+
+    Example:
+        >>> collection = ln.Collection.filter(key="my_collection").first()
+        >>> dataset = Dataset(
+        ...     lamin_dataset=collection,
+        ...     clss_to_predict=["organism_ontology_term_id", "cell_type_ontology_term_id"],
+        ...     hierarchical_clss=["cell_type_ontology_term_id"],
+        ... )
+        >>> sample = dataset[0]  # Returns dict with "X" and encoded labels
     """
 
     lamin_dataset: ln.Collection
@@ -165,7 +201,20 @@ class Dataset(torchDataset):
         self,
         obs_keys: Union[str, List[str]],
     ):
-        """Get all categories for the given label keys."""
+        """
+        Get combined categorical codes for one or more label columns.
+
+        Retrieves labels from the mapped dataset and combines them into a single
+        categorical encoding. Useful for creating compound class labels for
+        stratified sampling.
+
+        Args:
+            obs_keys (str | List[str]): Column name(s) to retrieve and combine.
+
+        Returns:
+            np.ndarray: Integer codes representing the (combined) categories.
+                Shape: (n_samples,).
+        """
         if isinstance(obs_keys, str):
             obs_keys = [obs_keys]
         labels = None
@@ -179,25 +228,37 @@ class Dataset(torchDataset):
 
     def get_unseen_mapped_dataset_elements(self, idx: int):
         """
-        get_unseen_mapped_dataset_elements is a wrapper around mappedDataset.get_unseen_mapped_dataset_elements
+        Get genes marked as unseen for a specific sample.
+
+        Retrieves the list of genes that were not observed (expression = 0 or
+        marked as unseen) for the sample at the given index.
 
         Args:
-            idx (int): index of the element to get
+            idx (int): Sample index in the dataset.
 
         Returns:
-            List[str]: list of unseen genes
+            List[str]: List of unseen gene identifiers.
         """
         return [str(i)[2:-1] for i in self.mapped_dataset.uns(idx, "unseen_genes")]
 
     def define_hierarchies(self, clsses: List[str]):
         """
-        define_hierarchies is a method to define the hierarchies for the classes to predict
+        Define hierarchical label groupings from ontology relationships.
+
+        Uses Bionty to retrieve parent-child relationships for ontology terms,
+        then builds groupings mapping parent terms to their descendants.
+        Updates encoders to include parent terms and reorders labels so that
+        leaf terms (directly predictable) come first.
 
         Args:
-            clsses (List[str]): list of classes to predict
+            clsses (List[str]): List of ontology column names to process.
 
         Raises:
-            ValueError: if the class is not in the accepted classes
+            ValueError: If a class name is not in the supported ontology types.
+
+        Note:
+            Modifies self.labels_groupings, self.class_topred, and
+            self.mapped_dataset.encoders in place.
         """
         # TODO: use all possible hierarchies instead of just the ones for which we have a sample annotated with
         self.labels_groupings = {}
@@ -318,6 +379,7 @@ class Dataset(torchDataset):
 
 
 class SimpleAnnDataset(torchDataset):
+
     def __init__(
         self,
         adata: AnnData,
@@ -327,16 +389,40 @@ class SimpleAnnDataset(torchDataset):
         encoder: Optional[dict[str, dict]] = None,
     ):
         """
-        SimpleAnnDataset is a simple dataloader for an AnnData dataset. this is to interface nicely with the rest of
-        scDataloader and with your model during inference.
+        Simple PyTorch Dataset wrapper for a single AnnData object.
+
+        Provides a lightweight interface for using AnnData with PyTorch DataLoaders,
+        compatible with the scDataLoader collator. Useful for inference on new data
+        that isn't stored in LaminDB.
 
         Args:
-        ----
-            adata (anndata.AnnData): anndata object to use
-            obs_to_output (List[str]): list of observations to output from anndata.obs
-            layer (str): layer of the anndata to use
-            get_knn_cells (bool): whether to get the knn cells
-            encoder (dict[str, dict]): dictionary of encoders for the observations.
+            adata (AnnData): AnnData object containing expression data.
+            obs_to_output (List[str], optional): Observation columns to include in
+                output dictionaries. Defaults to [].
+            layer (str, optional): Layer name to use for expression values. If None,
+                uses adata.X. Defaults to None.
+            get_knn_cells (bool, optional): Whether to include k-nearest neighbor
+                expression data. Requires precomputed neighbors in adata.obsp.
+                Defaults to False.
+            encoder (dict[str, dict], optional): Dictionary mapping observation column
+                names to encoding dictionaries (str -> int). Defaults to None.
+
+        Attributes:
+            adataX (np.ndarray): Dense expression matrix.
+            encoder (dict): Label encoders.
+            obs_to_output (pd.DataFrame): Observation metadata to include.
+            distances (scipy.sparse matrix): KNN distance matrix (if get_knn_cells=True).
+
+        Raises:
+            ValueError: If get_knn_cells=True but "connectivities" not in adata.obsp.
+
+        Example:
+            >>> dataset = SimpleAnnDataset(
+            ...     adata=my_adata,
+            ...     obs_to_output=["cell_type", "organism_ontology_term_id"],
+            ...     encoder={"organism_ontology_term_id": {"NCBITaxon:9606": 0}},
+            ... )
+            >>> loader = DataLoader(dataset, batch_size=32, collate_fn=collator)
         """
         self.adataX = adata.layers[layer] if layer is not None else adata.X
         self.adataX = self.adataX.toarray() if issparse(self.adataX) else self.adataX
@@ -392,6 +478,46 @@ def mapped(
     store_location: str | None = None,
     force_recompute_indices: bool = False,
 ) -> MappedCollection:
+    """
+    Create a MappedCollection from a LaminDB Collection.
+
+    Factory function that handles artifact path resolution (staging or streaming)
+    and creates a MappedCollection for efficient access to multiple h5ad/zarr files.
+
+    Args:
+        dataset (ln.Collection): LaminDB Collection containing artifacts to map.
+        obs_keys (List[str], optional): Observation columns to load. Defaults to None.
+        obsm_keys (List[str], optional): Obsm keys to load. Defaults to None.
+        obs_filter (dict, optional): Filter observations by column values.
+            Keys are column names, values are allowed values. Defaults to None.
+        join (str, optional): How to join variables across files. "inner" for
+            intersection, "outer" for union. Defaults to "inner".
+        encode_labels (bool | List[str], optional): Whether/which columns to
+            integer-encode. True encodes all obs_keys. Defaults to True.
+        unknown_label (str | dict, optional): Label to use for unknown/missing
+            categories. Defaults to None.
+        cache_categories (bool, optional): Whether to cache category mappings.
+            Defaults to True.
+        parallel (bool, optional): Enable parallel data loading. Defaults to False.
+        dtype (str, optional): Data type for expression values. Defaults to None.
+        stream (bool, optional): If True, stream from cloud storage instead of
+            staging locally. Defaults to False.
+        is_run_input (bool, optional): Track as run input in LaminDB. Defaults to None.
+        metacell_mode (bool, optional): Enable metacell aggregation. Defaults to False.
+        meta_assays (List[str], optional): Assay types to treat as metacell-like.
+            Defaults to ["EFO:0022857", "EFO:0010961"].
+        get_knn_cells (bool, optional): Include KNN neighbor data. Defaults to False.
+        store_location (str, optional): Cache directory path. Defaults to None.
+        force_recompute_indices (bool, optional): Force recompute cached data.
+            Defaults to False.
+
+    Returns:
+        MappedCollection: Mapped collection for data access.
+
+    Note:
+        Artifacts with suffixes other than .h5ad, .zrad, .zarr are ignored.
+        Non-existent paths are skipped with a warning.
+    """
     path_list = []
     for artifact in dataset.artifacts.all():
         if artifact.suffix not in {".h5ad", ".zrad", ".zarr"}:
@@ -425,14 +551,26 @@ def mapped(
 
 
 def concat_categorical_codes(series_list: List[pd.Categorical]) -> pd.Categorical:
-    """Efficiently combine multiple categorical data using their codes,
-    only creating categories for combinations that exist in the data.
+    """
+    Efficiently combine multiple categorical arrays into a single encoding.
+
+    Creates a combined categorical where each unique combination of input
+    categories gets a unique code. Only combinations that exist in the data
+    are assigned codes (sparse encoding).
 
     Args:
-        series_list: List of pandas Categorical data
+        series_list (List[pd.Categorical]): List of categorical arrays to combine.
+            All arrays must have the same length.
 
     Returns:
-        Combined Categorical with only existing combinations
+        pd.Categorical: Combined categorical with compressed codes representing
+            unique combinations present in the data.
+
+    Example:
+        >>> cat1 = pd.Categorical(["a", "a", "b", "b"])
+        >>> cat2 = pd.Categorical(["x", "y", "x", "y"])
+        >>> combined = concat_categorical_codes([cat1, cat2])
+        >>> # Results in 4 unique codes for (a,x), (a,y), (b,x), (b,y)
     """
     # Get the codes for each categorical
     codes_list = [s.codes.astype(np.int32) for s in series_list]
