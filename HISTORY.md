@@ -4,6 +4,14 @@ Changelog
 
 (unreleased)
 ------------
+- Better doc. [jkobject]
+- Debug. [jkobject]
+- Debug datamodule. [jkobject]
+
+
+2.0.3 (2025-12-10)
+------------------
+- Release: version 2.0.3 🚀 [jkobject]
 - Debug the start_at. [jkobject]
 - Fmt. [jkobject]
 
