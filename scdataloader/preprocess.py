@@ -51,9 +51,9 @@ class Preprocessor:
         length_normalize: bool = False,
         force_preprocess: bool = False,
         min_dataset_size: int = 100,
-        min_valid_genes_id: int = 10_000,
-        min_nnz_genes: int = 200,
-        maxdropamount: int = 50,
+        min_valid_genes_id: int = 100,
+        min_nnz_genes: int = 50,
+        maxdropamount: int = 25,
         madoutlier: int = 5,
         pct_mt_outlier: int = 8,
         batch_keys: List[str] = [
@@ -161,8 +161,19 @@ class Preprocessor:
         self.keepdata = keepdata
 
     def __call__(self, adata, dataset_id=None) -> AnnData:
+
+        print("CHECK 0")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
         if self.additional_preprocess is not None:
             adata = self.additional_preprocess(adata)
+
+        print("CHECK 0.1")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
+        # Vérifie si ID ontologique de l'organisme est dans adata.obs ou adata.uns -> sinon erreur  
         if "organism_ontology_term_id" not in adata[0].obs.columns:
             if "organism_ontology_term_id" in adata.uns:
                 adata.obs["organism_ontology_term_id"] = adata.uns[
@@ -177,9 +188,16 @@ class Preprocessor:
                 "we cannot work with this organism",
                 adata.obs["organism_ontology_term_id"],
             )
+        # Savoir si utilise données raw ou adata.X (c'est quoi données raw??)
         if adata.raw is not None and self.use_raw:
             adata.X = adata.raw.X
             del adata.raw
+
+        print("CHECK 0.2")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
+        # Si besoin d'utiliser des données présentes dans layers + suppr les layers inutiles
         if self.use_layer is not None:
             adata.X = adata.layers[self.use_layer]
         if adata.layers is not None:
@@ -190,15 +208,25 @@ class Preprocessor:
             if not self.keepdata:
                 print("Dropping layers: ", adata.layers.keys())
                 del adata.layers
+
+        print("CHECK 0.3")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
+        # supprime data inutile
         if len(adata.varm.keys()) > 0 and not self.keepdata:
             del adata.varm
         if len(adata.obsm.keys()) > 0 and not self.keepdata:
             del adata.obsm
-        if len(adata.obsp.keys()) > 0 and not self.keepdata:
-            del adata.obsp
+        """ if len(adata.obsp.keys()) > 0 and not self.keepdata:
+            del adata.obsp """
         if len(adata.varp.keys()) > 0 and not self.keepdata:
             del adata.varp
         # check that it is a count
+
+        print("CHECK 1")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
 
         print("checking raw counts")
         if np.abs(
@@ -225,8 +253,12 @@ class Preprocessor:
                 prevsize - adata.shape[0], adata.shape[0]
             )
         )
+
         # # cleanup and dropping low expressed genes and unexpressed cells
         prevsize = adata.shape[0]
+
+
+        # Filtrage gènes et cellules
         adata.obs["nnz"] = np.array(np.sum(adata.X != 0, axis=1).flatten())[0]
         if self.filter_gene_by_counts:
             sc.pp.filter_genes(adata, min_counts=self.filter_gene_by_counts)
@@ -240,7 +272,11 @@ class Preprocessor:
                 adata,
                 min_genes=self.min_nnz_genes,
             )
+        print("MIN NNZ GENES: ", self.min_nnz_genes)
+        print("RATIO OF MAXDROPAMOUNT: ", self.maxdropamount)
         # if lost > 50% of the dataset, drop dataset
+
+        # Validation taille dataset -> drop dataset si trop de cellules perdues
         if prevsize / (adata.shape[0] + 1) > self.maxdropamount:
             raise Exception(
                 "Dataset dropped due to low expressed genes and unexpressed cells: factor of "
@@ -257,9 +293,17 @@ class Preprocessor:
             )
         )
 
+        print("CHECK 2")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
+        # Load les gènes de cet organism et ?????
         # load the genes
         genesdf = data_utils.load_genes(adata.obs.organism_ontology_term_id.iloc[0])
         genesdf["ensembl_gene_id"] = genesdf.index
+
+        print("Let's show genesdf: ")
+        print(genesdf.head())
 
         # For genes that are already ENS IDs, use them directly
         prev_size = adata.shape[1]
@@ -283,14 +327,19 @@ class Preprocessor:
         print(f"Removed {prev_size - adata.shape[1]} genes not known to the ontology")
         prev_size = adata.shape[1]
 
+        print("CHECK 3")
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+
         adata.var = new_var
         # Drop duplicate genes, keeping first occurrence
         adata = adata[:, ~adata.var.index.duplicated(keep="first")]
         print(f"Removed {prev_size - adata.shape[1]} duplicate genes")
 
         if adata.shape[1] < self.min_valid_genes_id:
-            raise Exception("Dataset dropped due to too many genes not mapping to it")
+            raise Exception("Dataset dropped due to too many genes not mapping to it (more than 100 genes)")
 
+        # Sup gènes de l'ontologie non dans adata ????
         unseen = set(genesdf.index) - set(adata.var.index)
         # adding them to adata
         emptyda = ad.AnnData(
@@ -301,6 +350,19 @@ class Preprocessor:
         print(
             f"Added {len(unseen)} genes in the ontology but not present in the dataset"
         )
+
+
+        print("CHECK 4")
+        print("is there duplicated genes in adata.var.index? ", adata.var.index.duplicated().any())
+        print("is there duplicated genes in emptyda.var.index? ", emptyda.var.index.duplicated().any())
+        print("is there duplicated cells in adata.obs.index? ", adata.obs.index.duplicated().any())
+        print("is there duplicated cells in emptyda.obs.index? ", emptyda.obs.index.duplicated().any())
+
+        print("Chevauchement de genes entre adata et emptyda: ", set(adata.var_names).intersection(emptyda.var_names))
+        print("Chevauchement de cells entre adata et emptyda: ", set(adata.obs_names).intersection(emptyda.obs_names))
+
+
+
         adata = ad.concat([adata, emptyda], axis=1, join="outer", merge="only")
         # do a validation function
         adata.uns["unseen_genes"] = list(unseen)
@@ -336,6 +398,8 @@ class Preprocessor:
                 )
 
         # QC
+        # Normalisation et PCA, binning si activé 
+
 
         adata.var[genesdf.columns] = genesdf.loc[adata.var.index]
         print("starting QC")
@@ -511,6 +575,9 @@ class LaminPreprocessor(Preprocessor):
             version (str, optional): Version string for the dataset.
                 Defaults to "2".
         """
+
+        print("LAMIN PREPROCESSOR CALL - CHANGES APPLIED")
+
         files = []
         all_ready_processed_keys = set()
         if self.cache:
@@ -519,10 +586,13 @@ class LaminPreprocessor(Preprocessor):
         if isinstance(data, AnnData):
             return super().__call__(data)
         elif isinstance(data, ln.Collection):
+            # Pour chaque artifacts
             for i, file in enumerate(data.artifacts.all()[start_at:]):
                 # use the counts matrix
                 i = i + start_at
                 print(i)
+
+                # Si artifact pas encore traité 
                 if file.stem_uid in all_ready_processed_keys:
                     print(f"{file.stem_uid} is already processed... not preprocessing")
                     continue
@@ -534,6 +604,7 @@ class LaminPreprocessor(Preprocessor):
                     # file.cache()
                     backed = file.open()
 
+                # Si artifact pas de cell primaire -> drop 
                 if "is_primary_data" in backed.obs.columns:
                     if backed.obs.is_primary_data.sum() == 0:
                         print(f"{file.key} only contains non primary cells.. dropping")
@@ -543,14 +614,19 @@ class LaminPreprocessor(Preprocessor):
                         continue
                 else:
                     print("Warning: couldn't check unicity from is_primary_data column")
+
+                # Si artifact appartient à un certain type assays à drop -> drop
                 if backed.obs.assay_ontology_term_id[0] in self.assays_to_drop:
                     print(f"{file.key} is in the assay drop list.. dropping")
                     continue
-                if backed.shape[1] < 1000:
+                # Si artifact contient moins de 100 gènes -> drop
+                if backed.shape[1] < 100:
                     print(
-                        f"{file.key} only contains less than 1000 genes and is likely not scRNAseq... dropping"
+                        f"{file.key} only contains less than 100 genes and is likely not scRNAseq... dropping"
                     )
                     continue
+
+                # Si artifact < MAXFILESIZE -> load en mémoire sinon en mode backed
                 if file.size <= MAXFILESIZE:
                     adata = backed.to_memory()
                     print(adata)
@@ -558,6 +634,7 @@ class LaminPreprocessor(Preprocessor):
                     badata = backed
                     print(badata)
                 try:
+                    # Si artifact > MAXFILESIZE -> diviser en blocks
                     if file.size > MAXFILESIZE:
                         print(
                             f"dividing the dataset as it is too large: {file.size // 1_000_000_000}Gb"
@@ -574,6 +651,8 @@ class LaminPreprocessor(Preprocessor):
                             "total elements ",
                             badata.shape[0],
                         )
+
+                        # Pour chaque block -> preprocess avec call + save
                         for j in range(num_blocks):
                             start_index = j * block_size
                             end_index = min((j + 1) * block_size, badata.shape[0])
@@ -613,6 +692,7 @@ class LaminPreprocessor(Preprocessor):
                                 del myfile
                                 del block
                     else:
+                        # Si artifact < MAXFILESIZE -> pas besoin de blocks : preprocess avec call + save
                         adata = super().__call__(adata, dataset_id=file.stem_uid)
                         saved = False
                         while not saved:
@@ -623,7 +703,11 @@ class LaminPreprocessor(Preprocessor):
                                     description=description + " p" + str(i),
                                     version=version,
                                 )
-                                myfile.save()
+                                try:
+                                    myfile.save()
+                                    print(f"Artefact {myfile.uid} sauvegardé avec succès.")
+                                except Exception as e:
+                                    print(f"Erreur lors de la sauvegarde de l'artefact : {e}")
                                 saved = True
                             except OperationalError:
                                 print(
@@ -651,14 +735,34 @@ class LaminPreprocessor(Preprocessor):
                         raise e
                 gc.collect()
                 # issues with KLlggfw6I6lvmbqiZm46
-            if self.keep_files:
+
+            print("FILES ADDED TO THE COLLECTION:", files)
+
+            print("--- FILTRAGE SUR L ARITEFACT SPECIFIQUE POUR TEST ---")
+            artifact = ln.Artifact.filter(uid='IxqorZsm6CMkp27D0000').one()
+            print(artifact)
+            print("------------------------------")
+
+            print("KEYS OF FILES: ", [f.key for f in files])
+
+            if self.keep_files:  
+                # Nouvelle collection d'artifacts créée avec les fichiers traités 
+
                 # Reconstruct collection using keys
-                dataset = ln.Collection(
+                """ dataset = ln.Collection(
                     [ln.Artifact.filter(key=k).one() for k in files],
                     key=name,
                     description=description,
+                ) """
+
+                dataset = ln.Collection(
+                    [ln.Artifact.filter(uid=f.uid).one() for f in files],
+                    name=name,
+                    description=description,
                 )
-                dataset.save()
+
+                print("FILE SAVED")
+                
                 return dataset
             else:
                 return
@@ -818,8 +922,10 @@ def additional_postprocess(adata):
     #    sc.external.pp.harmony_integrate(adata, key="batches")
     #    sc.pp.neighbors(adata, use_rep="X_pca_harmony")
     # else:
+
+    # Calcul voisins + clustering leiden + umap 
     print("starting post processing")
-    sc.pp.neighbors(adata, use_rep="X_pca")
+    sc.pp.neighbors(adata, use_rep="X_pca", n_neighbors=6)
     sc.tl.leiden(
         adata, key_added="leiden_2", resolution=2.0, flavor="igraph", n_iterations=2
     )
@@ -830,13 +936,18 @@ def additional_postprocess(adata):
         adata, key_added="leiden_0.5", resolution=0.5, flavor="igraph", n_iterations=2
     )
     sc.tl.umap(adata)
+
+    # Créer vizu umap 
     mid = adata.uns["dataset_id"] if "dataset_id" in adata.uns else "unknown_id"
-    sc.pl.umap(
+    """ sc.pl.umap(
         adata,
         ncols=1,
         color=["cell_type", "batches"],
         save="_" + mid + ".png",
-    )
+    ) """
+
+    """
+    # Pour chaque cluster leiden 1 -> calcul moyenne d'expression
     COL = "cell_type_ontology_term_id"
     NEWOBS = "clust_cell_type"
     MINCELLS = 10
@@ -844,16 +955,19 @@ def additional_postprocess(adata):
     from collections import Counter
 
     import bionty as bt
-
-    from .config import MAIN_HUMAN_MOUSE_DEV_STAGE_MAP
+ 
 
     remap_stages = {u: k for k, v in MAIN_HUMAN_MOUSE_DEV_STAGE_MAP.items() for u in v}
 
+    # Crée colonne clust_cell_type = celltype + leiden_1
     adata.obs[NEWOBS] = (
         adata.obs[COL].astype(str) + "_" + adata.obs["leiden_1"].astype(str)
     )
     coun = Counter(adata.obs[NEWOBS])
     relab = {}
+
+
+    # PAS COMPRIS
     for i in adata.obs[COL].unique():
         num = 0
         for n, c in sorted(coun.items(), key=lambda x: x[1], reverse=True):
@@ -866,6 +980,9 @@ def additional_postprocess(adata):
 
     adata.obs[NEWOBS] = adata.obs[NEWOBS].map(relab)
 
+    print("Calculate mean expression foreach cell typeper cluster")
+
+    # Calcul mean expression pour chaque type de cellule par cluster 
     cluster_means = pd.DataFrame(
         np.array(
             [
@@ -876,10 +993,15 @@ def additional_postprocess(adata):
         index=adata.obs[NEWOBS].unique(),
     )
 
+    print("Calculate correlation matrix between clusters")
+
     # Calculate correlation matrix between clusters
     cluster_similarity = cluster_means.T.corr()
     cluster_similarity.values[np.tril_indices(len(cluster_similarity), -1)] = 0
 
+    print("Find similar clusters")
+
+    # Trouve paires de clusters similaires (>0.95) -> fusionne
     # Get pairs with similarity > 0.95
     high_sim_pairs = []
     for i in range(len(cluster_similarity)):
@@ -895,6 +1017,9 @@ def additional_postprocess(adata):
                         cluster_similarity.columns[j],
                     )
                 )
+
+    print("Fusion similar clusters")
+
     # Create mapping for merging similar clusters
     merge_mapping = {}
     for pair in high_sim_pairs:
@@ -906,6 +1031,8 @@ def additional_postprocess(adata):
     # Apply merging
     adata.obs[NEWOBS] = adata.obs[NEWOBS].map(merge_mapping).fillna(adata.obs[NEWOBS])
     adata.obs[NEWOBS] = adata.obs[NEWOBS].astype(str)
+
+    
     coun = Counter(adata.obs[NEWOBS]).most_common()
     merge_mapping = {}
     for i in adata.obs[COL].unique():
@@ -955,7 +1082,7 @@ def additional_postprocess(adata):
         )
     else:
         # raise ValueError("organism not supported")
-        print("organism not supported for age labels")
+        print("organism not supported for age labels") """
     # palantir.utils.run_diffusion_maps(adata, n_components=20)
     # palantir.utils.determine_multiscale_space(adata)
     # terminal_states = palantir.utils.find_terminal_states(

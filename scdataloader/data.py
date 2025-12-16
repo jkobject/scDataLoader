@@ -442,9 +442,13 @@ class SimpleAnnDataset(torchDataset):
 
         self.obs_to_output = adata.obs[obs_to_output]
         self.get_knn_cells = get_knn_cells
-        if get_knn_cells and "connectivities" not in adata.obsp:
+
+        print("Checking that get_knn_cells is true: ", self.get_knn_cells)
+        print("adata.obsp keys: ", list(adata.obsp.keys()))
+        if get_knn_cells and "distances" not in adata.obsp:
             raise ValueError("neighbors key not found in adata.obsm")
-        if get_knn_cells:
+        if get_knn_cells: 
+            print("Getting KNN cells")
             self.distances = adata.obsp["distances"]
 
     def __len__(self):

@@ -115,6 +115,7 @@ class Collator:
         """
         if genedf is None:
             genedf = load_genes(self.organisms)
+            # liste des id des organismes:
             self.organism_ids = (
                 set([org_to_id[k] for k in self.organisms])
                 if org_to_id is not None
@@ -131,9 +132,28 @@ class Collator:
             tot = genedf[genedf.index.isin(valid_genes)]
         else:
             tot = genedf
+
+        if tot.empty:
+            print("Aucun gène valide trouvé dans genedf")
+
+        print("Organismes dans self.organisms:", self.organisms)
+        print("Organismes dans tot['organism']:", tot['organism'].unique())
+        
+        # get the start idx for each organism in order to give the correct gene indices
         for organism in self.organisms:
             org = org_to_id[organism] if org_to_id is not None else organism
-            self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
+            print(f"Recherche pour l'organisme : {organism} (mapping {org})")
+
+            if 'organism' in tot.columns:
+                indices = np.where(tot.organism == organism)[0]
+                if indices.size > 0:
+                    self.start_idx.update({org: indices[0]})
+                else:
+                    print(f"Aucun organisme trouvé pour {organism} dans tot")
+            else:
+                print(f"La colonne 'organism' est manquante dans tot")
+        
+            # self.start_idx.update({org: np.where(tot.organism == organism)[0][0]})
 
             ogenedf = genedf[genedf.organism == organism]
             if valid_genes is not None:
