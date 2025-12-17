@@ -454,9 +454,18 @@ def _adding_scbasecamp_genes(
     if len(species) == 0:
         species = set(
             bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id
-        )
-        -set(["NCBITaxon:10090", "NCBITaxon:9606"])
+        ) - set(["NCBITaxon:10090", "NCBITaxon:9606"])
     species = list(species)
+    for i in set(
+        bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id
+    ) - set(bt.Organism.filter().df().ontology_id):
+        print(i)
+        rec = (
+            bt.Organism.using("laminlabs/arc-virtual-cell-atlas")
+            .filter(ontology_id=i)
+            .first()
+        )
+        rec.save()
     if len(bt.Organism.filter(ontology_id="NCBITaxon:9593")) == 0:
         bt.Organism(
             name="gorilla gorilla",
