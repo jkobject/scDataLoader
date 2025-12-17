@@ -20,6 +20,8 @@ from scipy.sparse import csr_matrix
 from scipy.stats import median_abs_deviation
 from torch import Tensor
 
+from .config import DROP
+
 
 def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
     """
@@ -442,168 +444,7 @@ def load_genes(
         if col in organismdf.columns:
             organismdf.drop(columns=[col], inplace=True)
     # temp fix
-    drop = {
-        "ENSG00000112096",
-        "ENSG00000137808",
-        "ENSG00000161149",
-        "ENSG00000182230",
-        "ENSG00000203812",
-        "ENSG00000204092",
-        "ENSG00000205485",
-        "ENSG00000212951",
-        "ENSG00000215271",
-        "ENSG00000221995",
-        "ENSG00000224739",
-        "ENSG00000224745",
-        "ENSG00000225178",
-        "ENSG00000225932",
-        "ENSG00000226377",
-        "ENSG00000226380",
-        "ENSG00000226403",
-        "ENSG00000227021",
-        "ENSG00000227220",
-        "ENSG00000227902",
-        "ENSG00000228139",
-        "ENSG00000228206",
-        "ENSG00000228906",
-        "ENSG00000229352",
-        "ENSG00000231575",
-        "ENSG00000232196",
-        "ENSG00000232295",
-        "ENSG00000233776",
-        "ENSG00000236166",
-        "ENSG00000236673",
-        "ENSG00000236740",
-        "ENSG00000236886",
-        "ENSG00000236996",
-        "ENSG00000237133",
-        "ENSG00000237513",
-        "ENSG00000237548",
-        "ENSG00000237838",
-        "ENSG00000239446",
-        "ENSG00000239467",
-        "ENSG00000239665",
-        "ENSG00000244693",
-        "ENSG00000244952",
-        "ENSG00000249860",
-        "ENSG00000251044",
-        "ENSG00000253878",
-        "ENSG00000254561",
-        "ENSG00000254740",
-        "ENSG00000255633",
-        "ENSG00000255823",
-        "ENSG00000256045",
-        "ENSG00000256222",
-        "ENSG00000256374",
-        "ENSG00000256427",
-        "ENSG00000256618",
-        "ENSG00000256863",
-        "ENSG00000256892",
-        "ENSG00000258414",
-        "ENSG00000258808",
-        "ENSG00000258861",
-        "ENSG00000259444",
-        "ENSG00000259820",
-        "ENSG00000259834",
-        "ENSG00000259855",
-        "ENSG00000260461",
-        "ENSG00000261068",
-        "ENSG00000261438",
-        "ENSG00000261490",
-        "ENSG00000261534",
-        "ENSG00000261737",
-        "ENSG00000261773",
-        "ENSG00000261963",
-        "ENSG00000262668",
-        "ENSG00000263464",
-        "ENSG00000267637",
-        "ENSG00000268955",
-        "ENSG00000269028",
-        "ENSG00000269900",
-        "ENSG00000269933",
-        "ENSG00000269966",
-        "ENSG00000270188",
-        "ENSG00000270394",
-        "ENSG00000270672",
-        "ENSG00000271043",
-        "ENSG00000271409",
-        "ENSG00000271734",
-        "ENSG00000271870",
-        "ENSG00000272040",
-        "ENSG00000272196",
-        "ENSG00000272267",
-        "ENSG00000272354",
-        "ENSG00000272370",
-        "ENSG00000272551",
-        "ENSG00000272567",
-        "ENSG00000272880",
-        "ENSG00000272904",
-        "ENSG00000272934",
-        "ENSG00000273301",
-        "ENSG00000273370",
-        "ENSG00000273496",
-        "ENSG00000273576",
-        "ENSG00000273614",
-        "ENSG00000273837",
-        "ENSG00000273888",
-        "ENSG00000273923",
-        "ENSG00000276612",
-        "ENSG00000276814",
-        "ENSG00000277050",
-        "ENSG00000277077",
-        "ENSG00000277352",
-        "ENSG00000277666",
-        "ENSG00000277761",
-        "ENSG00000278198",
-        "ENSG00000278782",
-        "ENSG00000278927",
-        "ENSG00000278955",
-        "ENSG00000279226",
-        "ENSG00000279765",
-        "ENSG00000279769",
-        "ENSG00000279948",
-        "ENSG00000280058",
-        "ENSG00000280095",
-        "ENSG00000280250",
-        "ENSG00000280346",
-        "ENSG00000280374",
-        "ENSG00000280710",
-        "ENSG00000282080",
-        "ENSG00000282246",
-        "ENSG00000282965",
-        "ENSG00000283486",
-        "ENSG00000284299",
-        "ENSG00000284741",
-        "ENSG00000285106",
-        "ENSG00000285162",
-        "ENSG00000285476",
-        "ENSG00000285762",
-        "ENSG00000286065",
-        "ENSG00000286228",
-        "ENSG00000286601",
-        "ENSG00000286699",
-        "ENSG00000286949",
-        "ENSG00000286996",
-        "ENSG00000287116",
-        "ENSG00000287388",
-        "ENSG00000288541",
-        "ENSG00000288546",
-        "ENSG00000288630",
-        "ENSG00000288639",
-        "ENSMUSG00000069518",
-        "ENSMUSG00000073682",
-        "ENSMUSG00000075014",
-        "ENSMUSG00000075015",
-        "ENSMUSG00000078091",
-        "ENSMUSG00000094958",
-        "ENSMUSG00000095547",
-        "ENSMUSG00000095891",
-        "ENSMUSG00000096385",
-        "ENSMUSG00000096519",
-        "ENSMUSG00000096923",
-        "ENSMUSG00000097078",
-    }
-    organismdf = organismdf[~organismdf.index.isin(drop)]
+    organismdf = organismdf[~organismdf.index.isin(DROP)]
     return organismdf
 
 
@@ -656,15 +497,16 @@ def _adding_scbasecamp_genes(
 
 
 def populate_my_ontology(
-    sex: List[str] = ["PATO:0000384", "PATO:0000383"],
-    celltypes: List[str] = [],
-    ethnicities: List[str] = [],
-    assays: List[str] = [],
-    tissues: List[str] = [],
-    diseases: List[str] = [],
-    dev_stages: List[str] = [],
-    organisms_clade: List[str] = ["vertebrates", "plants", "metazoa"],
-    genes_from: List[str] = ["NCBITaxon:10090", "NCBITaxon:9606"],
+    sex: Optional[List[str]] = ["PATO:0000384", "PATO:0000383"],
+    celltypes: Optional[List[str]] = [],
+    ethnicities: Optional[List[str]] = [],
+    assays: Optional[List[str]] = [],
+    tissues: Optional[List[str]] = [],
+    diseases: Optional[List[str]] = [],
+    dev_stages: Optional[List[str]] = [],
+    organisms_clade: Optional[List[str]] = ["vertebrates"],  # "plants", "metazoa"],
+    organisms: Optional[List[str]] = ["NCBITaxon:10090", "NCBITaxon:9606"],
+    genes_from: Optional[List[str]] = ["NCBITaxon:10090", "NCBITaxon:9606"],
 ):
     """
     creates a local version of the lamin ontologies and add the required missing values in base ontologies
@@ -697,8 +539,10 @@ def populate_my_ontology(
             names = bt.CellType.public().df().index if not celltypes else celltypes
             records = bt.CellType.from_values(names, field="ontology_id")
             ln.save(records)
-        bt.CellType(name="unknown", ontology_id="unknown").save()
+        elem = bt.CellType(name="unknown", ontology_id="unknown")
+        ln.save([elem], ignore_conflicts=True)
     # OrganismClade
+    nrecords = []
     if organisms_clade is not None:
         records = []
         for organism_clade in organisms_clade:
@@ -709,7 +553,7 @@ def populate_my_ontology(
                     records.append(bt.Organism.from_source(name=name, source=source))
                 except DoesNotExist:
                     print(f"Organism {name} not found in source {source}")
-        nrecords = []
+
         prevrec = set()
         for rec in records:
             if rec is None:
@@ -717,10 +561,15 @@ def populate_my_ontology(
             if not isinstance(rec, bt.Organism):
                 rec = rec[0]
             if rec.uid not in prevrec:
+                if organisms is not None:
+                    if rec.ontology_id not in organisms:
+                        continue
                 nrecords.append(rec)
                 prevrec.add(rec.uid)
+
         ln.save(nrecords)
-        bt.Organism(name="unknown", ontology_id="unknown").save()
+        elem = bt.Organism(name="unknown", ontology_id="unknown").save()
+        ln.save([elem], ignore_conflicts=True)
     # Phenotype
     if sex is not None:
         names = bt.Phenotype.public().df().index if not sex else sex
@@ -729,7 +578,8 @@ def populate_my_ontology(
             bt.Phenotype.from_source(ontology_id=i, source=source) for i in names
         ]
         ln.save(records)
-        bt.Phenotype(name="unknown", ontology_id="unknown").save()
+        elem = bt.Phenotype(name="unknown", ontology_id="unknown").save()
+        ln.save([elem], ignore_conflicts=True)
     # ethnicity
     if ethnicities is not None:
         if len(ethnicities) == 0:
@@ -738,9 +588,8 @@ def populate_my_ontology(
             names = bt.Ethnicity.public().df().index if not ethnicities else ethnicities
             records = bt.Ethnicity.from_values(names, field="ontology_id")
             ln.save(records)
-        bt.Ethnicity(
-            name="unknown", ontology_id="unknown"
-        ).save()  # multi ethnic will have to get renamed
+        elem = bt.Ethnicity(name="unknown", ontology_id="unknown")
+        ln.save([elem], ignore_conflicts=True)
     # ExperimentalFactor
     if assays is not None:
         if len(assays) == 0:
@@ -749,7 +598,8 @@ def populate_my_ontology(
             names = bt.ExperimentalFactor.public().df().index if not assays else assays
             records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
             ln.save(records)
-        bt.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
+        elem = bt.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
+        ln.save([elem], ignore_conflicts=True)
         # lookup = bt.ExperimentalFactor.lookup()
         # lookup.smart_seq_v4.parents.add(lookup.smart_like)
     # Tissue
@@ -760,7 +610,8 @@ def populate_my_ontology(
             names = bt.Tissue.public().df().index if not tissues else tissues
             records = bt.Tissue.from_values(names, field="ontology_id")
             ln.save(records)
-        bt.Tissue(name="unknown", ontology_id="unknown").save()
+        elem = bt.Tissue(name="unknown", ontology_id="unknown").save()
+        ln.save([elem], ignore_conflicts=True)
     # DevelopmentalStage
     if dev_stages is not None:
         if len(dev_stages) == 0:
@@ -775,7 +626,6 @@ def populate_my_ontology(
             )
             records = bt.DevelopmentalStage.from_values(names, field="ontology_id")
             ln.save(records)
-        bt.DevelopmentalStage(name="unknown", ontology_id="unknown").save()
 
     # Disease
     if diseases is not None:
