@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+2.0.5 (2025-12-17)
+------------------
+- Release: version 2.0.5 🚀 [jkobject]
 - Solve issues. [jkobject]
 - Update to scPRINT-2. [jkobject]
 
