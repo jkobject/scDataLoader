@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Solve issues. [jkobject]
+- Update to scPRINT-2. [jkobject]
+
+
+2.0.4 (2025-12-15)
+------------------
+- Release: version 2.0.4 🚀 [jkobject]
 - Better doc. [jkobject]
 - Debug. [jkobject]
 - Debug datamodule. [jkobject]
