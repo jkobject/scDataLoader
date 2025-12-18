@@ -449,7 +449,7 @@ number of GPUs as previous run. Defaults to 0.</p>
               <b><code>**kwargs</code></b>
               –
               <div class="doc-md-description">
-                <p>Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
+                <p>dict[str, Any]: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
 num_workers, pin_memory).</p>
               </div>
             </li>
@@ -659,6 +659,7 @@ train_loader = dm.train_dataloader()</p>
         <ul class="first simple">
             <li>
               <b><code>decoders</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="int">int</span>, <span title="str">str</span>]]</code>)
               –
               <div class="doc-md-description">
                 <p>decoders the decoders for any labels that would have been encoded</p>
@@ -666,6 +667,7 @@ train_loader = dm.train_dataloader()</p>
             </li>
             <li>
               <b><code>genes</code></b>
+                  (<code><span title="list">list</span></code>)
               –
               <div class="doc-md-description">
                 <p>genes the genes used in this datamodule</p>
@@ -673,6 +675,7 @@ train_loader = dm.train_dataloader()</p>
             </li>
             <li>
               <b><code>labels_hierarchy</code></b>
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>)
               –
               <div class="doc-md-description">
                 <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
@@ -993,7 +996,7 @@ train_loader = dm.train_dataloader()</p>
 <span class="sd">            increases sampling weight balance over epochs. Defaults to 0.</span>
 <span class="sd">        start_at (int, optional): Starting index for resuming inference. Requires same</span>
 <span class="sd">            number of GPUs as previous run. Defaults to 0.</span>
-<span class="sd">        **kwargs: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,</span>
+<span class="sd">        **kwargs: dict[str, Any]: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,</span>
 <span class="sd">            num_workers, pin_memory).</span>
 
 <span class="sd">    Attributes:</span>
@@ -1133,6 +1136,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="int">int</span>, <span title="str">str</span>]]</code>
               –
               <div class="doc-md-description">
                 <p>dict[str, dict[int, str]]</p>
@@ -1177,6 +1181,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="list">list</span></code>
               –
               <div class="doc-md-description">
                 <p>list</p>
@@ -1221,6 +1226,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>
               –
               <div class="doc-md-description">
                 <p>dict[str, dict[str, str]]</p>
@@ -1264,7 +1270,8 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>DataLoader</code></b>              –
+<b><code>DataLoader</code></b>(                  <code><span title="torch.utils.data.DataLoader">DataLoader</span></code>
+)              –
               <div class="doc-md-description">
                 <p>Prediction DataLoader instance.</p>
               </div>
@@ -1291,7 +1298,7 @@ train_loader = dm.train_dataloader()</p>
 <span class="normal">605</span>
 <span class="normal">606</span>
 <span class="normal">607</span>
-<span class="normal">608</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">predict_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">608</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">predict_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a DataLoader for prediction over all training data.</span>
 
@@ -1368,6 +1375,7 @@ Currently not used but kept for Lightning compatibility. Defaults to None.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
               –
               <div class="doc-md-description">
                 <p>List[str]: List of paths to test datasets.</p>
@@ -1554,7 +1562,7 @@ deterministic when loading from cache.</p>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
-<span class="normal">513</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">513</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare data splits for training, validation, and testing.</span>
 
@@ -1753,6 +1761,7 @@ deterministic when loading from cache.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, <span title="list">list</span>]</code>
               –
               <div class="doc-md-description">
                 <p>DataLoader | List: Test DataLoader, or empty list if no test split.</p>
@@ -1779,7 +1788,7 @@ deterministic when loading from cache.</p>
 <span class="normal">589</span>
 <span class="normal">590</span>
 <span class="normal">591</span>
-<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the test DataLoader with sequential sampling.</span>
 
@@ -1830,7 +1839,7 @@ distributed training without weighting.</p>
               <b><code>**kwargs</code></b>
               –
               <div class="doc-md-description">
-                <p>Additional arguments passed to DataLoader, overriding defaults.</p>
+                <p>dict[str, Any]: Additional arguments passed to DataLoader, overriding defaults.</p>
               </div>
             </li>
         </ul>
@@ -1850,7 +1859,8 @@ distributed training without weighting.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>DataLoader</code></b>              –
+<b><code>DataLoader</code></b>(                  <code><span title="torch.utils.data.DataLoader">DataLoader</span></code>
+)              –
               <div class="doc-md-description">
                 <p>Training DataLoader instance.</p>
               </div>
@@ -1932,7 +1942,7 @@ distributed training without weighting.</p>
 <span class="normal">558</span>
 <span class="normal">559</span>
 <span class="normal">560</span>
-<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the training DataLoader with weighted random sampling.</span>
 
@@ -1941,7 +1951,7 @@ distributed training without weighting.</p>
 <span class="sd">    distributed training without weighting.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        **kwargs: Additional arguments passed to DataLoader, overriding defaults.</span>
+<span class="sd">        **kwargs: dict[str, Any]: Additional arguments passed to DataLoader, overriding defaults.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        DataLoader: Training DataLoader instance.</span>
@@ -2010,6 +2020,7 @@ distributed training without weighting.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, <span title="list">list</span>]</code>
               –
               <div class="doc-md-description">
                 <p>DataLoader | List: Validation DataLoader, or empty list if no validation split.</p>
@@ -2037,7 +2048,7 @@ distributed training without weighting.</p>
 <span class="normal">574</span>
 <span class="normal">575</span>
 <span class="normal">576</span>
-<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the validation DataLoader.</span>
 

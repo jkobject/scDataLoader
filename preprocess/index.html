@@ -173,15 +173,6 @@ Defaults to 1e4.</p>
               </div>
             </li>
             <li>
-              <b><code>log1p</code></b>
-                  (<code><span title="bool">bool</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>Determines whether to apply log1p transform to the normalized data.
-Defaults to True.</p>
-              </div>
-            </li>
-            <li>
               <b><code>n_hvg_for_postp</code></b>
                   (<code><span title="int">int</span> or <span title="bool">bool</span></code>, default:
                       <code>0</code>
@@ -189,6 +180,28 @@ Defaults to True.</p>
               –
               <div class="doc-md-description">
                 <p>Determines whether to subset to highly variable genes for the PCA.
+Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>use_layer</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The layer to use for preprocessing.
+Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>is_symbol</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether genes are provided as symbols instead of Ensembl IDs.
 Defaults to False.</p>
               </div>
             </li>
@@ -313,11 +326,13 @@ Defaults to 8.</p>
               </div>
             </li>
             <li>
-              <b><code>batch_key</code></b>
-                  (<code><span title="str">str</span></code>)
+              <b><code>batch_keys</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code>[&#39;assay_ontology_term_id&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;suspension_type&#39;]</code>
+)
               –
               <div class="doc-md-description">
-                <p>The key of :class:<code>~anndata.AnnData.obs</code> to use for batch information.
+                <p>The keys of :class:<code>~anndata.AnnData.obs</code> to use for batch information.
 This arg is used in the highly variable gene selection step.</p>
               </div>
             </li>
@@ -330,6 +345,61 @@ This arg is used in the highly variable gene selection step.</p>
               <div class="doc-md-description">
                 <p>Determines whether to skip the validation step.
 Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>additional_preprocess</code></b>
+                  (<code><span title="typing.Callable">Callable</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Additional preprocessing function.
+Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>additional_postprocess</code></b>
+                  (<code><span title="typing.Callable">Callable</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Additional postprocessing function.
+Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>do_postp</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to perform postprocessing.
+Defaults to True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>organisms</code></b>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code>[&#39;NCBITaxon:9606&#39;, &#39;NCBITaxon:10090&#39;]</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of organisms to support.
+Defaults to ["NCBITaxon:9606", "NCBITaxon:10090"].</p>
+              </div>
+            </li>
+            <li>
+              <b><code>use_raw</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to use raw counts.
+Defaults to True.</p>
               </div>
             </li>
             <li>
@@ -481,7 +551,19 @@ Defaults to False.</p>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
-<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filter_gene_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filter_cell_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -531,9 +613,11 @@ Defaults to False.</p>
 <span class="sd">            If int, filters cells with counts. Defaults to False.</span>
 <span class="sd">        normalize_sum (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.</span>
 <span class="sd">            Defaults to 1e4.</span>
-<span class="sd">        log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.</span>
-<span class="sd">            Defaults to True.</span>
 <span class="sd">        n_hvg_for_postp (int or bool, optional): Determines whether to subset to highly variable genes for the PCA.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        use_layer (str, optional): The layer to use for preprocessing.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        is_symbol (bool, optional): Whether genes are provided as symbols instead of Ensembl IDs.</span>
 <span class="sd">            Defaults to False.</span>
 <span class="sd">        hvg_flavor (str, optional): Specifies the flavor of highly variable genes selection.</span>
 <span class="sd">            See :func:`scanpy.pp.highly_variable_genes` for more details. Defaults to &quot;seurat_v3&quot;.</span>
@@ -556,10 +640,20 @@ Defaults to False.</p>
 <span class="sd">            Defaults to 5.</span>
 <span class="sd">        pct_mt_outlier (int, optional): The maximum percentage of mitochondrial genes outlier.</span>
 <span class="sd">            Defaults to 8.</span>
-<span class="sd">        batch_key (str, optional): The key of :class:`~anndata.AnnData.obs` to use for batch information.</span>
+<span class="sd">        batch_keys (List[str], optional): The keys of :class:`~anndata.AnnData.obs` to use for batch information.</span>
 <span class="sd">            This arg is used in the highly variable gene selection step.</span>
 <span class="sd">        skip_validate (bool, optional): Determines whether to skip the validation step.</span>
 <span class="sd">            Defaults to False.</span>
+<span class="sd">        additional_preprocess (Callable, optional): Additional preprocessing function.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        additional_postprocess (Callable, optional): Additional postprocessing function.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        do_postp (bool, optional): Whether to perform postprocessing.</span>
+<span class="sd">            Defaults to True.</span>
+<span class="sd">        organisms (List[str], optional): List of organisms to support.</span>
+<span class="sd">            Defaults to [&quot;NCBITaxon:9606&quot;, &quot;NCBITaxon:10090&quot;].</span>
+<span class="sd">        use_raw (bool, optional): Whether to use raw counts.</span>
+<span class="sd">            Defaults to True.</span>
 <span class="sd">        keepdata (bool, optional): Determines whether to keep the data in the AnnData object.</span>
 <span class="sd">            Defaults to False.</span>
 <span class="sd">        drop_non_primary (bool, optional): Determines whether to drop non-primary cells.</span>
@@ -655,7 +749,7 @@ Defaults to False.</p>
               <td><code><a class="autorefs autorefs-internal" title="__call__ (scdataloader.preprocess.LaminPreprocessor.__call__)" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>format controls the different input value wrapping, including categorical</p>
+                  <p>Process data with format controlling different input value wrapping.</p>
                 </div>
               </td>
             </tr>
@@ -666,20 +760,20 @@ Defaults to False.</p>
 
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -720,8 +814,9 @@ Defaults to False.</p>
 
     <div class="doc doc-contents ">
 
-        <p>format controls the different input value wrapping, including categorical
-binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.</p>
+        <p>Process data with format controlling different input value wrapping.</p>
+<p>Includes support for categorical binned style, fixed-sum normalized counts,
+log1p fixed-sum normalized counts, etc.</p>
 
 
 <table class="field-list">
@@ -735,20 +830,56 @@ binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, et
       <td class="field-body">
         <ul class="first simple">
             <li>
-              <b><code>adata</code></b>
-                  (<code><span title="anndata.AnnData">AnnData</span></code>)
+              <b><code>data</code></b>
+                  (<code><span title="typing.Union">Union</span>[<span title="lamindb.Collection">Collection</span>, <span title="anndata.AnnData">AnnData</span>]</code>, default:
+                      <code>None</code>
+)
               –
               <div class="doc-md-description">
-                <p>The AnnData object to preprocess.</p>
+                <p>The AnnData object or Collection to preprocess.</p>
               </div>
             </li>
             <li>
-              <b><code>batch_key</code></b>
-                  (<code><span title="str">str</span></code>)
+              <b><code>name</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;preprocessed dataset&#39;</code>
+)
               –
               <div class="doc-md-description">
-                <p>The key of AnnData.obs to use for batch information. This arg
-is used in the highly variable gene selection step.</p>
+                <p>Name for the preprocessed dataset. Defaults to "preprocessed dataset".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>description</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;preprocessed dataset using scprint&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Description for the preprocessed dataset.
+Defaults to "preprocessed dataset using scprint".</p>
+              </div>
+            </li>
+            <li>
+              <b><code>start_at</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Starting index for resuming preprocessing.
+Defaults to 0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>version</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;2&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Version string for the dataset.
+Defaults to "2".</p>
               </div>
             </li>
         </ul>
@@ -759,19 +890,7 @@ is used in the highly variable gene selection step.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">489</span>
 <span class="normal">490</span>
 <span class="normal">491</span>
 <span class="normal">492</span>
@@ -928,7 +1047,26 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">643</span>
 <span class="normal">644</span>
 <span class="normal">645</span>
-<span class="normal">646</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
@@ -937,13 +1075,20 @@ is used in the highly variable gene selection step.</p>
     <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    format controls the different input value wrapping, including categorical</span>
-<span class="sd">    binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.</span>
+<span class="sd">    Process data with format controlling different input value wrapping.</span>
+
+<span class="sd">    Includes support for categorical binned style, fixed-sum normalized counts,</span>
+<span class="sd">    log1p fixed-sum normalized counts, etc.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        adata (AnnData): The AnnData object to preprocess.</span>
-<span class="sd">        batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg</span>
-<span class="sd">            is used in the highly variable gene selection step.</span>
+<span class="sd">        data (Union[ln.Collection, AnnData]): The AnnData object or Collection to preprocess.</span>
+<span class="sd">        name (str, optional): Name for the preprocessed dataset. Defaults to &quot;preprocessed dataset&quot;.</span>
+<span class="sd">        description (str, optional): Description for the preprocessed dataset.</span>
+<span class="sd">            Defaults to &quot;preprocessed dataset using scprint&quot;.</span>
+<span class="sd">        start_at (int, optional): Starting index for resuming preprocessing.</span>
+<span class="sd">            Defaults to 0.</span>
+<span class="sd">        version (str, optional): Version string for the dataset.</span>
+<span class="sd">            Defaults to &quot;2&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">all_ready_processed_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -1127,26 +1272,7 @@ is used in the highly variable gene selection step.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">733</span>
-<span class="normal">734</span>
-<span class="normal">735</span>
-<span class="normal">736</span>
-<span class="normal">737</span>
-<span class="normal">738</span>
-<span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span>
-<span class="normal">742</span>
-<span class="normal">743</span>
-<span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">752</span>
 <span class="normal">753</span>
 <span class="normal">754</span>
 <span class="normal">755</span>
@@ -1180,7 +1306,26 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">783</span>
 <span class="normal">784</span>
 <span class="normal">785</span>
-<span class="normal">786</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1254,26 +1399,7 @@ is used in the highly variable gene selection step.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">808</span>
 <span class="normal">809</span>
 <span class="normal">810</span>
 <span class="normal">811</span>
@@ -1413,7 +1539,26 @@ is used in the highly variable gene selection step.</p>
 <span class="normal">945</span>
 <span class="normal">946</span>
 <span class="normal">947</span>
-<span class="normal">948</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="c1"># import palantir</span>
 
     <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>

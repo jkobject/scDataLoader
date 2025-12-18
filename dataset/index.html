@@ -823,6 +823,7 @@ stratified sampling.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
               –
               <div class="doc-md-description">
                 <p>np.ndarray: Integer codes representing the (combined) categories.
@@ -867,7 +868,7 @@ Shape: (n_samples,).</p>
 <span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_label_cats</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obs_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get combined categorical codes for one or more label columns.</span>
 
@@ -949,6 +950,7 @@ marked as unseen) for the sample at the given index.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
               –
               <div class="doc-md-description">
                 <p>List[str]: List of unseen gene identifiers.</p>
@@ -975,7 +977,7 @@ marked as unseen) for the sample at the given index.</p>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get genes marked as unseen for a specific sample.</span>
 
