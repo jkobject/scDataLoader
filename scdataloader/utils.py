@@ -340,7 +340,7 @@ def load_dataset_local(
     description: str,
     use_cache: bool = True,
     only: Optional[List[int]] = None,
-) -> ln.Dataset:
+) -> ln.Collection:
     """
     This function loads a remote lamindb dataset to local.
 
