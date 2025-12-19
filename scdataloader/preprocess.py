@@ -87,9 +87,11 @@ class Preprocessor:
                 If int, filters cells with counts. Defaults to False.
             normalize_sum (float or bool, optional): Determines whether to normalize the total counts of each cell to a specific value.
                 Defaults to 1e4.
-            log1p (bool, optional): Determines whether to apply log1p transform to the normalized data.
-                Defaults to True.
             n_hvg_for_postp (int or bool, optional): Determines whether to subset to highly variable genes for the PCA.
+                Defaults to False.
+            use_layer (str, optional): The layer to use for preprocessing.
+                Defaults to None.
+            is_symbol (bool, optional): Whether genes are provided as symbols instead of Ensembl IDs.
                 Defaults to False.
             hvg_flavor (str, optional): Specifies the flavor of highly variable genes selection.
                 See :func:`scanpy.pp.highly_variable_genes` for more details. Defaults to "seurat_v3".
@@ -112,10 +114,20 @@ class Preprocessor:
                 Defaults to 5.
             pct_mt_outlier (int, optional): The maximum percentage of mitochondrial genes outlier.
                 Defaults to 8.
-            batch_key (str, optional): The key of :class:`~anndata.AnnData.obs` to use for batch information.
+            batch_keys (List[str], optional): The keys of :class:`~anndata.AnnData.obs` to use for batch information.
                 This arg is used in the highly variable gene selection step.
             skip_validate (bool, optional): Determines whether to skip the validation step.
                 Defaults to False.
+            additional_preprocess (Callable, optional): Additional preprocessing function.
+                Defaults to None.
+            additional_postprocess (Callable, optional): Additional postprocessing function.
+                Defaults to None.
+            do_postp (bool, optional): Whether to perform postprocessing.
+                Defaults to True.
+            organisms (List[str], optional): List of organisms to support.
+                Defaults to ["NCBITaxon:9606", "NCBITaxon:10090"].
+            use_raw (bool, optional): Whether to use raw counts.
+                Defaults to True.
             keepdata (bool, optional): Determines whether to keep the data in the AnnData object.
                 Defaults to False.
             drop_non_primary (bool, optional): Determines whether to drop non-primary cells.
@@ -483,13 +495,20 @@ class LaminPreprocessor(Preprocessor):
         version: str = "2",
     ):
         """
-        format controls the different input value wrapping, including categorical
-        binned style, fixed-sum normalized counts, log1p fixed-sum normalized counts, etc.
+        Process data with format controlling different input value wrapping.
+
+        Includes support for categorical binned style, fixed-sum normalized counts,
+        log1p fixed-sum normalized counts, etc.
 
         Args:
-            adata (AnnData): The AnnData object to preprocess.
-            batch_key (str, optional): The key of AnnData.obs to use for batch information. This arg
-                is used in the highly variable gene selection step.
+            data (Union[ln.Collection, AnnData]): The AnnData object or Collection to preprocess.
+            name (str, optional): Name for the preprocessed dataset. Defaults to "preprocessed dataset".
+            description (str, optional): Description for the preprocessed dataset.
+                Defaults to "preprocessed dataset using scprint".
+            start_at (int, optional): Starting index for resuming preprocessing.
+                Defaults to 0.
+            version (str, optional): Version string for the dataset.
+                Defaults to "2".
         """
         files = []
         all_ready_processed_keys = set()

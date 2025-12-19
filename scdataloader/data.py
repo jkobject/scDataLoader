@@ -200,7 +200,7 @@ class Dataset(torchDataset):
     def get_label_cats(
         self,
         obs_keys: Union[str, List[str]],
-    ):
+    ) -> np.ndarray:
         """
         Get combined categorical codes for one or more label columns.
 
@@ -226,7 +226,7 @@ class Dataset(torchDataset):
                 labels = concat_categorical_codes([labels, labels_to_str])
         return np.array(labels.codes)
 
-    def get_unseen_mapped_dataset_elements(self, idx: int):
+    def get_unseen_mapped_dataset_elements(self, idx: int) -> list[str]:
         """
         Get genes marked as unseen for a specific sample.
 

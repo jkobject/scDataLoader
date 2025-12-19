@@ -1,7 +1,17 @@
 # About the scripts
 
-_These scripts file automate some things that I had to do to take care of the database_
+_These scripts file automate some things that I had to do to take care of the
+database_
 
-- `rename_obs.py`: this was very useful to 
--  
-
+- `rename_obs.py`: this was very useful to rewrite some mistakes I had in the
+  obs of my datasets (If you made mistakes you can follow a similar pipeline)
+- `run_scbasecount.py` & `finish_scbasecount.py`: the script I use to add
+  scbasecount to my database (also look at the notebook for info)
+- `addtional.py`: placeholder for other datasets I would be keen to add in the
+  future
+- `run_tahoe.py`: the script I used to add the tahoe 100M dataset (also look at
+  the notebook for info)
+- `adding_zhang.py`: the script I used to add the mouse embryo development
+  dataset from zhang et. al. 2024 (now available on cellxgene)
+- `do_perturb.py`: a notebook I might use to add other perturbation data. I
+  haven't used it now.

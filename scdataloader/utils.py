@@ -28,10 +28,11 @@ def fileToList(filename: str, strconv: callable = lambda x: x) -> list:
     loads an input file with a\\n b\\n.. into a list [a,b,..]
 
     Args:
-        input_str (str): The input string to be completed.
+        filename (str): The filename to load from.
+        strconv (callable): A function to convert each line. Defaults to identity function.
 
     Returns:
-        str: The completed string with 'complete' appended.
+        list: The list of converted elements from the file.
     """
     with open(filename) as f:
         return [strconv(val[:-1]) for val in f.readlines()]
@@ -44,7 +45,7 @@ def listToFile(
     listToFile loads a list with [a,b,..] into an input file a\\n b\\n..
 
     Args:
-        l (list): The list of elements to be written to the file.
+        li (list): The list of elements to be written to the file.
         filename (str): The name of the file where the list will be written.
         strconv (callable, optional): A function to convert each element of the list to a string. Defaults to str.
 
@@ -124,7 +125,7 @@ def getBiomartTable(
     attributes: List[str] = [],
     bypass_attributes: bool = False,
     database: str = "hsapiens_gene_ensembl",
-):
+) -> pd.DataFrame:
     """generate a genelist dataframe from ensembl's biomart
 
     Args:
@@ -175,14 +176,14 @@ def getBiomartTable(
     return res
 
 
-def validate(adata: AnnData, organism: str, need_all=False):
+def validate(adata: AnnData, organism: str, need_all: bool = False) -> bool:
     """
     validate checks if the adata object is valid for lamindb
 
     Args:
-        adata (anndata): the anndata object
-        lb (lamindb): the lamindb instance
-        organism (str): the organism
+        adata (AnnData): the anndata object
+        organism (str): the organism ontology ID
+        need_all (bool, optional): whether all columns should be present. Defaults to False.
 
     Raises:
         ValueError: if the adata object is not valid
@@ -298,7 +299,7 @@ def get_descendants(val, df):
     return r_onto | ontos
 
 
-def get_ancestry_mapping(all_elem: List[str], onto_df: pd.DataFrame):
+def get_ancestry_mapping(all_elem: List[str], onto_df: pd.DataFrame) -> dict:
     """
     This function generates a mapping of all elements to their ancestors in the ontology dataframe.
 
@@ -339,13 +340,12 @@ def load_dataset_local(
     description: str,
     use_cache: bool = True,
     only: Optional[List[int]] = None,
-):
+) -> ln.Dataset:
     """
     This function loads a remote lamindb dataset to local.
 
     Args:
-        lb (lamindb): The lamindb instance.
-        remote_dataset (lamindb.Dataset): The remote Dataset.
+        remote_dataset (lamindb.Collection): The remote Collection.
         download_folder (str): The path to the download folder.
         name (str): The name of the dataset.
         description (str): The description of the dataset.
@@ -396,7 +396,7 @@ def load_dataset_local(
 
 def load_genes(
     organisms: Union[str, List[str]] = "NCBITaxon:9606",
-):  # "NCBITaxon:10090",
+) -> pd.DataFrame:  # "NCBITaxon:10090",
     """
     Loads genes from the given organisms.
 
@@ -664,7 +664,7 @@ def populate_my_ontology(
             ln.save(records)
 
 
-def random_str(stringLength=6, stype="all", withdigits=True):
+def random_str(stringLength=6, stype="all", withdigits=True) -> str:
     """
     Generate a random string of letters and digits
 
@@ -673,7 +673,7 @@ def random_str(stringLength=6, stype="all", withdigits=True):
         stype (str, optional): one of lowercase, uppercase, all. Defaults to 'all'.
         withdigits (bool, optional): digits allowed in the string? Defaults to True.
 
-        Returns:
+    Returns:
         str: random string
     """
     if stype == "lowercase":
@@ -687,12 +687,12 @@ def random_str(stringLength=6, stype="all", withdigits=True):
     return "".join(random.choice(lettersAndDigits) for i in range(stringLength))
 
 
-def is_outlier(adata: AnnData, metric: str, nmads: int):
+def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series:
     """
     is_outlier detects outliers in adata.obs[metric]
 
     Args:
-        adata (annData): the anndata object
+        adata (AnnData): the anndata object
         metric (str): the metric column to use
         nmads (int): the number of median absolute deviations to use as a threshold
 
@@ -706,16 +706,16 @@ def is_outlier(adata: AnnData, metric: str, nmads: int):
     return outlier
 
 
-def length_normalize(adata: AnnData, gene_lengths: list):
+def length_normalize(adata: AnnData, gene_lengths: list) -> AnnData:
     """
     length_normalize normalizes the counts by the gene length
 
     Args:
-        adata (anndata): the anndata object
+        adata (AnnData): the anndata object
         gene_lengths (list): the gene lengths
 
     Returns:
-        anndata: the anndata object
+        AnnData: the normalized anndata object
     """
     adata.X = csr_matrix((adata.X.T / gene_lengths).T)
     return adata
@@ -723,13 +723,13 @@ def length_normalize(adata: AnnData, gene_lengths: list):
 
 def translate(
     val: Union[str, list, set, Counter, dict], t: str = "cell_type_ontology_term_id"
-):
+) -> dict:
     """
     translate translates the ontology term id to the name
 
     Args:
-        val (str, dict, set, list, dict): the object to translate
-        t (flat, optional): the type of ontology terms.
+        val (Union[str, dict, set, list]): the object to translate
+        t (str, optional): the type of ontology terms.
             one of cell_type_ontology_term_id, assay_ontology_term_id, tissue_ontology_term_id.
             Defaults to "cell_type_ontology_term_id".
 

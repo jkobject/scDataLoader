@@ -136,7 +136,7 @@ class DataModule(L.LightningDataModule):
                 increases sampling weight balance over epochs. Defaults to 0.
             start_at (int, optional): Starting index for resuming inference. Requires same
                 number of GPUs as previous run. Defaults to 0.
-            **kwargs: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
+            **kwargs: dict[str, Any]: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
                 num_workers, pin_memory).
 
         Attributes:
@@ -256,7 +256,7 @@ class DataModule(L.LightningDataModule):
         )
 
     @property
-    def decoders(self):
+    def decoders(self) -> dict[str, dict[int, str]]:
         """
         decoders the decoders for any labels that would have been encoded
 
@@ -269,7 +269,7 @@ class DataModule(L.LightningDataModule):
         return decoders
 
     @property
-    def labels_hierarchy(self):
+    def labels_hierarchy(self) -> dict[str, dict[str, str]]:
         """
         labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy
 
@@ -287,7 +287,7 @@ class DataModule(L.LightningDataModule):
         return labels_hierarchy
 
     @property
-    def genes(self):
+    def genes(self) -> list:
         """
         genes the genes used in this datamodule
 
@@ -343,7 +343,7 @@ class DataModule(L.LightningDataModule):
     def num_datasets(self):
         return len(self.dataset.mapped_dataset.storages)
 
-    def setup(self, stage=None):
+    def setup(self, stage: Optional[str] = None) -> list[str]:
         """
         Prepare data splits for training, validation, and testing.
 
@@ -512,7 +512,7 @@ class DataModule(L.LightningDataModule):
         print(f"done setup, took {time.time() - start_time:.2f} seconds")
         return self.test_datasets
 
-    def train_dataloader(self, **kwargs):
+    def train_dataloader(self, **kwargs) -> DataLoader:
         """
         Create the training DataLoader with weighted random sampling.
 
@@ -521,7 +521,7 @@ class DataModule(L.LightningDataModule):
         distributed training without weighting.
 
         Args:
-            **kwargs: Additional arguments passed to DataLoader, overriding defaults.
+            **kwargs: dict[str, Any]: Additional arguments passed to DataLoader, overriding defaults.
 
         Returns:
             DataLoader: Training DataLoader instance.
@@ -560,7 +560,7 @@ class DataModule(L.LightningDataModule):
             **current_loader_kwargs,
         )
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> Union[DataLoader, list]:
         """
         Create the validation DataLoader.
 
@@ -576,7 +576,7 @@ class DataModule(L.LightningDataModule):
             else []
         )
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> Union[DataLoader, list]:
         """
         Create the test DataLoader with sequential sampling.
 
@@ -591,7 +591,7 @@ class DataModule(L.LightningDataModule):
             else []
         )
 
-    def predict_dataloader(self):
+    def predict_dataloader(self) -> DataLoader:
         """
         Create a DataLoader for prediction over all training data.
 
