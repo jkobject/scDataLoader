@@ -40,7 +40,7 @@ def test_base():
     adata = preprocessor(adata)
     art = ln.Artifact(adata, description="test")
     art.save()
-    ln.Collection(art, name="test", description="test").save()
+    ln.Collection(art, key="test", description="test").save()
     datamodule = DataModule(
         collection_name="test",
         how="most expr",  # for the collator (most expr genes only will be selected)

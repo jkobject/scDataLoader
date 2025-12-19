@@ -110,7 +110,7 @@ adata = preprocessor(adata)
 
 art = ln.Artifact(adata, description="test")
 art.save()
-ln.Collection(art, name="test", description="test").save()
+ln.Collection(art, key="test", description="test").save()
 
 datamodule = DataModule(
     collection_name="test",

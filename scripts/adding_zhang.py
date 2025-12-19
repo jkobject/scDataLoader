@@ -27,6 +27,6 @@ for f in files:
 # this dataset alone is 13M cells
 files = ln.Artifact.filter(description=description)
 dataset = ln.Collection(
-    files, name="temp2", description="temp for the scprint preprocessing"
+    files, key="temp2", description="temp for the scprint preprocessing"
 )
 dataset.save()

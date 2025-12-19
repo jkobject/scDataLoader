@@ -389,7 +389,7 @@ def load_dataset_local(
         except IntegrityError:
             print(f"File {file.key} already exists in storage")
         saved_files.append(file)
-    dataset = ln.Collection(saved_files, name=name, description=description)
+    dataset = ln.Collection(saved_files, key=name, description=description)
     dataset.save()
     return dataset
 

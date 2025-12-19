@@ -654,7 +654,7 @@ class LaminPreprocessor(Preprocessor):
                 # Reconstruct collection using keys
                 dataset = ln.Collection(
                     [ln.Artifact.filter(key=k).one() for k in files],
-                    name=name,
+                    key=name,
                     description=description,
                 )
                 dataset.save()
@@ -819,9 +819,15 @@ def additional_postprocess(adata):
     # else:
     print("starting post processing")
     sc.pp.neighbors(adata, use_rep="X_pca")
-    sc.tl.leiden(adata, key_added="leiden_2", resolution=2.0)
-    sc.tl.leiden(adata, key_added="leiden_1", resolution=1.0)
-    sc.tl.leiden(adata, key_added="leiden_0.5", resolution=0.5)
+    sc.tl.leiden(
+        adata, key_added="leiden_2", resolution=2.0, flavor="igraph", n_iterations=2
+    )
+    sc.tl.leiden(
+        adata, key_added="leiden_1", resolution=1.0, flavor="igraph", n_iterations=2
+    )
+    sc.tl.leiden(
+        adata, key_added="leiden_0.5", resolution=0.5, flavor="igraph", n_iterations=2
+    )
     sc.tl.umap(adata)
     mid = adata.uns["dataset_id"] if "dataset_id" in adata.uns else "unknown_id"
     sc.pl.umap(
