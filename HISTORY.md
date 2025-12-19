@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Testing this. [jkobject]
+
+
+2.0.10 (2025-12-19)
+-------------------
+- Release: version 2.0.10 🚀 [jkobject]
 - Debug ln dataset. [jkobject]
 
 
