@@ -334,7 +334,7 @@ using absolute paths. You need to do 3 things:
 
 ```python
 import lamin as ln
-ln.Storage.df()
+ln.Storage.to_dataframe(limit=None)
 # view what is your current storage id (in my case it was GZgLW1TQ)
 ln.Storage.filter(uid="GZgLW1TI").update(
     root=Path("your_new_locations").as_posix().rstrip("/")

@@ -412,7 +412,7 @@ def load_genes(
     for organism in organisms:
         genesdf = bt.Gene.filter(
             organism_id=bt.Organism.filter(ontology_id=organism).first().id
-        ).df()
+        ).to_dataframe(limit=None)
         genesdf.loc[genesdf.ensembl_gene_id.isna(), "ensembl_gene_id"] = genesdf.loc[
             genesdf.ensembl_gene_id.isna(), "stable_id"
         ]
@@ -453,12 +453,16 @@ def _adding_scbasecamp_genes(
 ):
     if len(species) == 0:
         species = set(
-            bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id
+            bt.Organism.using("laminlabs/arc-virtual-cell-atlas")
+            .to_dataframe(limit=None)
+            .ontology_id
         ) - set(["NCBITaxon:10090", "NCBITaxon:9606"])
     species = list(species)
     for i in set(
-        bt.Organism.using("laminlabs/arc-virtual-cell-atlas").df().ontology_id
-    ) - set(bt.Organism.filter().df().ontology_id):
+        bt.Organism.using("laminlabs/arc-virtual-cell-atlas")
+        .to_dataframe(limit=None)
+        .ontology_id
+    ) - set(bt.Organism.filter().to_dataframe(limit=None).ontology_id):
         print(i)
         rec = (
             bt.Organism.using("laminlabs/arc-virtual-cell-atlas")
@@ -485,7 +489,7 @@ def _adding_scbasecamp_genes(
             bt.Gene.using("laminlabs/arc-virtual-cell-atlas")
             .filter(organism__ontology_id=i)
             .all()
-            .df()
+            .to_dataframe(limit=None)
         )
         genes = []
         org = bt.Organism.filter(ontology_id=i).one()
@@ -545,7 +549,11 @@ def populate_my_ontology(
         if len(celltypes) == 0:
             bt.CellType.import_source()
         else:
-            names = bt.CellType.public().df().index if not celltypes else celltypes
+            names = (
+                bt.CellType.public().to_dataframe().index
+                if not celltypes
+                else celltypes
+            )
             records = bt.CellType.from_values(names, field="ontology_id")
             ln.save(records)
         elem = bt.CellType(name="unknown", ontology_id="unknown")
@@ -555,7 +563,7 @@ def populate_my_ontology(
     if organisms_clade is not None:
         records = []
         for organism_clade in organisms_clade:
-            names = bt.Organism.public(organism=organism_clade).df().index
+            names = bt.Organism.public(organism=organism_clade).to_dataframe().index
             source = bt.Source.filter(name="ensembl", organism=organism_clade).last()
             for name in names:
                 try:
@@ -581,7 +589,7 @@ def populate_my_ontology(
         ln.save([elem], ignore_conflicts=True)
     # Phenotype
     if sex is not None:
-        names = bt.Phenotype.public().df().index if not sex else sex
+        names = bt.Phenotype.public().to_dataframe().index if not sex else sex
         source = bt.Source.filter(name="pato").first()
         records = [
             bt.Phenotype.from_source(ontology_id=i, source=source) for i in names
@@ -594,7 +602,11 @@ def populate_my_ontology(
         if len(ethnicities) == 0:
             bt.Ethnicity.import_source()
         else:
-            names = bt.Ethnicity.public().df().index if not ethnicities else ethnicities
+            names = (
+                bt.Ethnicity.public().to_dataframe().index
+                if not ethnicities
+                else ethnicities
+            )
             records = bt.Ethnicity.from_values(names, field="ontology_id")
             ln.save(records)
         elem = bt.Ethnicity(name="unknown", ontology_id="unknown")
@@ -604,7 +616,11 @@ def populate_my_ontology(
         if len(assays) == 0:
             bt.ExperimentalFactor.import_source()
         else:
-            names = bt.ExperimentalFactor.public().df().index if not assays else assays
+            names = (
+                bt.ExperimentalFactor.public().to_dataframe().index
+                if not assays
+                else assays
+            )
             records = bt.ExperimentalFactor.from_values(names, field="ontology_id")
             ln.save(records)
         elem = bt.ExperimentalFactor(name="unknown", ontology_id="unknown").save()
@@ -616,7 +632,11 @@ def populate_my_ontology(
         if len(tissues) == 0:
             bt.Tissue.import_source()
         else:
-            names = bt.Tissue.public().df().index if not tissues else tissues
+            names = (
+                bt.Tissue.public().to_dataframe().index
+                if not tissues
+                else tissues
+            )
             records = bt.Tissue.from_values(names, field="ontology_id")
             ln.save(records)
         elem = bt.Tissue(name="unknown", ontology_id="unknown").save()
@@ -629,7 +649,7 @@ def populate_my_ontology(
             bt.DevelopmentalStage.import_source(source=source)
         else:
             names = (
-                bt.DevelopmentalStage.public().df().index
+                bt.DevelopmentalStage.public().to_dataframe().index
                 if not dev_stages
                 else dev_stages
             )
@@ -641,7 +661,11 @@ def populate_my_ontology(
         if len(diseases) == 0:
             bt.Disease.import_source()
         else:
-            names = bt.Disease.public().df().index if not diseases else diseases
+            names = (
+                bt.Disease.public().to_dataframe().index
+                if not diseases
+                else diseases
+            )
             records = bt.Disease.from_values(names, field="ontology_id")
             ln.save(records)
         bt.Disease(name="normal", ontology_id="PATO:0000461").save()
@@ -650,7 +674,9 @@ def populate_my_ontology(
     for organism in genes_from:
         # convert onto to name
         organism = bt.Organism.filter(ontology_id=organism).one().name
-        names = bt.Gene.public(organism=organism).df()["ensembl_gene_id"]
+        names = bt.Gene.public(organism=organism).to_dataframe()[
+            "ensembl_gene_id"
+        ]
 
         # Process names in blocks of 10,000 elements
         block_size = 10000

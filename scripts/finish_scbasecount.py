@@ -1,9 +1,10 @@
-from scdataloader import Preprocessor
-from scdataloader.preprocess import additional_postprocess, LaminPreprocessor
-import pandas as pd
 import lamindb as ln
-from upath import UPath
+import pandas as pd
 from anndata import AnnData, read_h5ad
+from upath import UPath
+
+from scdataloader import Preprocessor
+from scdataloader.preprocess import LaminPreprocessor, additional_postprocess
 
 col = ln.Collection.filter(key__contains="scbasecamp").first()
 
@@ -57,7 +58,7 @@ preprocessor = Preprocessor(
 f = [
     int(i.split(" p")[-1])
     for i in ln.Artifact.filter(description__contains="scbasecamp", version="2")
-    .df()
+    .to_dataframe(limit=None)
     .description
 ]
 print(len(f))
