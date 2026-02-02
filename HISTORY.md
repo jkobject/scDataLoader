@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Update lamindb. [jkobject]
+- Debugs ci. [jkobject]
+
+
+2.0.11 (2025-12-19)
+-------------------
+- Release: version 2.0.11 🚀 [jkobject]
 - Testing this. [jkobject]
 
 
