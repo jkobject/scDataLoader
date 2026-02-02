@@ -301,7 +301,7 @@
 <span class="normal">89</span>
 <span class="normal">90</span>
 <span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">createFoldersFor</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">createFoldersFor</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    will recursively create folders if needed until having all the folders required to save the file in this filepath</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -401,7 +401,7 @@
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fileToList</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strconv</span><span class="p">:</span> <span class="nb">callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fileToList</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strconv</span><span class="p">:</span> <span class="nb">callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    loads an input file with a\\n b\\n.. into a list [a,b,..]</span>
 
@@ -613,7 +613,7 @@
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
-<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">getBiomartTable</span><span class="p">(</span>
+<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">getBiomartTable</span><span class="p">(</span>
     <span class="n">ensemble_server</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://may2024.archive.ensembl.org/biomart&quot;</span><span class="p">,</span>
     <span class="n">useCache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">cache_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/tmp/biomart/&quot;</span><span class="p">,</span>
@@ -777,7 +777,7 @@
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
-<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_ancestry_mapping</span><span class="p">(</span><span class="n">all_elem</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">onto_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function generates a mapping of all elements to their ancestors in the ontology dataframe.</span>
 
@@ -894,23 +894,23 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
-<span class="normal">702</span>
-<span class="normal">703</span>
-<span class="normal">704</span>
-<span class="normal">705</span>
-<span class="normal">706</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_outlier</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nmads</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    is_outlier detects outliers in adata.obs[metric]</span>
 
@@ -1004,19 +1004,19 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">709</span>
-<span class="normal">710</span>
-<span class="normal">711</span>
-<span class="normal">712</span>
-<span class="normal">713</span>
-<span class="normal">714</span>
-<span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
-<span class="normal">718</span>
-<span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnnData</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">length_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">gene_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    length_normalize normalizes the counts by the gene length</span>
 
@@ -1132,7 +1132,7 @@
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
-<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">listToFile</span><span class="p">(</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">listToFile</span><span class="p">(</span>
     <span class="n">li</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strconv</span><span class="p">:</span> <span class="nb">callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1320,7 +1320,7 @@
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
-<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_dataset_local</span><span class="p">(</span>
+<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_dataset_local</span><span class="p">(</span>
     <span class="n">remote_dataset</span><span class="p">:</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span>
     <span class="n">download_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1376,7 +1376,7 @@
         <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in storage&quot;</span><span class="p">)</span>
         <span class="n">saved_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="n">saved_files</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="n">saved_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
     <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">dataset</span>
 </code></pre></div></td></tr></table></div>
@@ -1501,7 +1501,7 @@
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
-<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_genes</span><span class="p">(</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_genes</span><span class="p">(</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>  <span class="c1"># &quot;NCBITaxon:10090&quot;,</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1519,7 +1519,7 @@
     <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">:</span>
         <span class="n">genesdf</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
             <span class="n">organism_id</span><span class="o">=</span><span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">genesdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">genesdf</span><span class="o">.</span><span class="n">ensembl_gene_id</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
             <span class="n">genesdf</span><span class="o">.</span><span class="n">ensembl_gene_id</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;stable_id&quot;</span>
         <span class="p">]</span>
@@ -1676,11 +1676,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">512</span>
 <span class="normal">513</span>
 <span class="normal">514</span>
 <span class="normal">515</span>
@@ -1832,7 +1828,33 @@
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">populate_my_ontology</span><span class="p">(</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">populate_my_ontology</span><span class="p">(</span>
     <span class="n">sex</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PATO:0000384&quot;</span><span class="p">,</span> <span class="s2">&quot;PATO:0000383&quot;</span><span class="p">],</span>
     <span class="n">celltypes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">ethnicities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -1872,7 +1894,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">celltypes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span> <span class="k">else</span> <span class="n">celltypes</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">celltypes</span>
+                <span class="k">else</span> <span class="n">celltypes</span>
+            <span class="p">)</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
@@ -1882,7 +1908,7 @@
     <span class="k">if</span> <span class="n">organisms_clade</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">organism_clade</span> <span class="ow">in</span> <span class="n">organisms_clade</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Source</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ensembl&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism_clade</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1908,7 +1934,7 @@
         <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">([</span><span class="n">elem</span><span class="p">],</span> <span class="n">ignore_conflicts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># Phenotype</span>
     <span class="k">if</span> <span class="n">sex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sex</span> <span class="k">else</span> <span class="n">sex</span>
         <span class="n">source</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Source</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pato&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
         <span class="n">records</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">Phenotype</span><span class="o">.</span><span class="n">from_source</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span>
@@ -1921,7 +1947,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ethnicities</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span> <span class="k">else</span> <span class="n">ethnicities</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ethnicities</span>
+                <span class="k">else</span> <span class="n">ethnicities</span>
+            <span class="p">)</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
@@ -1931,7 +1961,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span> <span class="k">else</span> <span class="n">assays</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">assays</span>
+                <span class="k">else</span> <span class="n">assays</span>
+            <span class="p">)</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1943,7 +1977,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tissues</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span> <span class="k">else</span> <span class="n">tissues</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">tissues</span>
+                <span class="k">else</span> <span class="n">tissues</span>
+            <span class="p">)</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1956,7 +1994,7 @@
             <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">import_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_stages</span>
                 <span class="k">else</span> <span class="n">dev_stages</span>
             <span class="p">)</span>
@@ -1968,7 +2006,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diseases</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">import_source</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">df</span><span class="p">()</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span> <span class="k">else</span> <span class="n">diseases</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">public</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">diseases</span>
+                <span class="k">else</span> <span class="n">diseases</span>
+            <span class="p">)</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">from_values</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="n">ln</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
         <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="s2">&quot;PATO:0000461&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1977,7 +2019,9 @@
     <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">genes_from</span><span class="p">:</span>
         <span class="c1"># convert onto to name</span>
         <span class="n">organism</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()[</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span>
+            <span class="s2">&quot;ensembl_gene_id&quot;</span>
+        <span class="p">]</span>
 
         <span class="c1"># Process names in blocks of 10,000 elements</span>
         <span class="n">block_size</span> <span class="o">=</span> <span class="mi">10000</span>
@@ -2080,27 +2124,27 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
-<span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">random_str</span><span class="p">(</span><span class="n">stringLength</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">withdigits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_str</span><span class="p">(</span><span class="n">stringLength</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">withdigits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a random string of letters and digits</span>
 
@@ -2202,33 +2246,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
-<span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span>
-<span class="normal">734</span>
-<span class="normal">735</span>
-<span class="normal">736</span>
-<span class="normal">737</span>
-<span class="normal">738</span>
-<span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span>
-<span class="normal">742</span>
-<span class="normal">743</span>
-<span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">750</span>
 <span class="normal">751</span>
 <span class="normal">752</span>
 <span class="normal">753</span>
@@ -2245,7 +2263,33 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">764</span>
 <span class="normal">765</span>
 <span class="normal">766</span>
-<span class="normal">767</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span>
     <span class="n">val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">t</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2553,7 +2597,7 @@ Defaults to "cell_type_ontology_term_id".</p>
 <span class="normal">274</span>
 <span class="normal">275</span>
 <span class="normal">276</span>
-<span class="normal">277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">need_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">need_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    validate checks if the adata object is valid for lamindb</span>
 

@@ -222,7 +222,7 @@ adata = preprocessor(adata)
 
 art = ln.Artifact(adata, description=&quot;test&quot;)
 art.save()
-ln.Collection(art, name=&quot;test&quot;, description=&quot;test&quot;).save()
+ln.Collection(art, key=&quot;test&quot;, description=&quot;test&quot;).save()
 
 datamodule = DataModule(
     collection_name=&quot;test&quot;,
@@ -403,7 +403,7 @@ using absolute paths. You need to do 3 things:</p>
 <li>update the absolute paths in your lamin database. You can do it like this:</li>
 </ol>
 <pre><code class="language-python">import lamin as ln
-ln.Storage.df()
+ln.Storage.to_dataframe(limit=None)
 # view what is your current storage id (in my case it was GZgLW1TQ)
 ln.Storage.filter(uid=&quot;GZgLW1TI&quot;).update(
     root=Path(&quot;your_new_locations&quot;).as_posix().rstrip(&quot;/&quot;)
@@ -473,5 +473,5 @@ details.</p>
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-12-19 14:40:39.931904+00:00
+Build Date UTC : 2026-02-02 10:30:24.808425+00:00
 -->

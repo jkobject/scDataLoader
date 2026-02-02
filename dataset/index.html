@@ -630,7 +630,19 @@ self.mapped_dataset.encoders in place.</p>
 <span class="normal">375</span>
 <span class="normal">376</span>
 <span class="normal">377</span>
-<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Define hierarchical label groupings from ontology relationships.</span>
 
@@ -671,19 +683,25 @@ self.mapped_dataset.encoders in place.</p>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;cell_type_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;tissue_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Tissue</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;disease_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Disease</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="ow">in</span> <span class="p">[</span>
@@ -693,19 +711,25 @@ self.mapped_dataset.encoders in place.</p>
         <span class="p">]:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">DevelopmentalStage</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;assay_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">ExperimentalFactor</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">clss</span> <span class="o">==</span> <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span>
             <span class="n">parentdf</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bt</span><span class="o">.</span><span class="n">Ethnicity</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parents__ontology_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ontology_id&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ontology_id&quot;</span><span class="p">)</span>
             <span class="p">)</span>
 
@@ -721,7 +745,7 @@ self.mapped_dataset.encoders in place.</p>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">groupings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># that should not happen</span>
-                <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>
+                <span class="kn">import</span> <span class="nn">pdb</span>
 
                 <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
                 <span class="n">groupings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -865,7 +889,7 @@ Shape: (n_samples,).</p>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_label_cats</span><span class="p">(</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_label_cats</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obs_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -977,7 +1001,7 @@ marked as unseen) for the sample at the given index.</p>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get genes marked as unseen for a specific sample.</span>
 
@@ -1196,19 +1220,7 @@ loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
 
                   <details class="quote">
                     <summary>Source code in <code>scdataloader/data.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">395</span>
 <span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
@@ -1249,7 +1261,19 @@ loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
 <span class="normal">433</span>
 <span class="normal">434</span>
 <span class="normal">435</span>
-<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
     <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>

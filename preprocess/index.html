@@ -563,7 +563,7 @@ Defaults to False.</p>
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
-<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filter_gene_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filter_cell_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -773,7 +773,7 @@ Defaults to False.</p>
 <span class="normal">484</span>
 <span class="normal">485</span>
 <span class="normal">486</span>
-<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1066,7 +1066,7 @@ Defaults to "2".</p>
 <span class="normal">662</span>
 <span class="normal">663</span>
 <span class="normal">664</span>
-<span class="normal">665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
@@ -1234,7 +1234,7 @@ Defaults to "2".</p>
             <span class="c1"># Reconstruct collection using keys</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Artifact</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">files</span><span class="p">],</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -1325,7 +1325,7 @@ Defaults to "2".</p>
 <span class="normal">802</span>
 <span class="normal">803</span>
 <span class="normal">804</span>
-<span class="normal">805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1558,7 +1558,13 @@ Defaults to "2".</p>
 <span class="normal">964</span>
 <span class="normal">965</span>
 <span class="normal">966</span>
-<span class="normal">967</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">967</span>
+<span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="c1"># import palantir</span>
 
     <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>
@@ -1572,9 +1578,15 @@ Defaults to "2".</p>
     <span class="c1"># else:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting post processing&quot;</span><span class="p">)</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;X_pca&quot;</span><span class="p">)</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_2&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_1&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_0.5&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_2&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;igraph&quot;</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_1&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;igraph&quot;</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s2">&quot;leiden_0.5&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;igraph&quot;</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">2</span>
+    <span class="p">)</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
     <span class="n">mid</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;dataset_id&quot;</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span> <span class="k">else</span> <span class="s2">&quot;unknown_id&quot;</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
@@ -1587,11 +1599,11 @@ Defaults to "2".</p>
     <span class="n">NEWOBS</span> <span class="o">=</span> <span class="s2">&quot;clust_cell_type&quot;</span>
     <span class="n">MINCELLS</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">MAXSIM</span> <span class="o">=</span> <span class="mf">0.94</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 
-    <span class="kn">import</span><span class="w"> </span><span class="nn">bionty</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bt</span>
+    <span class="kn">import</span> <span class="nn">bionty</span> <span class="k">as</span> <span class="nn">bt</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
+    <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
 
     <span class="n">remap_stages</span> <span class="o">=</span> <span class="p">{</span><span class="n">u</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">v</span><span class="p">}</span>
 
