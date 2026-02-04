@@ -264,8 +264,9 @@ class Preprocessor:
         # For genes that are already ENS IDs, use them directly
         prev_size = adata.shape[1]
         # Handle symbol genes
+        cols_to_use = adata.var.columns.difference(genesdf.columns)
         if self.is_symbol:
-            new_var = adata.var.merge(
+            new_var = adata.var[cols_to_use].merge(
                 genesdf.drop_duplicates("symbol").set_index("symbol", drop=False),
                 left_index=True,
                 right_index=True,
@@ -275,7 +276,7 @@ class Preprocessor:
             adata = adata[:, new_var.index]
             new_var.index = new_var["ensembl_gene_id"]
         else:
-            new_var = adata.var.merge(
+            new_var = adata.var[cols_to_use].merge(
                 genesdf, left_index=True, right_index=True, how="inner"
             )
             adata = adata[:, new_var.index]

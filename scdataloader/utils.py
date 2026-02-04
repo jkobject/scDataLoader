@@ -440,6 +440,7 @@ def load_genes(
         "ncbi_gene_ids",
         "synonyms",
         "description",
+        "abbr",
     ]:
         if col in organismdf.columns:
             organismdf.drop(columns=[col], inplace=True)
