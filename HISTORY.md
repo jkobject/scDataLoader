@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Update scdataloader. [jkobject]
+
+
+2.0.12 (2026-02-02)
+-------------------
+- Release: version 2.0.12 🚀 [jkobject]
 - Update lamindb. [jkobject]
 - Debugs ci. [jkobject]
 
