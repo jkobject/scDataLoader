@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+2.1.0 (2026-02-04)
+------------------
+- Release: version 2.1.0 🚀 [jkobject]
 - Update scdataloader. [jkobject]
 
 
