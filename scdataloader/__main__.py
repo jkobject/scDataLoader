@@ -228,7 +228,7 @@ def main():
     #    return
     if args.instance is not None:
         collection = (
-            ln.Collection.using(instance=args.instance)
+            ln.Collection.connect(instance=args.instance)
             .filter(key=args.name, version=args.version)
             .first()
         )
