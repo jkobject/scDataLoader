@@ -304,7 +304,7 @@ from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, a
 # preprocess datasets
 DESCRIPTION='preprocessed by scDataLoader'
 
-cx_dataset = ln.Collection.using(instance=&quot;laminlabs/cellxgene&quot;).filter(name=&quot;cellxgene-census&quot;, version='2023-12-15').one()
+cx_dataset = ln.Collection.connect(instance=&quot;laminlabs/cellxgene&quot;).filter(name=&quot;cellxgene-census&quot;, version='2023-12-15').one()
 cx_dataset, len(cx_dataset.artifacts.all())
 
 # (OPTIONAL) if you want to do you preprocessing on a slurm cluster without internet connections,
@@ -473,5 +473,5 @@ details.</p>
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-02-04 14:40:36.769636+00:00
+Build Date UTC : 2026-02-10 13:01:15.308511+00:00
 -->

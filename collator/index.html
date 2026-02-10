@@ -112,7 +112,6 @@
     <div class="doc doc-contents first">
 
 
-
         <p>Collator for preparing gene expression data batches for the scPRINT model.</p>
 <p>This class handles the organization and preparation of gene expression data from
 different organisms, allowing for various configurations such as maximum gene list
@@ -132,7 +131,7 @@ length, normalization, binning, and gene selection strategies.</p>
         <ul class="first simple">
             <li>
               <b><code>organisms</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
+                  (<code><span title="typing.List">List</span>[str]</code>)
               –
               <div class="doc-md-description">
                 <p>List of organism ontology term IDs to include.
@@ -141,7 +140,7 @@ Samples from other organisms will be dropped (may lead to variable batch sizes).
             </li>
             <li>
               <b><code>how</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>&#39;all&#39;</code>
 )
               –
@@ -157,7 +156,7 @@ Samples from other organisms will be dropped (may lead to variable batch sizes).
             </li>
             <li>
               <b><code>org_to_id</code></b>
-                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="int">int</span>]</code>, default:
+                  (<code>dict[str, int]</code>, default:
                       <code>None</code>
 )
               –
@@ -168,7 +167,7 @@ If None, organism names are used directly. Defaults to None.</p>
             </li>
             <li>
               <b><code>valid_genes</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>None</code>
 )
               –
@@ -180,7 +179,7 @@ specific genes. Defaults to None (use all genes).</p>
             </li>
             <li>
               <b><code>max_len</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>2000</code>
 )
               –
@@ -191,7 +190,7 @@ or "random expr" selection methods. Defaults to 2000.</p>
             </li>
             <li>
               <b><code>add_zero_genes</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>0</code>
 )
               –
@@ -203,7 +202,7 @@ Defaults to 0.</p>
             </li>
             <li>
               <b><code>logp1</code></b>
-                  (<code><span title="bool">bool</span></code>, default:
+                  (<code>bool</code>, default:
                       <code>False</code>
 )
               –
@@ -214,7 +213,7 @@ Applied after normalization if both are enabled. Defaults to False.</p>
             </li>
             <li>
               <b><code>norm_to</code></b>
-                  (<code><span title="float">float</span></code>, default:
+                  (<code>float</code>, default:
                       <code>None</code>
 )
               –
@@ -225,7 +224,7 @@ are scaled so that total counts equal this value. Defaults to None (no normaliza
             </li>
             <li>
               <b><code>n_bins</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>0</code>
 )
               –
@@ -236,7 +235,7 @@ binning is applied. Binning uses quantile-based discretization. Defaults to 0.</
             </li>
             <li>
               <b><code>tp_name</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>None</code>
 )
               –
@@ -247,7 +246,7 @@ values. If None, time point values default to 0. Defaults to None.</p>
             </li>
             <li>
               <b><code>organism_name</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>&#39;organism_ontology_term_id&#39;</code>
 )
               –
@@ -258,7 +257,7 @@ term ID. Defaults to "organism_ontology_term_id".</p>
             </li>
             <li>
               <b><code>class_names</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[]</code>
 )
               –
@@ -269,7 +268,7 @@ include in the output. Defaults to [].</p>
             </li>
             <li>
               <b><code>genelist</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[]</code>
 )
               –
@@ -308,7 +307,7 @@ gene name with an 'organism' column. If None, loaded automatically using
         <ul class="first simple">
             <li>
               <b><code>organism_ids</code></b>
-                  (<code><span title="set">set</span></code>)
+                  (<code>set</code>)
               –
               <div class="doc-md-description">
                 <p>Set of organism IDs being processed.</p>
@@ -316,7 +315,7 @@ gene name with an 'organism' column. If None, loaded automatically using
             </li>
             <li>
               <b><code>start_idx</code></b>
-                  (<code><span title="dict">dict</span></code>)
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
                 <p>Mapping from organism ID to starting gene index in the model.</p>
@@ -324,7 +323,7 @@ gene name with an 'organism' column. If None, loaded automatically using
             </li>
             <li>
               <b><code>accepted_genes</code></b>
-                  (<code><span title="dict">dict</span></code>)
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
                 <p>Boolean masks for valid genes per organism.</p>
@@ -332,7 +331,7 @@ gene name with an 'organism' column. If None, loaded automatically using
             </li>
             <li>
               <b><code>to_subset</code></b>
-                  (<code><span title="dict">dict</span></code>)
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
                 <p>Boolean masks for genelist filtering per organism.</p>
@@ -355,7 +354,7 @@ gene name with an 'organism' column. If None, loaded automatically using
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="AssertionError">AssertionError</span></code>
+                  <code>AssertionError</code>
               –
               <div class="doc-md-description">
                 <p>If <code>how="some"</code> but <code>genelist</code> is empty.</p>
@@ -374,8 +373,6 @@ gene name with an 'organism' column. If None, loaded automatically using
 
 
 
-
-
 <p><span class="doc-section-title">Methods:</span></p>
     <table>
       <thead>
@@ -386,7 +383,7 @@ gene name with an 'organism' column. If None, loaded automatically using
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="__call__ (scdataloader.collator.Collator.__call__)" href="#scdataloader.collator.Collator.__call__">__call__</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.collator.Collator.__call__" href="#scdataloader.collator.Collator.__call__">__call__</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Collate a minibatch of gene expression data.</p>
@@ -488,7 +485,7 @@ gene name with an 'organism' column. If None, loaded automatically using
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">how</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
@@ -592,7 +589,6 @@ gene name with an 'organism' column. If None, loaded automatically using
 
 
 
-
 <div class="doc doc-object doc-function">
 
 
@@ -622,7 +618,7 @@ not in the configured organism list.</p>
         <ul class="first simple">
             <li>
               <b><code>batch</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="dict">dict</span>]</code>)
+                  (<code><span title="typing.List">List</span>[dict]</code>)
               –
               <div class="doc-md-description">
                 <p>List of sample dictionaries, each containing:
@@ -653,7 +649,7 @@ not in the configured organism list.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="torch.Tensor">Tensor</span>]</code>
+                  <code>dict[str, <span title="torch.Tensor">Tensor</span>]</code>
               –
               <div class="doc-md-description">
                 <p>dict[str, Tensor]: Dictionary containing collated tensors:
@@ -686,8 +682,7 @@ not in the configured organism list.</p>
   <p>Batch size in output may be smaller than input if some samples are filtered
 out due to organism mismatch.</p>
 </details>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/collator.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
 <span class="normal">146</span>
@@ -907,7 +902,7 @@ out due to organism mismatch.</p>
 <span class="normal">360</span>
 <span class="normal">361</span>
 <span class="normal">362</span>
-<span class="normal">363</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+<span class="normal">363</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collate a minibatch of gene expression data.</span>
 
@@ -1137,7 +1132,6 @@ out due to organism mismatch.</p>
   </div>
 
     </div>
-
 
 </div>
               

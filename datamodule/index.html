@@ -128,7 +128,6 @@
               Bases: <code><span title="lightning.LightningDataModule">LightningDataModule</span></code></p>
 
 
-
         <p>PyTorch Lightning DataModule for loading single-cell data from a LaminDB Collection.</p>
 <p>This DataModule provides train/val/test dataloaders with configurable sampling strategies.
 It combines MappedCollection, Dataset, and Collator to create efficient data pipelines
@@ -149,7 +148,7 @@ validation uses random sampling, and test uses sequential sampling on held-out d
         <ul class="first simple">
             <li>
               <b><code>collection_name</code></b>
-                  (<code><span title="str">str</span></code>)
+                  (<code>str</code>)
               –
               <div class="doc-md-description">
                 <p>Key of the LaminDB Collection to load.</p>
@@ -157,7 +156,7 @@ validation uses random sampling, and test uses sequential sampling on held-out d
             </li>
             <li>
               <b><code>clss_to_weight</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[&#39;organism_ontology_term_id&#39;]</code>
 )
               –
@@ -169,7 +168,7 @@ non-zero genes. Defaults to ["organism_ontology_term_id"].</p>
             </li>
             <li>
               <b><code>weight_scaler</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>10</code>
 )
               –
@@ -181,7 +180,7 @@ disable weighted sampling. Defaults to 10.</p>
             </li>
             <li>
               <b><code>n_samples_per_epoch</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>2000000</code>
 )
               –
@@ -192,7 +191,7 @@ Defaults to 2,000,000.</p>
             </li>
             <li>
               <b><code>validation_split</code></b>
-                  (<code><span title="float">float</span> | <span title="int">int</span></code>, default:
+                  (<code>float | int</code>, default:
                       <code>0.2</code>
 )
               –
@@ -203,7 +202,7 @@ of samples for validation. Defaults to 0.2.</p>
             </li>
             <li>
               <b><code>test_split</code></b>
-                  (<code><span title="float">float</span> | <span title="int">int</span></code>, default:
+                  (<code>float | int</code>, default:
                       <code>0</code>
 )
               –
@@ -215,7 +214,7 @@ nearest dataset boundary. Defaults to 0.</p>
             </li>
             <li>
               <b><code>use_default_col</code></b>
-                  (<code><span title="bool">bool</span></code>, default:
+                  (<code>bool</code>, default:
                       <code>True</code>
 )
               –
@@ -226,7 +225,7 @@ preparation. If False, no collate_fn is applied. Defaults to True.</p>
             </li>
             <li>
               <b><code>clss_to_predict</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[&#39;organism_ontology_term_id&#39;]</code>
 )
               –
@@ -238,7 +237,7 @@ targets. Must include "organism_ontology_term_id". Defaults to
             </li>
             <li>
               <b><code>hierarchical_clss</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[]</code>
 )
               –
@@ -249,7 +248,7 @@ ontology structure to be processed. Defaults to [].</p>
             </li>
             <li>
               <b><code>how</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>&#39;random expr&#39;</code>
 )
               –
@@ -260,7 +259,7 @@ ontology structure to be processed. Defaults to [].</p>
             </li>
             <li>
               <b><code>organism_col</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>&#39;organism_ontology_term_id&#39;</code>
 )
               –
@@ -271,7 +270,7 @@ Defaults to "organism_ontology_term_id".</p>
             </li>
             <li>
               <b><code>max_len</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>1000</code>
 )
               –
@@ -282,7 +281,7 @@ Defaults to 1000.</p>
             </li>
             <li>
               <b><code>replacement</code></b>
-                  (<code><span title="bool">bool</span></code>, default:
+                  (<code>bool</code>, default:
                       <code>True</code>
 )
               –
@@ -293,7 +292,7 @@ Defaults to True.</p>
             </li>
             <li>
               <b><code>gene_subset</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>None</code>
 )
               –
@@ -304,7 +303,7 @@ Useful when model only supports specific genes. Defaults to None.</p>
             </li>
             <li>
               <b><code>tp_name</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>None</code>
 )
               –
@@ -315,7 +314,7 @@ Defaults to None.</p>
             </li>
             <li>
               <b><code>assays_to_drop</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>[&#39;EFO:0030007&#39;]</code>
 )
               –
@@ -326,7 +325,7 @@ from training. Defaults to ["EFO:0030007"] (ATAC-seq).</p>
             </li>
             <li>
               <b><code>metacell_mode</code></b>
-                  (<code><span title="float">float</span></code>, default:
+                  (<code>float</code>, default:
                       <code>0.0</code>
 )
               –
@@ -337,7 +336,7 @@ Cannot be used with get_knn_cells. Defaults to 0.0.</p>
             </li>
             <li>
               <b><code>get_knn_cells</code></b>
-                  (<code><span title="bool">bool</span></code>, default:
+                  (<code>bool</code>, default:
                       <code>False</code>
 )
               –
@@ -348,7 +347,7 @@ expression data. Cannot be used with metacell_mode. Defaults to False.</p>
             </li>
             <li>
               <b><code>store_location</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>None</code>
 )
               –
@@ -359,7 +358,7 @@ labels for faster subsequent loading. Defaults to None.</p>
             </li>
             <li>
               <b><code>force_recompute_indices</code></b>
-                  (<code><span title="bool">bool</span></code>, default:
+                  (<code>bool</code>, default:
                       <code>False</code>
 )
               –
@@ -370,7 +369,7 @@ even if they exist. Defaults to False.</p>
             </li>
             <li>
               <b><code>sampler_workers</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>None</code>
 )
               –
@@ -381,7 +380,7 @@ indices. Auto-determined based on available CPUs if None. Defaults to None.</p>
             </li>
             <li>
               <b><code>sampler_chunk_size</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>None</code>
 )
               –
@@ -392,7 +391,7 @@ Auto-determined based on available memory if None. Defaults to None.</p>
             </li>
             <li>
               <b><code>organisms</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                  (<code><span title="typing.List">List</span>[str]</code>, default:
                       <code>None</code>
 )
               –
@@ -414,7 +413,7 @@ automatically. Defaults to None.</p>
             </li>
             <li>
               <b><code>n_bins</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>0</code>
 )
               –
@@ -425,7 +424,7 @@ no binning. Defaults to 0.</p>
             </li>
             <li>
               <b><code>curiculum</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>0</code>
 )
               –
@@ -436,7 +435,7 @@ increases sampling weight balance over epochs. Defaults to 0.</p>
             </li>
             <li>
               <b><code>start_at</code></b>
-                  (<code><span title="int">int</span></code>, default:
+                  (<code>int</code>, default:
                       <code>0</code>
 )
               –
@@ -471,11 +470,7 @@ num_workers, pin_memory).</p>
         <ul class="first simple">
             <li>
               <b><code>dataset</code></b>
-                  (<code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset
-
-  
-      dataclass
-   (scdataloader.data.Dataset)" href="../dataset/#scdataloader.data.Dataset">Dataset</a></code>)
+                  (<code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset" href="../dataset/#scdataloader.data.Dataset">Dataset</a></code>)
               –
               <div class="doc-md-description">
                 <p>The underlying Dataset instance.</p>
@@ -483,7 +478,7 @@ num_workers, pin_memory).</p>
             </li>
             <li>
               <b><code>classes</code></b>
-                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="int">int</span>]</code>)
+                  (<code>dict[str, int]</code>)
               –
               <div class="doc-md-description">
                 <p>Mapping from class names to number of categories.</p>
@@ -523,7 +518,7 @@ num_workers, pin_memory).</p>
             </li>
             <li>
               <b><code>test_datasets</code></b>
-                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
+                  (<code><span title="typing.List">List</span>[str]</code>)
               –
               <div class="doc-md-description">
                 <p>Paths to datasets used for testing.</p>
@@ -546,14 +541,14 @@ num_workers, pin_memory).</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="ValueError">ValueError</span></code>
+                  <code>ValueError</code>
               –
               <div class="doc-md-description">
                 <p>If "organism_ontology_term_id" not in clss_to_predict.</p>
               </div>
             </li>
             <li>
-                  <code><span title="ValueError">ValueError</span></code>
+                  <code>ValueError</code>
               –
               <div class="doc-md-description">
                 <p>If both metacell_mode &gt; 0 and get_knn_cells are True.</p>
@@ -590,8 +585,6 @@ train_loader = dm.train_dataloader()</p>
 
 
 
-
-
 <p><span class="doc-section-title">Methods:</span></p>
     <table>
       <thead>
@@ -602,7 +595,7 @@ train_loader = dm.train_dataloader()</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="predict_dataloader (scdataloader.datamodule.DataModule.predict_dataloader)" href="#scdataloader.datamodule.DataModule.predict_dataloader">predict_dataloader</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.predict_dataloader" href="#scdataloader.datamodule.DataModule.predict_dataloader">predict_dataloader</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Create a DataLoader for prediction over all training data.</p>
@@ -610,7 +603,7 @@ train_loader = dm.train_dataloader()</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="setup (scdataloader.datamodule.DataModule.setup)" href="#scdataloader.datamodule.DataModule.setup">setup</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.setup" href="#scdataloader.datamodule.DataModule.setup">setup</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Prepare data splits for training, validation, and testing.</p>
@@ -618,7 +611,7 @@ train_loader = dm.train_dataloader()</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="test_dataloader (scdataloader.datamodule.DataModule.test_dataloader)" href="#scdataloader.datamodule.DataModule.test_dataloader">test_dataloader</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.test_dataloader" href="#scdataloader.datamodule.DataModule.test_dataloader">test_dataloader</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Create the test DataLoader with sequential sampling.</p>
@@ -626,7 +619,7 @@ train_loader = dm.train_dataloader()</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="train_dataloader (scdataloader.datamodule.DataModule.train_dataloader)" href="#scdataloader.datamodule.DataModule.train_dataloader">train_dataloader</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.train_dataloader" href="#scdataloader.datamodule.DataModule.train_dataloader">train_dataloader</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Create the training DataLoader with weighted random sampling.</p>
@@ -634,7 +627,7 @@ train_loader = dm.train_dataloader()</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="val_dataloader (scdataloader.datamodule.DataModule.val_dataloader)" href="#scdataloader.datamodule.DataModule.val_dataloader">val_dataloader</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="scdataloader.datamodule.DataModule.val_dataloader" href="#scdataloader.datamodule.DataModule.val_dataloader">val_dataloader</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Create the validation DataLoader.</p>
@@ -659,7 +652,7 @@ train_loader = dm.train_dataloader()</p>
         <ul class="first simple">
             <li>
               <b><code>decoders</code></b>
-                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="int">int</span>, <span title="str">str</span>]]</code>)
+                  (<code>dict[str, dict[int, str]]</code>)
               –
               <div class="doc-md-description">
                 <p>decoders the decoders for any labels that would have been encoded</p>
@@ -667,7 +660,7 @@ train_loader = dm.train_dataloader()</p>
             </li>
             <li>
               <b><code>genes</code></b>
-                  (<code><span title="list">list</span></code>)
+                  (<code>list</code>)
               –
               <div class="doc-md-description">
                 <p>genes the genes used in this datamodule</p>
@@ -675,7 +668,7 @@ train_loader = dm.train_dataloader()</p>
             </li>
             <li>
               <b><code>labels_hierarchy</code></b>
-                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>)
+                  (<code>dict[str, dict[str, str]]</code>)
               –
               <div class="doc-md-description">
                 <p>labels_hierarchy the hierarchy of labels for any cls that would have a hierarchy</p>
@@ -890,7 +883,7 @@ train_loader = dm.train_dataloader()</p>
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span>
-<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">clss_to_weight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;organism_ontology_term_id&quot;</span><span class="p">],</span>
@@ -1136,7 +1129,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="int">int</span>, <span title="str">str</span>]]</code>
+                  <code>dict[str, dict[int, str]]</code>
               –
               <div class="doc-md-description">
                 <p>dict[str, dict[int, str]]</p>
@@ -1146,8 +1139,7 @@ train_loader = dm.train_dataloader()</p>
       </td>
     </tr>
   </tbody>
-</table>
-    </div>
+</table>    </div>
 
 </div>
 
@@ -1181,7 +1173,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="list">list</span></code>
+                  <code>list</code>
               –
               <div class="doc-md-description">
                 <p>list</p>
@@ -1191,8 +1183,7 @@ train_loader = dm.train_dataloader()</p>
       </td>
     </tr>
   </tbody>
-</table>
-    </div>
+</table>    </div>
 
 </div>
 
@@ -1226,7 +1217,7 @@ train_loader = dm.train_dataloader()</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>
+                  <code>dict[str, dict[str, str]]</code>
               –
               <div class="doc-md-description">
                 <p>dict[str, dict[str, str]]</p>
@@ -1236,11 +1227,9 @@ train_loader = dm.train_dataloader()</p>
       </td>
     </tr>
   </tbody>
-</table>
-    </div>
+</table>    </div>
 
 </div>
-
 
 
 
@@ -1281,8 +1270,7 @@ train_loader = dm.train_dataloader()</p>
     </tr>
   </tbody>
 </table>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
 <span class="normal">595</span>
@@ -1298,7 +1286,7 @@ train_loader = dm.train_dataloader()</p>
 <span class="normal">605</span>
 <span class="normal">606</span>
 <span class="normal">607</span>
-<span class="normal">608</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">predict_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+<span class="normal">608</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">predict_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a DataLoader for prediction over all training data.</span>
 
@@ -1349,7 +1337,7 @@ Test splits use entire datasets to ensure evaluation on unseen data sources.</p>
         <ul class="first simple">
             <li>
               <b><code>stage</code></b>
-                  (<code><span title="str">str</span></code>, default:
+                  (<code>str</code>, default:
                       <code>None</code>
 )
               –
@@ -1375,7 +1363,7 @@ Currently not used but kept for Lightning compatibility. Defaults to None.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+                  <code>list[str]</code>
               –
               <div class="doc-md-description">
                 <p>List[str]: List of paths to test datasets.</p>
@@ -1392,8 +1380,7 @@ Currently not used but kept for Lightning compatibility. Defaults to None.</p>
   <p>Must be called before using dataloaders. The train/val/test split is
 deterministic when loading from cache.</p>
 </details>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
 <span class="normal">347</span>
@@ -1562,7 +1549,7 @@ deterministic when loading from cache.</p>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
-<span class="normal">513</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">513</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare data splits for training, validation, and testing.</span>
 
@@ -1761,7 +1748,7 @@ deterministic when loading from cache.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, <span title="list">list</span>]</code>
+                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, list]</code>
               –
               <div class="doc-md-description">
                 <p>DataLoader | List: Test DataLoader, or empty list if no test split.</p>
@@ -1772,8 +1759,7 @@ deterministic when loading from cache.</p>
     </tr>
   </tbody>
 </table>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">579</span>
 <span class="normal">580</span>
@@ -1788,7 +1774,7 @@ deterministic when loading from cache.</p>
 <span class="normal">589</span>
 <span class="normal">590</span>
 <span class="normal">591</span>
-<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">test_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the test DataLoader with sequential sampling.</span>
 
@@ -1882,7 +1868,7 @@ distributed training without weighting.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="ValueError">ValueError</span></code>
+                  <code>ValueError</code>
               –
               <div class="doc-md-description">
                 <p>If setup() has not been called.</p>
@@ -1893,8 +1879,7 @@ distributed training without weighting.</p>
     </tr>
   </tbody>
 </table>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">515</span>
 <span class="normal">516</span>
@@ -1942,7 +1927,7 @@ distributed training without weighting.</p>
 <span class="normal">558</span>
 <span class="normal">559</span>
 <span class="normal">560</span>
-<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the training DataLoader with weighted random sampling.</span>
 
@@ -2020,7 +2005,7 @@ distributed training without weighting.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, <span title="list">list</span>]</code>
+                  <code><span title="typing.Union">Union</span>[<span title="torch.utils.data.DataLoader">DataLoader</span>, list]</code>
               –
               <div class="doc-md-description">
                 <p>DataLoader | List: Validation DataLoader, or empty list if no validation split.</p>
@@ -2031,8 +2016,7 @@ distributed training without weighting.</p>
     </tr>
   </tbody>
 </table>
-
-            <details class="mkdocstrings-source">
+            <details class="quote">
               <summary>Source code in <code>scdataloader/datamodule.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">563</span>
 <span class="normal">564</span>
@@ -2048,7 +2032,7 @@ distributed training without weighting.</p>
 <span class="normal">574</span>
 <span class="normal">575</span>
 <span class="normal">576</span>
-<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the validation DataLoader.</span>
 
@@ -2074,7 +2058,6 @@ distributed training without weighting.</p>
   </div>
 
     </div>
-
 
 </div>
               

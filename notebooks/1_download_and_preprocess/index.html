@@ -335,6 +335,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     processEnvironments: true
                 },
                 displayAlign: 'center',
+                messageStyle: 'none',
                 CommonHTML: {
                     linebreaks: {
                     automatic: true
@@ -612,10 +613,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">bionty</span> <span class="k">as</span> <span class="nn">bt</span>
-<span class="kn">import</span> <span class="nn">lamindb</span> <span class="k">as</span> <span class="nn">ln</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bionty</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lamindb</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ln</span>
 
-<span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scdataloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
@@ -716,7 +717,7 @@ from scdataloader import utils
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-4">
@@ -729,9 +730,9 @@ from scdataloader import utils
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"laminlabs/cellxgene"</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"cellxgene-census"</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"laminlabs/cellxgene"</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"cellxgene-census"</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-4">list(ln.Collection.using(instance="laminlabs/cellxgene").filter(name="cellxgene-census").all())</div>
+<div class="clipboard-copy-txt" id="cell-4">list(ln.Collection.connect(instance="laminlabs/cellxgene").filter(name="cellxgene-census").all())</div>
 </div>
 </div>
 </div>
@@ -741,7 +742,7 @@ from scdataloader import utils
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[ ]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>[Collection(uid='dMyEX3NTfKOEYXyMu591', version='2023-12-15', is_latest=False, name='cellxgene-census', hash='0NB32iVKG5ttaW5XILvG', visibility=1, created_by_id=1, transform_id=19, run_id=24, updated_at='2024-01-30 09:09:49 UTC'),
  Collection(uid='dMyEX3NTfKOEYXyMKDAQ', version='2023-07-25', is_latest=False, name='cellxgene-census', hash='pEJ9uvIeTLvHkZW2TBT5', visibility=1, created_by_id=1, transform_id=18, run_id=23, updated_at='2024-01-30 09:06:05 UTC'),
@@ -757,7 +758,7 @@ from scdataloader import utils
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-5">
@@ -770,10 +771,10 @@ from scdataloader import utils
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">cx_dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"laminlabs/cellxgene"</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"cellxgene-census"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">'2023-12-15'</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">cx_dataset</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"laminlabs/cellxgene"</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"cellxgene-census"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">'2023-12-15'</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
 <span class="n">cx_dataset</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cx_dataset</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5">cx_dataset = ln.Collection.using(instance="laminlabs/cellxgene").filter(name="cellxgene-census", version='2023-12-15').one()
+<div class="clipboard-copy-txt" id="cell-5">cx_dataset = ln.Collection.connect(instance="laminlabs/cellxgene").filter(name="cellxgene-census", version='2023-12-15').one()
 cx_dataset, len(cx_dataset.artifacts.all())</div>
 </div>
 </div>
@@ -791,7 +792,7 @@ cx_dataset, len(cx_dataset.artifacts.all())</div>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[ ]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>(Collection(uid='dMyEX3NTfKOEYXyMu591', version='2023-12-15', is_latest=False, name='cellxgene-census', hash='0NB32iVKG5ttaW5XILvG', visibility=1, created_by_id=1, transform_id=19, run_id=24, updated_at='2024-01-30 09:09:49 UTC'),
  1113)</pre>
@@ -886,7 +887,7 @@ mydataset = utils.load_dataset_local(lb, cx_dataset, "~/scdataloader/", name="ce
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">scdataloader.preprocess</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scdataloader.preprocess</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">LaminPreprocessor</span><span class="p">,</span>
     <span class="n">additional_postprocess</span><span class="p">,</span>
     <span class="n">additional_preprocess</span><span class="p">,</span>
