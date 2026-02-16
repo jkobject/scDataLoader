@@ -3,7 +3,9 @@ theme:
   name: readthedocs
   # analytics:
   # gtag: G-ABC123
+  logo: docs/scdataloader.png
 site_url: https://www.jkobject.com/scdataloader/
+
 nav:
   - Home: index.md
   - Example notebooks:
