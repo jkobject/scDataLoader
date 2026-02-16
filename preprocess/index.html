@@ -31,7 +31,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-          <a href=".." class="icon icon-home"> scdataloader
+          <a href="..">
+          <img src="../docs/scdataloader.png" class="logo" alt="Logo"/>
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
@@ -118,6 +119,7 @@
     <div class="doc doc-contents first">
 
 
+
         <p>Prepare data into training, valid and test split. Normalize raw expression
 values, binning or using other transform into the preset model input format.</p>
 
@@ -140,7 +142,7 @@ or the hugo gene symbols nomenclature (if the later, set <code>is_symbol</code> 
         <ul class="first simple">
             <li>
               <b><code>filter_gene_by_counts</code></b>
-                  (<code>int or bool</code>, default:
+                  (<code><span title="int">int</span> or <span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -151,7 +153,7 @@ If int, filters genes with counts. Defaults to False.</p>
             </li>
             <li>
               <b><code>filter_cell_by_counts</code></b>
-                  (<code>int or bool</code>, default:
+                  (<code><span title="int">int</span> or <span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -162,7 +164,7 @@ If int, filters cells with counts. Defaults to False.</p>
             </li>
             <li>
               <b><code>normalize_sum</code></b>
-                  (<code>float or bool</code>, default:
+                  (<code><span title="float">float</span> or <span title="bool">bool</span></code>, default:
                       <code>10000.0</code>
 )
               –
@@ -173,7 +175,7 @@ Defaults to 1e4.</p>
             </li>
             <li>
               <b><code>n_hvg_for_postp</code></b>
-                  (<code>int or bool</code>, default:
+                  (<code><span title="int">int</span> or <span title="bool">bool</span></code>, default:
                       <code>0</code>
 )
               –
@@ -184,7 +186,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>use_layer</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>None</code>
 )
               –
@@ -195,7 +197,7 @@ Defaults to None.</p>
             </li>
             <li>
               <b><code>is_symbol</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -206,7 +208,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>hvg_flavor</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;seurat_v3&#39;</code>
 )
               –
@@ -217,7 +219,7 @@ See :func:<code>scanpy.pp.highly_variable_genes</code> for more details. Default
             </li>
             <li>
               <b><code>binning</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>None</code>
 )
               –
@@ -227,7 +229,7 @@ See :func:<code>scanpy.pp.highly_variable_genes</code> for more details. Default
             </li>
             <li>
               <b><code>result_binned_key</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;X_binned&#39;</code>
 )
               –
@@ -238,7 +240,7 @@ Defaults to "X_binned".</p>
             </li>
             <li>
               <b><code>length_normalize</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -249,7 +251,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>force_preprocess</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -260,7 +262,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>min_dataset_size</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>100</code>
 )
               –
@@ -271,7 +273,7 @@ Defaults to 100.</p>
             </li>
             <li>
               <b><code>min_valid_genes_id</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>10000</code>
 )
               –
@@ -282,7 +284,7 @@ Defaults to 10_000.</p>
             </li>
             <li>
               <b><code>min_nnz_genes</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>200</code>
 )
               –
@@ -293,7 +295,7 @@ Defaults to 200.</p>
             </li>
             <li>
               <b><code>maxdropamount</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>50</code>
 )
               –
@@ -304,7 +306,7 @@ Defaults to 2.</p>
             </li>
             <li>
               <b><code>madoutlier</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>5</code>
 )
               –
@@ -315,7 +317,7 @@ Defaults to 5.</p>
             </li>
             <li>
               <b><code>pct_mt_outlier</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>8</code>
 )
               –
@@ -326,7 +328,7 @@ Defaults to 8.</p>
             </li>
             <li>
               <b><code>batch_keys</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>, default:
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
                       <code>[&#39;assay_ontology_term_id&#39;, &#39;self_reported_ethnicity_ontology_term_id&#39;, &#39;sex_ontology_term_id&#39;, &#39;donor_id&#39;, &#39;suspension_type&#39;]</code>
 )
               –
@@ -337,7 +339,7 @@ This arg is used in the highly variable gene selection step.</p>
             </li>
             <li>
               <b><code>skip_validate</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>True</code>
 )
               –
@@ -370,7 +372,7 @@ Defaults to None.</p>
             </li>
             <li>
               <b><code>do_postp</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>True</code>
 )
               –
@@ -381,7 +383,7 @@ Defaults to True.</p>
             </li>
             <li>
               <b><code>organisms</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>, default:
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
                       <code>[&#39;NCBITaxon:9606&#39;, &#39;NCBITaxon:10090&#39;]</code>
 )
               –
@@ -392,7 +394,7 @@ Defaults to ["NCBITaxon:9606", "NCBITaxon:10090"].</p>
             </li>
             <li>
               <b><code>use_raw</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>True</code>
 )
               –
@@ -403,7 +405,7 @@ Defaults to True.</p>
             </li>
             <li>
               <b><code>keepdata</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -414,7 +416,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>drop_non_primary</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -428,6 +430,8 @@ Defaults to False.</p>
     </tr>
   </tbody>
 </table>
+
+
 
 
 
@@ -560,7 +564,7 @@ Defaults to False.</p>
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
-<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filter_gene_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filter_cell_by_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -699,9 +703,11 @@ Defaults to False.</p>
 
 
 
+
   </div>
 
     </div>
+
 
 </div>
 
@@ -717,7 +723,10 @@ Defaults to False.</p>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.Preprocessor" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.Preprocessor (scdataloader.preprocess.Preprocessor)" href="#scdataloader.preprocess.Preprocessor">Preprocessor</a></code></p>
+
+
+
 
 
 
@@ -738,7 +747,7 @@ Defaults to False.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.preprocess.LaminPreprocessor.__call__" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="__call__ (scdataloader.preprocess.LaminPreprocessor.__call__)" href="#scdataloader.preprocess.LaminPreprocessor.__call__">__call__</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Process data with format controlling different input value wrapping.</p>
@@ -765,7 +774,7 @@ Defaults to False.</p>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
-<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -785,6 +794,7 @@ Defaults to False.</p>
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -832,7 +842,7 @@ log1p fixed-sum normalized counts, etc.</p>
             </li>
             <li>
               <b><code>name</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;preprocessed dataset&#39;</code>
 )
               –
@@ -842,7 +852,7 @@ log1p fixed-sum normalized counts, etc.</p>
             </li>
             <li>
               <b><code>description</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;preprocessed dataset using scprint&#39;</code>
 )
               –
@@ -853,7 +863,7 @@ Defaults to "preprocessed dataset using scprint".</p>
             </li>
             <li>
               <b><code>start_at</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>0</code>
 )
               –
@@ -864,7 +874,7 @@ Defaults to 0.</p>
             </li>
             <li>
               <b><code>version</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;2&#39;</code>
 )
               –
@@ -878,7 +888,8 @@ Defaults to "2".</p>
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">490</span>
 <span class="normal">491</span>
@@ -1056,7 +1067,7 @@ Defaults to "2".</p>
 <span class="normal">663</span>
 <span class="normal">664</span>
 <span class="normal">665</span>
-<span class="normal">666</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">666</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;preprocessed dataset&quot;</span><span class="p">,</span>
@@ -1245,6 +1256,7 @@ Defaults to "2".</p>
 
     </div>
 
+
 </div>
 
 <div class="doc doc-object doc-function">
@@ -1258,7 +1270,8 @@ Defaults to "2".</p>
 
     <div class="doc doc-contents first">
 
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">753</span>
 <span class="normal">754</span>
@@ -1313,7 +1326,7 @@ Defaults to "2".</p>
 <span class="normal">803</span>
 <span class="normal">804</span>
 <span class="normal">805</span>
-<span class="normal">806</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">806</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_preprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;self_reported_ethnicity_ontology_term_id&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1384,7 +1397,8 @@ Defaults to "2".</p>
 
     <div class="doc doc-contents first">
 
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/preprocess.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">809</span>
 <span class="normal">810</span>
@@ -1551,7 +1565,7 @@ Defaults to "2".</p>
 <span class="normal">971</span>
 <span class="normal">972</span>
 <span class="normal">973</span>
-<span class="normal">974</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<span class="normal">974</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">additional_postprocess</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="c1"># import palantir</span>
 
     <span class="c1"># define the &quot;up to&quot; 10 neighbors for each cells and add to obs</span>
@@ -1586,11 +1600,11 @@ Defaults to "2".</p>
     <span class="n">NEWOBS</span> <span class="o">=</span> <span class="s2">&quot;clust_cell_type&quot;</span>
     <span class="n">MINCELLS</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">MAXSIM</span> <span class="o">=</span> <span class="mf">0.94</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 
-    <span class="kn">import</span><span class="w"> </span><span class="nn">bionty</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bt</span>
+    <span class="kn">import</span> <span class="nn">bionty</span> <span class="k">as</span> <span class="nn">bt</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
+    <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span>
 
     <span class="n">remap_stages</span> <span class="o">=</span> <span class="p">{</span><span class="n">u</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MAIN_HUMAN_MOUSE_DEV_STAGE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">v</span><span class="p">}</span>
 

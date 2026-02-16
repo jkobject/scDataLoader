@@ -31,7 +31,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-          <a href=".." class="icon icon-home"> scdataloader
+          <a href="..">
+          <img src="../docs/scdataloader.png" class="logo" alt="Logo"/>
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
@@ -124,6 +125,7 @@
               Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
 
 
+
         <p>PyTorch Dataset for loading single-cell data from a LaminDB Collection.</p>
 <p>This class wraps LaminDB's MappedCollection to provide additional features:
 - Management of hierarchical ontology labels (cell type, tissue, disease, etc.)
@@ -166,8 +168,8 @@ in the dataset. Defaults to None.</p>
             </li>
             <li>
               <b><code>clss_to_predict</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>, default:
-                      <code>list()</code>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code><span title="list">list</span>()</code>
 )
               –
               <div class="doc-md-description">
@@ -177,8 +179,8 @@ targets. These will be integer-encoded in the output. Defaults to [].</p>
             </li>
             <li>
               <b><code>hierarchical_clss</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>, default:
-                      <code>list()</code>
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
+                      <code><span title="list">list</span>()</code>
 )
               –
               <div class="doc-md-description">
@@ -196,7 +198,7 @@ Defaults to [].</p>
             </li>
             <li>
               <b><code>join_vars</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>None</code>
 )
               –
@@ -208,7 +210,7 @@ Defaults to None.</p>
             </li>
             <li>
               <b><code>metacell_mode</code></b>
-                  (<code>float</code>, default:
+                  (<code><span title="float">float</span></code>, default:
                       <code>0.0</code>
 )
               –
@@ -219,7 +221,7 @@ expression instead of single-cell. Defaults to 0.0.</p>
             </li>
             <li>
               <b><code>get_knn_cells</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -231,7 +233,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>store_location</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>None</code>
 )
               –
@@ -242,7 +244,7 @@ Defaults to None.</p>
             </li>
             <li>
               <b><code>force_recompute_indices</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -285,7 +287,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>organisms</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>)
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>List of organism ontology term IDs in the dataset.</p>
@@ -293,7 +295,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>class_topred</code></b>
-                  (<code>dict[str, set]</code>)
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="set">set</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>Mapping from class name to set of valid labels.</p>
@@ -301,7 +303,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>labels_groupings</code></b>
-                  (<code>dict[str, dict]</code>)
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>Hierarchical groupings for ontology classes.</p>
@@ -309,7 +311,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>encoder</code></b>
-                  (<code>dict[str, dict]</code>)
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>Label encoders mapping strings to integers.</p>
@@ -332,7 +334,7 @@ Defaults to False.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>ValueError</code>
+                  <code><span title="ValueError">ValueError</span></code>
               –
               <div class="doc-md-description">
                 <p>If genedf is None and "organism_ontology_term_id" is not in clss_to_predict.</p>
@@ -368,6 +370,8 @@ sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
 
 
 
+
+
 <p><span class="doc-section-title">Methods:</span></p>
     <table>
       <thead>
@@ -378,7 +382,7 @@ sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.define_hierarchies" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="define_hierarchies (scdataloader.data.Dataset.define_hierarchies)" href="#scdataloader.data.Dataset.define_hierarchies">define_hierarchies</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Define hierarchical label groupings from ontology relationships.</p>
@@ -386,7 +390,7 @@ sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.get_label_cats" href="#scdataloader.data.Dataset.get_label_cats">get_label_cats</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="get_label_cats (scdataloader.data.Dataset.get_label_cats)" href="#scdataloader.data.Dataset.get_label_cats">get_label_cats</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Get combined categorical codes for one or more label columns.</p>
@@ -394,7 +398,7 @@ sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="scdataloader.data.Dataset.get_unseen_mapped_dataset_elements" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="get_unseen_mapped_dataset_elements (scdataloader.data.Dataset.get_unseen_mapped_dataset_elements)" href="#scdataloader.data.Dataset.get_unseen_mapped_dataset_elements">get_unseen_mapped_dataset_elements</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Get genes marked as unseen for a specific sample.</p>
@@ -410,6 +414,7 @@ sample = dataset[0]  # Returns dict with "X" and encoded labels</p>
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -449,7 +454,7 @@ leaf terms (directly predictable) come first.</p>
         <ul class="first simple">
             <li>
               <b><code>clsses</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>)
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>List of ontology column names to process.</p>
@@ -472,7 +477,7 @@ leaf terms (directly predictable) come first.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>ValueError</code>
+                  <code><span title="ValueError">ValueError</span></code>
               –
               <div class="doc-md-description">
                 <p>If a class name is not in the supported ontology types.</p>
@@ -489,7 +494,8 @@ leaf terms (directly predictable) come first.</p>
   <p>Modifies self.labels_groupings, self.class_topred, and
 self.mapped_dataset.encoders in place.</p>
 </details>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">244</span>
 <span class="normal">245</span>
@@ -637,7 +643,7 @@ self.mapped_dataset.encoders in place.</p>
 <span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
-<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">define_hierarchies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clsses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Define hierarchical label groupings from ontology relationships.</span>
 
@@ -740,7 +746,7 @@ self.mapped_dataset.encoders in place.</p>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">groupings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># that should not happen</span>
-                <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>
+                <span class="kn">import</span> <span class="nn">pdb</span>
 
                 <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
                 <span class="n">groupings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -819,7 +825,7 @@ stratified sampling.</p>
         <ul class="first simple">
             <li>
               <b><code>obs_keys</code></b>
-                  (<code>str | <span title="typing.List">List</span>[str]</code>)
+                  (<code><span title="str">str</span> | <span title="typing.List">List</span>[<span title="str">str</span>]</code>)
               –
               <div class="doc-md-description">
                 <p>Column name(s) to retrieve and combine.</p>
@@ -854,7 +860,8 @@ Shape: (n_samples,).</p>
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
 <span class="normal">201</span>
@@ -883,7 +890,7 @@ Shape: (n_samples,).</p>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_label_cats</span><span class="p">(</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_label_cats</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obs_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -945,7 +952,7 @@ marked as unseen) for the sample at the given index.</p>
         <ul class="first simple">
             <li>
               <b><code>idx</code></b>
-                  (<code>int</code>)
+                  (<code><span title="int">int</span></code>)
               –
               <div class="doc-md-description">
                 <p>Sample index in the dataset.</p>
@@ -968,7 +975,7 @@ marked as unseen) for the sample at the given index.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>list[str]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
               –
               <div class="doc-md-description">
                 <p>List[str]: List of unseen gene identifiers.</p>
@@ -979,7 +986,8 @@ marked as unseen) for the sample at the given index.</p>
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>scdataloader/data.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
 <span class="normal">230</span>
@@ -994,7 +1002,7 @@ marked as unseen) for the sample at the given index.</p>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_unseen_mapped_dataset_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get genes marked as unseen for a specific sample.</span>
 
@@ -1020,6 +1028,7 @@ marked as unseen) for the sample at the given index.</p>
 
     </div>
 
+
 </div>
 
 <div class="doc doc-object doc-class">
@@ -1035,6 +1044,7 @@ marked as unseen) for the sample at the given index.</p>
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
               Bases: <code><span title="torch.utils.data.Dataset">Dataset</span></code></p>
+
 
 
         <p>Simple PyTorch Dataset wrapper for a single AnnData object.</p>
@@ -1063,7 +1073,7 @@ that isn't stored in LaminDB.</p>
             </li>
             <li>
               <b><code>obs_to_output</code></b>
-                  (<code><span title="typing.List">List</span>[str]</code>, default:
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
                       <code>[]</code>
 )
               –
@@ -1074,7 +1084,7 @@ output dictionaries. Defaults to [].</p>
             </li>
             <li>
               <b><code>layer</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>None</code>
 )
               –
@@ -1085,7 +1095,7 @@ uses adata.X. Defaults to None.</p>
             </li>
             <li>
               <b><code>get_knn_cells</code></b>
-                  (<code>bool</code>, default:
+                  (<code><span title="bool">bool</span></code>, default:
                       <code>False</code>
 )
               –
@@ -1097,7 +1107,7 @@ Defaults to False.</p>
             </li>
             <li>
               <b><code>encoder</code></b>
-                  (<code>dict[str, dict]</code>, default:
+                  (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>, default:
                       <code>None</code>
 )
               –
@@ -1132,7 +1142,7 @@ names to encoding dictionaries (str -&gt; int). Defaults to None.</p>
             </li>
             <li>
               <b><code>encoder</code></b>
-                  (<code>dict</code>)
+                  (<code><span title="dict">dict</span></code>)
               –
               <div class="doc-md-description">
                 <p>Label encoders.</p>
@@ -1171,7 +1181,7 @@ names to encoding dictionaries (str -&gt; int). Defaults to None.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>ValueError</code>
+                  <code><span title="ValueError">ValueError</span></code>
               –
               <div class="doc-md-description">
                 <p>If get_knn_cells=True but "connectivities" not in adata.obsp.</p>
@@ -1198,6 +1208,8 @@ loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
 </blockquote>
 </blockquote>
 </details>
+
+
 
 
 
@@ -1262,7 +1274,7 @@ loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
-<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
     <span class="n">obs_to_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
@@ -1333,9 +1345,11 @@ loader = DataLoader(dataset, batch_size=32, collate_fn=collator)</p>
 
 
 
+
   </div>
 
     </div>
+
 
 </div>
               
