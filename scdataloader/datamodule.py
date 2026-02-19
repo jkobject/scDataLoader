@@ -204,6 +204,7 @@ class DataModule(L.LightningDataModule):
                 genedf=genedf,
                 n_bins=n_bins,
             )
+        self.gene_subset = gene_subset
         self.n_bins = n_bins
         self.validation_split = validation_split
         self.test_split = test_split
@@ -294,7 +295,10 @@ class DataModule(L.LightningDataModule):
         Returns:
             list
         """
-        return self.dataset.genedf.index.tolist()
+        if self.gene_subset is not None:
+            return self.gene_subset
+        else:
+            return self.dataset.genedf.index.tolist()
 
     @property
     def genes_dict(self):
@@ -932,6 +936,17 @@ class LabelWeightedSampler(Sampler[int]):
         print(f"Processing {n:,} elements in {n_chunks} chunks...")
 
         # Process in chunks to limit memory usage
+        if n_workers == 1:
+            # Process sequentially without multiprocessing
+            for i in tqdm(
+                range(n_chunks), total=n_chunks, desc="Processing chunks sequentially"
+            ):
+                start_idx = i * chunk_size
+                end_idx = min((i + 1) * chunk_size, n)
+                results.append(
+                    self._process_chunk_with_slice((start_idx, end_idx, labels))
+                )
+            return self._merge_chunk_results(results)
         with ProcessPoolExecutor(
             max_workers=n_workers, mp_context=mp.get_context("spawn")
         ) as executor:
