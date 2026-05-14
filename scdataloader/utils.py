@@ -740,6 +740,32 @@ def length_normalize(adata: AnnData, gene_lengths: list) -> AnnData:
     return adata
 
 
+def _lookup_name(obj, ontology_id):
+    """Resolve an ontology term's name from its ontology id.
+
+    Handles comma-joined compound ids (e.g. CellxGene's
+    ``self_reported_ethnicity_ontology_term_id`` for multi-ethnic donors) by
+    resolving each part and rejoining the names. Returns None if any part is
+    absent from the database, so callers can skip unmappable terms instead of
+    raising.
+
+    Args:
+        obj: the bionty registry to look the id up in (e.g. bt.Ethnicity).
+        ontology_id (str): a single ontology id, or several joined by commas.
+
+    Returns:
+        str or None: the resolved name(s), comma-joined for compound ids, or
+            None if any part could not be found.
+    """
+    names = []
+    for part in str(ontology_id).split(","):
+        record = obj.filter(ontology_id=part.strip()).one_or_none()
+        if record is None:
+            return None
+        names.append(record.name)
+    return ",".join(names)
+
+
 def translate(
     val: Union[str, list, set, Counter, dict], t: str = "cell_type_ontology_term_id"
 ) -> dict:
@@ -776,11 +802,11 @@ def translate(
     else:
         return None
     if type(val) is str:
-        return {val: obj.filter(ontology_id=val).one().name}
+        return {val: _lookup_name(obj, val)}
     elif type(val) is dict or type(val) is Counter:
-        return {obj.filter(ontology_id=k).one().name: v for k, v in val.items()}
+        return {_lookup_name(obj, k): v for k, v in val.items()}
     elif type(val) is set:
-        return {i: obj.filter(ontology_id=i).one().name for i in val}
+        return {i: _lookup_name(obj, i) for i in val}
     else:
-        rl = {i: obj.filter(ontology_id=i).one().name for i in set(val)}
+        rl = {i: _lookup_name(obj, i) for i in set(val)}
         return [rl.get(i, None) for i in val]
