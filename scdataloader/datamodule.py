@@ -66,6 +66,7 @@ class DataModule(L.LightningDataModule):
         n_bins: int = 0,
         curiculum: int = 0,
         start_at: int = 0,
+        restrict_to_subset: Optional[int] = None,
         **kwargs,
     ):
         """
@@ -136,6 +137,7 @@ class DataModule(L.LightningDataModule):
                 increases sampling weight balance over epochs. Defaults to 0.
             start_at (int, optional): Starting index for resuming inference. Requires same
                 number of GPUs as previous run. Defaults to 0.
+            restrict_to_subset (int, optional): If set, restrict sampling to this many topK
             **kwargs: dict[str, Any]: Additional arguments passed to PyTorch DataLoader (e.g., batch_size,
                 num_workers, pin_memory).
 
@@ -230,6 +232,7 @@ class DataModule(L.LightningDataModule):
         self.test_datasets = []
         self.force_recompute_indices = force_recompute_indices
         self.curiculum = curiculum
+        self.restrict_to_subset = restrict_to_subset
         self.valid_idx = []
         self.test_idx = []
         super().__init__()
@@ -549,6 +552,7 @@ class DataModule(L.LightningDataModule):
                     store_location=self.store_location,
                     force_recompute_indices=self.force_recompute_indices,
                     curiculum=self.curiculum,
+                    restrict_to_subset=self.restrict_to_subset,  # Only sample from top 100k most expressed cells within each class to save memory
                 )
             except ValueError as e:
                 raise ValueError(str(e) + " Have you run `datamodule.setup()`?")
@@ -619,6 +623,7 @@ class LabelWeightedSampler(Sampler[int]):
     num_samples: int
     element_weights: Optional[torch.Tensor]
     replacement: bool
+    restrict_to_subset: Optional[int]
 
     def __init__(
         self,
@@ -632,6 +637,7 @@ class LabelWeightedSampler(Sampler[int]):
         store_location: str = None,
         force_recompute_indices: bool = False,
         curiculum: int = 0,
+        restrict_to_subset: Optional[int] = None,
     ) -> None:
         """
         Weighted random sampler balancing both class frequencies and element weights.
@@ -675,6 +681,10 @@ class LabelWeightedSampler(Sampler[int]):
             klass_indices (torch.Tensor): Concatenated indices for all classes.
             klass_offsets (torch.Tensor): Starting offset for each class in klass_indices.
             count (int): Number of times __iter__ has been called (for curriculum).
+            element_weights (torch.Tensor): Optional per-element weights.
+            replacement (bool): Whether sampling is with replacement.
+            num_samples (int): Number of samples to draw per epoch.
+            restrict_to_subset (Optional[int]): If set, restrict sampling to this many topK samples by their weights.
 
         Example:
             >>> sampler = LabelWeightedSampler(
@@ -836,6 +846,16 @@ class LabelWeightedSampler(Sampler[int]):
                 # This is a critical point for memory
                 current_element_weights_slice = self.element_weights[klass_index]
 
+                if self.restrict_to_subset:
+                    # keep only the top N weights to sample from
+                    if current_element_weights_slice.shape[0] > self.restrict_to_subset:
+                        top_weights, top_indices = torch.topk(
+                            current_element_weights_slice, self.restrict_to_subset
+                        )
+                        klass_index = klass_index[top_indices]
+                        current_element_weights_slice = top_weights
+
+                # if too large to sample by weights, take the a random subset of the class to sample from
                 if current_element_weights_slice.shape[0] >= (2**24) - 1:
                     ind = torch.randperm(len(klass_index))[: (2**24) - 10]
                     klass_index = klass_index[ind]
@@ -1045,10 +1065,8 @@ class RankShardSampler(Sampler[int]):
 
         # contiguous chunk per rank (last rank may be shorter)
         if self.start_at > 0:
-            print(
-                "!!!!ATTENTION: make sure that you are running on the exact same \
-                number of GPU as your previous run!!!!!"
-            )
+            print("!!!!ATTENTION: make sure that you are running on the exact same \
+                number of GPU as your previous run!!!!!")
         print(f"Sharding data of size {data_len} over {self.world_size} ranks")
         per_rank = math.ceil(self.data_len / self.world_size)
         self.start = int((self.start_at / self.world_size) + (self.rank * per_rank))
