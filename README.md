@@ -63,7 +63,7 @@ pip install scdataloader
 # or
 pip install scDataLoader[dev] # for dev dependencies
 
-lamin init --storage ./testdb --name test --schema bionty
+lamin init --storage ./testdb --name test --modules bionty
 ```
 
 if you start with lamin and had to do a `lamin init`, you will also need to
@@ -107,7 +107,7 @@ pip install -e scDataLoader[dev]
 
 ```python
 # initialize a local lamin database
-#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
+#! lamin init --storage ./cellxgene --name cellxgene --modules bionty
 from scdataloader import utils, Preprocessor, DataModule
 
 
@@ -143,7 +143,7 @@ more
 
 ```python
 # initialize a local lamin database
-#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
+#! lamin init --storage ./cellxgene --name cellxgene --modules bionty
 
 from scdataloader import utils, Preprocessor, SimpleAnnDataset, Collator, DataLoader
 
@@ -203,7 +203,7 @@ scDataLoader as a script (a notebook version is also available in
 
 ```python
 # initialize a local lamin database
-#! lamin init --storage ./cellxgene --name cellxgene --schema bionty
+#! lamin init --storage ./cellxgene --name cellxgene --modules bionty
 
 from scdataloader import utils
 from scdataloader.preprocess import LaminPreprocessor, additional_postprocess, additional_preprocess
