@@ -866,10 +866,12 @@ def additional_postprocess(adata):
 
     adata.obs[NEWOBS] = adata.obs[NEWOBS].map(relab)
 
+    # scipy >= 1.15 no longer accepts a pandas Series for sparse boolean
+    # indexing of AnnData.X, so cast the mask to a numpy array.
     cluster_means = pd.DataFrame(
         np.array(
             [
-                adata.X[adata.obs[NEWOBS] == i].mean(axis=0)
+                adata.X[(adata.obs[NEWOBS] == i).to_numpy()].mean(axis=0)
                 for i in adata.obs[NEWOBS].unique()
             ]
         )[:, 0, :],
