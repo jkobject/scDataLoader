@@ -771,6 +771,7 @@ class LabelWeightedSampler(Sampler[int]):
         super(LabelWeightedSampler, self).__init__(None)
         self.count = 0
         self.curiculum = curiculum
+        self.restrict_to_subset = restrict_to_subset
 
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion

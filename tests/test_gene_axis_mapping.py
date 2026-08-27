@@ -8,6 +8,7 @@ import pandas as pd
 
 from scdataloader import DataModule
 from scdataloader.collator import Collator, build_axis_mapping
+from scdataloader.datamodule import LabelWeightedSampler
 
 
 def test_gene_embeddings_is_an_explicit_datamodule_cli_parameter():
@@ -74,3 +75,18 @@ def test_genes_dict_uses_embedding_subset_order():
         "org_a": ["g0"],
         "org_b": ["g2", "g3"],
     }
+
+
+def test_weighted_sampler_initializes_and_applies_subset_restriction():
+    sampler = LabelWeightedSampler(
+        labels=np.array([0, 0, 1]),
+        num_samples=8,
+        weight_scaler=10,
+        element_weights=np.array([0.1, 0.9, 1.0]),
+        n_workers=1,
+        chunk_size=10,
+        restrict_to_subset=1,
+    )
+
+    assert sampler.restrict_to_subset == 1
+    assert set(iter(sampler)) == {1}
