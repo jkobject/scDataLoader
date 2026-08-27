@@ -1,3 +1,4 @@
+import hashlib
 import math
 import multiprocessing as mp
 import os
@@ -12,6 +13,7 @@ import lightning as L
 import numpy as np
 import pandas as pd
 import torch
+from lamindb.core.storage._anndata_accessor import _safer_read_index
 from torch.utils.data import DataLoader, Sampler, Subset
 from torch.utils.data.sampler import (
     RandomSampler,
@@ -21,8 +23,9 @@ from torch.utils.data.sampler import (
 )
 from tqdm import tqdm
 
-from .collator import Collator
+from .collator import Collator, build_axis_mapping
 from .data import Dataset
+from .mapped import _Connect
 from .utils import fileToList, getBiomartTable, listToFile
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +41,7 @@ class DataModule(L.LightningDataModule):
         n_samples_per_epoch: int = 2_000_000,
         validation_split: float = 0.2,
         test_split: float = 0,
+        gene_embeddings: str = "",
         use_default_col: bool = True,
         # this is for the mappedCollection
         clss_to_predict: List[str] = ["organism_ontology_term_id"],
@@ -94,6 +98,9 @@ class DataModule(L.LightningDataModule):
             test_split (float | int, optional): Proportion (float) or absolute number (int)
                 of samples for testing. Uses entire datasets as test sets, rounding to
                 nearest dataset boundary. Defaults to 0.
+            gene_embeddings (str, optional): Parquet file whose index defines the exact
+                model gene axis. This legacy CLI source can be paired to the model's
+                ``precpt_gene_emb`` argument. Defaults to an empty string.
             use_default_col (bool, optional): Whether to use the default Collator for batch
                 preparation. If False, no collate_fn is applied. Defaults to True.
             clss_to_predict (List[str], optional): Observation columns to encode as prediction
@@ -186,14 +193,64 @@ class DataModule(L.LightningDataModule):
         self.metacell_mode = bool(metacell_mode)
         self.gene_pos = None
         self.collection_name = collection_name
-        if gene_subset is not None:
-            tokeep = set(mdataset.genedf.index.tolist())
-            gene_subset = [u for u in gene_subset if u in tokeep]
+        gene_frame = mdataset.genedf
+        if gene_frame is None:
+            raise ValueError("dataset gene registry is unavailable")
+        if gene_embeddings:
+            embedding_genes = (
+                pd.read_parquet(gene_embeddings, columns=[]).index.astype(str).tolist()
+            )
+            available = set(gene_frame.index.astype(str))
+            gene_subset = [gene for gene in embedding_genes if gene in available]
+        elif gene_subset is not None:
+            available = set(gene_frame.index.astype(str))
+            gene_subset = [str(gene) for gene in gene_subset if str(gene) in available]
         self.classes = {k: len(v) for k, v in mdataset.class_topred.items()}
         # we might want not to order the genes by expression (or do it?)
         # we might want to not introduce zeros and
 
         if use_default_col:
+            model_genes = gene_subset or gene_frame.index.astype(str).tolist()
+            global_gene_index = {gene: index for index, gene in enumerate(model_genes)}
+            if len(global_gene_index) != len(model_genes):
+                raise ValueError("global model gene ids are not unique")
+            mapping_cache = {}
+            storage_gene_mappings = []
+            overlap_sizes = []
+            for storage_index, storage in enumerate(
+                mdataset.mapped_dataset.storages, start=1
+            ):
+                with _Connect(storage) as store:
+                    native_axis = _safer_read_index(store["var"]).astype(str).tolist()
+                digest = hashlib.sha256("\0".join(native_axis).encode()).digest()
+                key = (len(native_axis), digest)
+                mapping = mapping_cache.get(key)
+                if mapping is None:
+                    mapping = build_axis_mapping(native_axis, global_gene_index)
+                    if len(mapping[1]) < max_len:
+                        raise ValueError(
+                            "artifact maps fewer genes than max_len: "
+                            f"storage={storage_index - 1}, mapped={len(mapping[1])}, "
+                            f"max_len={max_len}"
+                        )
+                    mapping_cache[key] = mapping
+                storage_gene_mappings.append(mapping)
+                overlap_sizes.append(len(mapping[1]))
+                if storage_index % 1000 == 0:
+                    print(
+                        "STORAGE_GENE_MAP_PROGRESS "
+                        f"{storage_index}/{len(mdataset.mapped_dataset.storages)} "
+                        f"unique_axes={len(mapping_cache)}",
+                        flush=True,
+                    )
+            print(
+                "STORAGE_GENE_MAP_PASS "
+                f"storages={len(storage_gene_mappings)} "
+                f"unique_axes={len(mapping_cache)} "
+                f"min_overlap={min(overlap_sizes)} "
+                f"max_overlap={max(overlap_sizes)}",
+                flush=True,
+            )
             kwargs["collate_fn"] = Collator(
                 organisms=mdataset.organisms if organisms is None else organisms,
                 how=how,
@@ -205,6 +262,7 @@ class DataModule(L.LightningDataModule):
                 class_names=list(self.classes.keys()),
                 genedf=genedf,
                 n_bins=n_bins,
+                storage_gene_mappings=storage_gene_mappings,
             )
         self.gene_subset = gene_subset
         self.n_bins = n_bins
@@ -305,9 +363,21 @@ class DataModule(L.LightningDataModule):
 
     @property
     def genes_dict(self):
+        if self.gene_subset is None:
+            return {
+                organism: self.dataset.genedf.index[
+                    self.dataset.genedf.organism == organism
+                ].tolist()
+                for organism in self.dataset.organisms
+            }
+        organism_by_gene = self.dataset.genedf["organism"].to_dict()
         return {
-            i: self.dataset.genedf.index[self.dataset.genedf.organism == i].tolist()
-            for i in self.dataset.organisms
+            organism: [
+                gene
+                for gene in self.gene_subset
+                if organism_by_gene.get(gene) == organism
+            ]
+            for organism in self.dataset.organisms
         }
 
     def set_valid_genes_collator(self, genes):
@@ -701,6 +771,7 @@ class LabelWeightedSampler(Sampler[int]):
         super(LabelWeightedSampler, self).__init__(None)
         self.count = 0
         self.curiculum = curiculum
+        self.restrict_to_subset = restrict_to_subset
 
         # Compute label weights (incorporating class frequencies)
         # Directly use labels as numpy array without conversion

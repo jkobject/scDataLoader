@@ -8,6 +8,20 @@ from .preprocess import _digitize
 from .utils import load_genes
 
 
+def build_axis_mapping(native_axis: list[str], global_gene_index: dict[str, int]):
+    """Map one artifact's native gene axis into the model's global gene axis."""
+    positions = np.fromiter(
+        (global_gene_index.get(gene, -1) for gene in native_axis),
+        dtype=np.int64,
+        count=len(native_axis),
+    )
+    accepted = positions >= 0
+    model_positions = positions[accepted]
+    if len(model_positions) == 0:
+        raise ValueError("native var axis has no model genes")
+    return accepted, model_positions
+
+
 class Collator:
     def __init__(
         self,
@@ -25,6 +39,7 @@ class Collator:
         class_names: List[str] = [],
         genelist: List[str] = [],
         genedf: Optional[pd.DataFrame] = None,
+        storage_gene_mappings: list[tuple[np.ndarray, np.ndarray]] | None = None,
     ):
         """
         Collator for preparing gene expression data batches for the scPRINT model.
@@ -94,6 +109,7 @@ class Collator:
         self.organism_name = organism_name
         self.tp_name = tp_name
         self.class_names = class_names
+        self.storage_gene_mappings = storage_gene_mappings
         self.start_idx = {}
         self.accepted_genes = {}
         self.to_subset = {}
@@ -156,7 +172,7 @@ class Collator:
                 - organism_name (any): Organism identifier (column name set by `organism_name`).
                 - tp_name (float, optional): Time point value (column name set by `tp_name`).
                 - class_names... (any, optional): Additional class labels.
-                - "_storage_idx" (int, optional): Dataset storage index.
+                - "_store_idx" (int, optional): Dataset storage index.
                 - "is_meta" (int, optional): Metadata flag.
                 - "knn_cells" (array, optional): KNN neighbor expression data.
                 - "knn_cells_info" (array, optional): KNN neighbor metadata.
@@ -178,7 +194,7 @@ class Collator:
                 - "knn_cells_info" (Tensor, optional): KNN metadata. Present if input
                   contains "knn_cells_info".
                 - "dataset" (Tensor, optional): Dataset indices as int64. Present if input
-                  contains "_storage_idx".
+                  contains "_store_idx".
 
         Note:
             Batch size in output may be smaller than input if some samples are filtered
@@ -198,14 +214,30 @@ class Collator:
         knn_cells = []
         knn_cells_info = []
         for elem in batch:
+            storage_mapping = None
+            storage_gene_locs = None
             organism_id = elem[self.organism_name]
             if organism_id not in self.organism_ids:
                 continue
-            if "_storage_idx" in elem:
-                dataset.append(elem["_storage_idx"])
+            storage_idx = elem.get("_store_idx", elem.get("_storage_idx"))
+            if storage_idx is not None:
+                dataset.append(storage_idx)
             expr = np.array(elem["X"])
             total_count.append(expr.sum())
-            if len(self.accepted_genes) > 0:
+            if self.storage_gene_mappings is not None:
+                if storage_idx is None:
+                    raise KeyError("storage-aware gene mapping requires _store_idx")
+                storage_mapping = self.storage_gene_mappings[int(storage_idx)]
+                accepted, storage_gene_locs = storage_mapping
+                if len(expr) != len(accepted):
+                    raise ValueError(
+                        "expression/native-axis length mismatch for storage "
+                        f"{storage_idx}: {len(expr)} != {len(accepted)}"
+                    )
+                expr = expr[accepted]
+                if "knn_cells" in elem:
+                    elem["knn_cells"] = elem["knn_cells"][:, accepted]
+            elif len(self.accepted_genes) > 0:
                 expr = expr[self.accepted_genes[organism_id]]
                 if "knn_cells" in elem:
                     elem["knn_cells"] = elem["knn_cells"][
@@ -287,7 +319,10 @@ class Collator:
                 knn_cells_info.append(elem["knn_cells_info"])
             # then we need to add the start_idx to the loc to give it the correct index
             # according to the model
-            gene_locs.append(loc + self.start_idx[organism_id])
+            if storage_mapping is not None and storage_gene_locs is not None:
+                gene_locs.append(storage_gene_locs[loc])
+            else:
+                gene_locs.append(loc + self.start_idx[organism_id])
 
             if self.tp_name is not None:
                 tp.append(elem[self.tp_name])
